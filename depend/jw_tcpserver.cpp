@@ -14,75 +14,10 @@ TcpServer::~TcpServer(){
 bool TcpServer::Initialize()
 {
 	stoped_ = false;
-	////create socket pair
-	//sockaddr_in pairAddr;
-	//memset(&pairAddr, 0, sizeof(pairAddr));
-	//pairAddr.sin_family = AF_INET;
-	//pairAddr.sin_addr.s_addr = htonl(INADDR_LOOPBACK);
-	//my_addr.sin_port = 0;
-	//int acpt = socket(AF_INET, SOCK_STREAM, 0);
-	//_sockpair[0] = socket(AF_INET, SOCK_STREAM, 0);
-	//_sockpair[1] = socket(AF_INET, SOCK_STREAM, 0);
-	//if (_sockpair[0] == -1 || _sockpair[1] == -1 || acpt == -1)
-	//{
-	//	LCF("ZSummerImpl::initialize[this0x" << this << "] bind sockpair socket error. ");
-	//	return false;
-	//}
-	//if (::bind(acpt, (sockaddr*)&pairAddr, sizeof(pairAddr)) == -1)
-	//{
-	//	LCF("EventLoop::initialize[this0x" << this << "] bind sockpair socket error. ");
-	//	::close(acpt);
-	//	::close(_sockpair[0]);
-	//	::close(_sockpair[1]);
-	//	return false;
-	//}
-	//if (listen(acpt, 1) == -1)
-	//{
-	//	LCF("EventLoop::initialize[this0x" << this << "] listen sockpair socket error. ");
-	//	::close(acpt);
-	//	::close(_sockpair[0]);
-	//	::close(_sockpair[1]);
-	//	return false;
-	//}
-	//socklen_t len = sizeof(pairAddr);
-	//if (getsockname(acpt, (sockaddr*)&pairAddr, &len) != 0)
-	//{
-	//	LCF("EventLoop::initialize[this0x" << this << "] getsockname sockpair socket error. ");
-	//	::close(acpt);
-	//	::close(_sockpair[0]);
-	//	::close(_sockpair[1]);
-	//	return false;
-	//}
-
-	//if (::connect(_sockpair[0], (sockaddr*)&pairAddr, sizeof(pairAddr)) == -1)
-	//{
-	//	LCF("EventLoop::initialize[this0x" << this << "] connect sockpair socket error. ");
-	//	::close(acpt);
-	//	::close(_sockpair[0]);
-	//	::close(_sockpair[1]);
-	//	return false;
-	//}
-	//_sockpair[1] = accept(acpt, (sockaddr*)&pairAddr, &len);
-	//if (_sockpair[1] == -1)
-	//{
-	//	LCF("EventLoop::initialize[this0x" << this << "] accept sockpair socket error. ");
-	//	::close(acpt);
-	//	::close(_sockpair[0]);
-	//	::close(_sockpair[1]);
-	//	return false;
-	//}
-	//::close(acpt);
-
-	//setNonBlock(_sockpair[0]);
-	//setNonBlock(_sockpair[1]);
-	//setNoDelay(_sockpair[0]);
-	//setNoDelay(_sockpair[1]);
-	//setEvent(_sockpair[1], 0);
 #ifdef _MSC_VER
 	FD_ZERO(&fds_);
 	FD_ZERO(&fdreads_);
 	FD_ZERO(&fdwrites_);
-	
 #else
 	listen_fd_ = epoll_create1(EPOLL_CLOEXEC);
 #endif // _MSC_VER
@@ -108,7 +43,7 @@ void TcpServer::AddConvey(SOCKET fd, void *c) {
 	ev.data.ptr = c;
 	int r = epoll_ctl(listen_fd_, EPOLL_CTL_ADD, fd, &ev);
 	if (r) {
-		fprintf(stderr, "epoll_ctl add failed %d %s\n", ErrerCode, strerror(ErrerCode));
+		printf( "epoll_ctl add failed %d %s\n", ErrerCode, strerror(ErrerCode));
 	}
 #endif // _MSC_VER
 
@@ -130,7 +65,7 @@ void TcpServer::DelConvey(SOCKET fd) {
 #else
 	int r = epoll_ctl(listen_fd_, EPOLL_CTL_DEL, fd, nullptr);
 	if (r) {
-		fprintf(stderr, "epoll_ctl del failed %d %s\n", ErrerCode, strerror(ErrerCode));
+		printf( "epoll_ctl del failed %d %s\n", ErrerCode, strerror(ErrerCode));
 	}
 #endif // _MSC_VER
 }
@@ -153,7 +88,7 @@ void TcpServer::SetReadEvent(SOCKET fd, void *io, bool enable) {
 	ev.data.ptr = io;
 	int r = epoll_ctl(listen_fd_, EPOLL_CTL_MOD, fd, &ev);
 	if (r) {
-		fprintf(stderr, "epoll_ctl mod failed %d %s\n", ErrerCode, strerror(ErrerCode));
+		printf( "epoll_ctl mod failed %d %s\n", ErrerCode, strerror(ErrerCode));
 	}
 #endif // _MSC_VER
 }
@@ -176,11 +111,10 @@ void TcpServer::SetWriteEvent(SOCKET fd, void *io, bool enable) {
 	ev.data.ptr = io;
 	int r = epoll_ctl(listen_fd_, EPOLL_CTL_MOD, fd, &ev);
 	if (r) {
-		fprintf(stderr, "epoll_ctl mod failed %d %s\n", ErrerCode, strerror(ErrerCode));
+		printf( "epoll_ctl mod failed %d %s\n", ErrerCode, strerror(ErrerCode));
 	}
 #endif // _MSC_VER
 }
-
 
 void TcpServer::Loop() {
 #ifdef _MSC_VER
@@ -206,7 +140,7 @@ void TcpServer::Loop() {
 			}
 			auto ptr = it->second;
 			if (!ptr) {
-				fprintf(stderr, "ptr is null fd %d is null\n", fd);
+				printf( "ptr is null fd %d is null\n", fd);
 				assert(true);
 			}
 			if (this == it->second) {
@@ -271,7 +205,7 @@ void TcpServer::Loop() {
 				continue;
 			}
 			else {
-				fprintf(stderr, "epoll_wait error %d %s", ErrerCode, strerror(ErrerCode));
+				printf( "epoll_wait error %d %s", ErrerCode, strerror(ErrerCode));
 				break;
 			}
 		}
@@ -280,7 +214,7 @@ void TcpServer::Loop() {
 			TcpConn* io = (TcpConn*)ptr;
 			int ev = evs[i].events;
 			if (ev & (EPOLLERR | EPOLLHUP)) {
-				fprintf(stdout, "epoll_wait triger %s %s ", ev | EPOLLERR ? "EPOLLERR" : "", ev | EPOLLERR ? "EPOLLHUP" : "");
+				printf( "epoll_wait triger %s %s ", ev | EPOLLERR ? "EPOLLERR" : "", ev | EPOLLERR ? "EPOLLHUP" : "");
 				io->HandleError();
 				continue;
 			}
@@ -298,57 +232,80 @@ void TcpServer::Loop() {
 
 bool TcpServer::Start(const char *ip, const short port, int back_log/*=256*/){
 	if (!Initialize()) {
-		fprintf(stdout, "Initialize error\n");
+		printf("Initialize error\n");
 		return false;
 	}
 	if (!socket_.Create()) {
-		fprintf(stderr, "create %d %s\n", ErrerCode, strerror(ErrerCode));
-		return false;
-	}
-	if (!socket_pair_send_.Create()) {
-		fprintf(stderr, "create socket_pair_send_ %d %s\n", ErrerCode, strerror(ErrerCode));
-		return false;
-	}
-	if (!socket_pair_recv_.Create()) {
-		fprintf(stderr, "create socket_pair_recv_ %d %s\n", ErrerCode, strerror(ErrerCode));
+		printf("create %d\n", ErrerCode);
 		return false;
 	}
 	if (!socket_.Bind(ip, port)){
-		fprintf(stderr, "bind %d %s\n", ErrerCode, strerror(ErrerCode));
+		socket_.Close();
+		printf("bind %d\n", ErrerCode);
 		return false;
 	}
 	if (!socket_.Listen(back_log)) {
-		fprintf(stderr, "listen %d %s\n", ErrerCode, strerror(ErrerCode));
+		socket_.Close();
+		printf("listen %d\n", ErrerCode);
+		return false;
+	}
+	if (!socket_pair_send_.Create()) {
+		socket_.Close();
+		printf("create socket_pair_send_ %d\n", ErrerCode);
+		return false;
+	}
+	if (!socket_pair_recv_.Create()) {
+		socket_.Close();
+		socket_pair_send_.Close();
+		printf("create socket_pair_recv_ %d\n", ErrerCode);
 		return false;
 	}
 	if (!socket_pair_send_.Connect(ip, port))
 	{
-		fprintf(stderr, "Connect fail11 %d %s\n", ErrerCode, strerror(ErrerCode));
+		socket_.Close();
+		socket_pair_send_.Close();
+		socket_pair_recv_.Close();
+		printf("Connect fail11 %d\n", ErrerCode);
 		return false;
 	}
 	if (!socket_.Accept(socket_pair_recv_))
 	{
-		fprintf(stderr, "Accept fail22 %d %s\n", ErrerCode, strerror(ErrerCode));
+		socket_.Close();
+		socket_pair_send_.Close();
+		socket_pair_recv_.Close();
+		printf( "Accept fail22 %d\n", ErrerCode);
 		return false;
 	}
 	AddConvey((SOCKET)socket_pair_recv_, this);
 	auto accept_thread_func = [this]() { 
-		fprintf(stderr, "accept_thread_func\n"); 
-		while (!stoped_)
+		printf( "accept_thread_func\n"); 
+		JwSocket socket;
+		while (socket_.Accept(socket))
 		{
-			this->Accept();
+			if (stoped_) {
+				socket.Close();
+				break;
+			}else {
+				//创建客户端连接类
+				TcpConn* conn = new TcpConn(this);
+				conn->GetSocket() = socket;
+				InterMsg msg;
+				msg.msg_id_ = gcAddClient;
+				msg.msg_data_.fd_ = (SOCKET)socket;
+				msg.msg_data_.ptr_ = conn;
+				PushInterMsg(msg);
+			}
 		}
 		socket_.Close();
 	};
 	accept_thread_.Start(accept_thread_func);
 
 	auto engine_thread_func = [this]() {
-		fprintf(stderr, "engine_thread_func\n");
+		printf( "engine_thread_func\n");
 		while (!stoped_)
 		{
 			this->Loop();
 		}
-		
 		socket_pair_recv_.Close();
 	};
 	work_thread_.Start(engine_thread_func);
@@ -359,50 +316,24 @@ bool TcpServer::Start(const char *ip, const short port, int back_log/*=256*/){
 void TcpServer::Stop()
 {
 	stoped_ = true;
-	socket_pair_send_.Close();
-	
 	//防止accept阻塞线程退出
-	//SOCKET fd = socket(AF_INET, SOCK_STREAM, 0);
-	//struct sockaddr_in svraddr;
-	//socket_.getLoaclAddr(&svraddr);
-	//::connect(fd, (struct sockaddr*)&svraddr, sizeof(svraddr));
-}
-
-void TcpServer::Accept()
-{
-	//创建客户端连接类
-	TcpConn* conn = new TcpConn(this);
-	//创建连接类失败，则关闭套接字
-	if (!conn)
-	{
-		fprintf(stdout, "not set on new tcp session\n");
-		return;
-	}
-
-	JwSocket &socket = conn->GetSocket();
-	if (!socket_.Accept(socket))
-	{
-		fprintf(stdout, "socket_.Accept fail %d\n", ErrerCode);
-		return;
-	}
-	
-	InterMsg msg;
-	msg.msg_id_ = gcAddClient;
-	msg.msg_data_.fd_ = (SOCKET)socket;
-	msg.msg_data_.ptr_ = conn;
-	PushInterMsg(msg);
-}
-
-void TcpServer::OnConnClose(TcpConn* conn)
-{
-
+	SOCKET fd = socket(AF_INET, SOCK_STREAM, 0);
+	struct sockaddr_in svraddr;
+	socket_.getLoaclAddr(&svraddr);
+	::connect(fd, (struct sockaddr*)&svraddr, sizeof(svraddr));
+	//等待accept线程退出
+	accept_thread_.waitFor();
+	//关闭连接唤醒select,防止阻塞,并处理所有内部消息
+	socket_pair_send_.Close();
+	work_thread_.waitFor();
 }
 
 bool TcpServer::PushInterMsg(InterMsg &msg)
 {
 	if (stoped_)
 	{
-		fprintf(stdout, "PushInterMsgxx fail\n");
+		//停止后不能接受消息
+		printf( "PushInterMsgxx fail\n");
 		return false;
 	}
 	inter_msg_.push(std::move(msg));

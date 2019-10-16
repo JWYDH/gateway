@@ -12,7 +12,6 @@ BaseThread::~BaseThread()
 {
 	if (thread_id_!=0)
 	{
-		waitFor();
 #ifdef _MSC_VER
 		if (thread_)
 		{
@@ -29,13 +28,15 @@ void CALLBACK BaseThread::Hook(void* thread_ptr)
 {
 	BaseThread* thread = (BaseThread*)thread_ptr;
 	thread->thread_func_();
+	thread->terminated_ = true;
 	ExitThread(0);
 }
 #else
 void* BaseThread::Hook(void* thread_ptr)
 {
 	BaseThread* thread = (BaseThread*)thread_ptr;
-	thread->GetRunnable()->Run(thread, thread->GetArgs());
+	thread->thread_func_();
+	thread->terminated_ = true;
 	return (void*)NULL;
 }
 #endif

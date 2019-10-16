@@ -3,6 +3,7 @@
 #include <vector>
 #include <map>
 #include <functional>
+#include <thread>
 #include "jw_socket.h"
 #include "jw_thread.h"
 #include "jw_safe_queue.h"
@@ -62,13 +63,9 @@ public:
 
 	bool Start(const char *ip, const short port, int back_log=256);
 	void Stop();
-	void Accept();
-	void OnConnClose(TcpConn* conn);
-	
 	bool PushInterMsg(InterMsg &msg);
 	void ProcessInterMsg();
 	void OnRecvSysMsg(InterMsg& msg);
-
 	void OnNewSession(std::function<void(TcpConn*)> newsession_callback) { newsession_callback_ = newsession_callback; }
 private:
 	bool stoped_;
@@ -82,7 +79,5 @@ private:
 	std::map<SOCKET, TcpConn*> conn_list_;
 
 	std::function<void(TcpConn*)> newsession_callback_;
-
-	
 };
 

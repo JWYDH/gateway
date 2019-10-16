@@ -9,7 +9,7 @@ TcpConn::TcpConn(TcpServer* events): events_(events){
 		sockaddr_in remote_addr;
 		socket_.getLoaclAddr(&local_addr);
 		socket_.getRemoteAddr(&remote_addr);
-		fprintf(stdout, "OnConnected fd=%d, %s ========= %s\n", (int)socket, inet_ntoa(local_addr.sin_addr), inet_ntoa(local_addr.sin_addr));
+		printf( "OnConnected fd=%d, %s ========= %s\n", (int)socket, inet_ntoa(local_addr.sin_addr), inet_ntoa(local_addr.sin_addr));
 	});
 
 	OnDisconnected([this](TcpConn* conn) {
@@ -17,7 +17,7 @@ TcpConn::TcpConn(TcpServer* events): events_(events){
 		sockaddr_in remote_addr;
 		socket_.getLoaclAddr(&local_addr);
 		socket_.getRemoteAddr(&remote_addr);
-		fprintf(stdout, "OnDisconnected fd=%d, %s ====|==== %s\n", (int)socket, inet_ntoa(local_addr.sin_addr), inet_ntoa(local_addr.sin_addr));
+		printf( "OnDisconnected fd=%d, %s ====|==== %s\n", (int)socket, inet_ntoa(local_addr.sin_addr), inet_ntoa(local_addr.sin_addr));
 	});
 
 	OnRead([this](TcpConn* conn, char* buf, int32_t len) {
@@ -25,7 +25,7 @@ TcpConn::TcpConn(TcpServer* events): events_(events){
 		sockaddr_in remote_addr;
 		socket_.getLoaclAddr(&local_addr);
 		socket_.getRemoteAddr(&remote_addr);
-		fprintf(stdout, "OnDisconnected fd=%d, %s ====|==== %s\n", (int)socket, inet_ntoa(local_addr.sin_addr), inet_ntoa(local_addr.sin_addr));
+		printf( "OnDisconnected fd=%d, %s ====|==== %s\n", (int)socket, inet_ntoa(local_addr.sin_addr), inet_ntoa(local_addr.sin_addr));
 	});
 }
 
@@ -39,11 +39,11 @@ void TcpConn::EnableWrite(bool enable) {
 void TcpConn::Connected() {
 	socket_.SetNoBlock();
 	if (!socket_.SetRecvBufSize(RECV_BUF_SIZE)) {
-		fprintf(stderr, "set recv %d %s\n", ErrerCode, strerror(ErrerCode));
+		printf( "set recv %d\n", ErrerCode);
 		return;
 	}
 	if (!socket_.SetSendBufSize(SEND_BUF_SIZE)) {
-		fprintf(stderr, "set send %d %s\n", ErrerCode, strerror(ErrerCode));
+		printf( "set send %d\n", ErrerCode);
 		return;
 	}
 	connected_callback_(this);
@@ -132,7 +132,7 @@ void TcpConn::HandleRead() {
 				//	read_callback_(this, bufs.OffsetPtr(), bufs.Length());
 				//}
 				Close();
-				fprintf(stderr, "read expect %d\n", error);
+				printf( "read expect %d\n", error);
 				break;
 			}
 		}
@@ -186,7 +186,7 @@ void TcpConn::HandleWrite() {
 				}
 #endif
 				else {
-					fprintf(stderr, "write expect %d\n", error);
+					printf( "write expect %d\n", error);
 				}
 			}
 		}
@@ -198,7 +198,7 @@ void TcpConn::HandleWrite() {
 }
 
 void TcpConn::HandleError() {
-	fprintf(stderr, "TcpConn HandleError\n");
+	printf( "TcpConn HandleError\n");
 	Close();
 }
 

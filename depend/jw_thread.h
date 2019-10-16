@@ -32,5 +32,6 @@ private:
 	pthread_t		thread_id_;
 #endif
 	std::function<void()> thread_func_;
+	bool terminated_;
 };
 
