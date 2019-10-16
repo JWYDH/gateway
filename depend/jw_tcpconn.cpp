@@ -9,7 +9,9 @@ TcpConn::TcpConn(TcpServer* events): events_(events){
 		sockaddr_in remote_addr;
 		socket_.getLoaclAddr(&local_addr);
 		socket_.getRemoteAddr(&remote_addr);
-		printf( "OnConnected fd=%d, %s ========= %s\n", (int)socket, inet_ntoa(local_addr.sin_addr), inet_ntoa(local_addr.sin_addr));
+		
+		printf( "OnConnected fd=%d, %s:%d ========= %s:%d\n", (int)socket_
+			, inet_ntoa(local_addr.sin_addr), ntohs(local_addr.sin_port), inet_ntoa(remote_addr.sin_addr), ntohs(remote_addr.sin_port));
 	});
 
 	OnDisconnected([this](TcpConn* conn) {
@@ -17,19 +19,34 @@ TcpConn::TcpConn(TcpServer* events): events_(events){
 		sockaddr_in remote_addr;
 		socket_.getLoaclAddr(&local_addr);
 		socket_.getRemoteAddr(&remote_addr);
-		printf( "OnDisconnected fd=%d, %s ====|==== %s\n", (int)socket, inet_ntoa(local_addr.sin_addr), inet_ntoa(local_addr.sin_addr));
+		printf("OnDisconnected fd=%d, %s:%d ========= %s:%d\n", (int)socket_
+			, inet_ntoa(local_addr.sin_addr), ntohs(local_addr.sin_port), inet_ntoa(remote_addr.sin_addr), ntohs(remote_addr.sin_port));
 	});
 
-	OnRead([this](TcpConn* conn, char* buf, int32_t len) {
+	OnRead([this](TcpConn* conn, char* buf, int32_t len)->bool {
 		sockaddr_in local_addr;
 		sockaddr_in remote_addr;
 		socket_.getLoaclAddr(&local_addr);
 		socket_.getRemoteAddr(&remote_addr);
-		printf( "OnDisconnected fd=%d, %s ====|==== %s\n", (int)socket, inet_ntoa(local_addr.sin_addr), inet_ntoa(local_addr.sin_addr));
+		printf("OnRead fd=%d, %s:%d ========= %s:%d\n", (int)socket_
+			, inet_ntoa(local_addr.sin_addr), ntohs(local_addr.sin_port), inet_ntoa(remote_addr.sin_addr), ntohs(remote_addr.sin_port));
+		return true;
 	});
 }
 
 TcpConn::~TcpConn() {
+	for (auto& buf : free_data_)
+	{
+		delete buf;
+	}
+	for (auto& buf : recv_data_)
+	{
+		delete buf;
+	}
+	for (auto& buf : send_data_)
+	{
+		delete buf;
+	}
 }
 
 void TcpConn::EnableWrite(bool enable) {
@@ -46,6 +63,7 @@ void TcpConn::Connected() {
 		printf( "set send %d\n", ErrerCode);
 		return;
 	}
+	conn_state_ = TcpConn::CONNSTATE_CONNECTED;
 	connected_callback_(this);
 }
 
@@ -59,32 +77,37 @@ void TcpConn::HandleRead() {
 	int32_t count = 0;
 	for (;;) {
 		int32_t n = 0;
-		Buffer* data = new Buffer();
-		n = socket_.Recv(data->OffsetPtr(), data->Length(), 0);
-		if (n > 0) {
-			count += n;
-			data->SetLength(n);
-			recv_data_.push_back(data);
-		}
-		else if (n == 0) {
-			if (count > 0)
-			{
-				Buffer bufs(count);
-				printf("create buf size = %d\n", count);
-				for (auto &buf : recv_data_)
-				{
-					bufs.WriteBuff(buf->OffsetPtr(), buf->Length());
-					delete buf;
-				}
-				recv_data_.clear();
-				bufs.Seek(0);
-				printf("recv data count n= %d\n", bufs.Length());
-				read_callback_(this, bufs.OffsetPtr(), bufs.Length());
+		Buffer* data = NULL;
+		if (free_data_.empty())
+		{
+			data = new Buffer(RECV_ONCV_SIZE);
+			n = socket_.Recv(data->MemPtr(), data->Capacity(), 0);
+			if (n > 0) {
+				count += n;
+				data->SetLength(n);
+				recv_data_.push_back(data);
+				continue;
+			}else {
+				free_data_.push_back(data);
 			}
+		}else {
+			data = free_data_.back();
+			data->SetLength(0);
+			n = socket_.Recv(data->MemPtr(), data->Capacity(), 0);
+			if (n > 0) {
+				count += n;
+				data->SetLength(n);
+				free_data_.pop_back();
+				recv_data_.push_back(data);
+				continue;
+			}
+		}
+
+		if (n == 0) {
 			Close();
 			break;
 		}
-		else if (n < 0) {
+		if (n < 0) {
 			int error = ErrerCode;
 #ifdef _MSC_VER
 			if (error == WSAEINTR) {
@@ -93,17 +116,14 @@ void TcpConn::HandleRead() {
 			else if (error == WSAEWOULDBLOCK) {
 				if (count > 0)
 				{
-					Buffer bufs(count);
-					printf("create buf size = %d\n", count);
-					for (auto &buf : recv_data_)
+					printf("this time recv data sum = %d\n", count);
+					for (auto it = recv_data_.begin(); it != recv_data_.end();++it)
 					{
-						bufs.WriteBuff(buf->OffsetPtr(), buf->Length());
-						delete buf;
+						read_callback_(this, (*it)->OffsetPtr(), (*it)->Length());
+						free_data_.push_back((*it));
+						//recv_data_.erase(it);
 					}
 					recv_data_.clear();
-					bufs.Seek(0);
-					printf("recv data count n= %d\n", bufs.Length());
-					read_callback_(this, bufs.OffsetPtr(), bufs.Length());
 				}
 				break;
 			}
@@ -117,20 +137,6 @@ void TcpConn::HandleRead() {
 #endif
 			else {
 				//第二次写？？？断了连接 管道破裂的异常 SIGPIPE,
-				//if (count > 0)
-				//{
-				//	Buffer bufs(count);
-				//	printf("create buf size = %d\n", count);
-				//	for (auto &buf : recv_data_)
-				//	{
-				//		bufs.WriteBuff(buf->OffsetPtr(), buf->Length());
-				//		delete buf;
-				//	}
-				//	recv_data_.clear();
-				//	bufs.Seek(0);
-				//	printf("recv data count n= %d\n", bufs.Length());
-				//	read_callback_(this, bufs.OffsetPtr(), bufs.Length());
-				//}
 				Close();
 				printf( "read expect %d\n", error);
 				break;
@@ -156,7 +162,7 @@ void TcpConn::HandleWrite() {
 				send_count += n;
 				data->AdjustOffset(n);
 				if (data->Length() == 0) {
-					delete data;
+					free_data_.push_back(data);
 					send_data_.erase(it);
 					printf("发送一个大包成功");
 				}
@@ -187,6 +193,7 @@ void TcpConn::HandleWrite() {
 #endif
 				else {
 					printf( "write expect %d\n", error);
+					break;
 				}
 			}
 		}
@@ -218,7 +225,16 @@ void TcpConn::DoWrite(const char *buf, int32_t len) {
 			return;
 		}
 	}
-	Buffer *data = new Buffer(SEND_BUF_SIZE);
+	Buffer* data = NULL;
+	if (free_data_.empty())
+	{
+		data = new Buffer(RECV_ONCV_SIZE);
+	}
+	else {
+		free_data_.pop_back();
+		data = free_data_.back();
+		data->SetLength(0);
+	}
 	data->WriteBuff(buf, len);
 	send_data_.push_back(data);
 }

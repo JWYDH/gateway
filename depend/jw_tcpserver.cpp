@@ -143,18 +143,20 @@ void TcpServer::Loop() {
 				printf( "ptr is null fd %d is null\n", fd);
 				assert(true);
 			}
-			if (this == it->second && FD_ISSET(fd, &fdr)) {
-
-				assert(fd == (SOCKET)socket_pair_recv_);
-				char buf[1024] = { 0 };
-				int n = 0;
-				do {
-					n = socket_pair_recv_.Recv(buf, sizeof(buf));
-					if (n == 0) {
-						socket_pair_recv_.Close();
-					}
-				} while (n >= sizeof(buf));
-				ProcessInterMsg();
+			if (this == it->second) {
+				if (FD_ISSET(fd, &fdr)) {
+					assert(fd == (SOCKET)socket_pair_recv_);
+					char buf[1024] = { 0 };
+					int n = 0;
+					do {
+						n = socket_pair_recv_.Recv(buf, sizeof(buf));
+						if (n == 0) {
+							socket_pair_recv_.Close();
+						}
+					} while (n >= sizeof(buf));
+					ProcessInterMsg();
+					
+				}
 				continue;
 			}
 			
@@ -184,6 +186,7 @@ void TcpServer::Loop() {
 				assert(true);
 				return;
 			}
+			delete it->second;
 			conn_list_.erase(it);
 		}
 	}
@@ -277,6 +280,7 @@ bool TcpServer::Start(const char *ip, const short port, int back_log/*=256*/){
 		printf( "Accept fail22 %d\n", ErrerCode);
 		return false;
 	}
+	socket_pair_send_.SetNoDelay();
 	AddConvey((SOCKET)socket_pair_recv_, this);
 	auto accept_thread_func = [this]() { 
 		printf( "accept_thread_func\n"); 
@@ -289,7 +293,10 @@ bool TcpServer::Start(const char *ip, const short port, int back_log/*=256*/){
 			}else {
 				//创建客户端连接类
 				TcpConn* conn = new TcpConn(this);
-				conn->GetSocket() = socket;
+				sockaddr_in local_addr;
+				socket_.getLoaclAddr(&local_addr);
+				socket.setLoaclAddr(&local_addr);
+				conn->GetSocket() = socket;//默认拷贝构造
 				InterMsg msg;
 				msg.msg_id_ = gcAddClient;
 				msg.msg_data_.fd_ = (SOCKET)socket;
