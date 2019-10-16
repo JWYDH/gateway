@@ -130,7 +130,7 @@ void TcpServer::Loop() {
 	int   nRetAll = select(0/*window可为0*/, &fdr, &fdw, NULL, NULL /*&time*/);//若不设置超时则select为阻塞  
 	if (nRetAll > 0) {
 		std::vector<SOCKET> close_list;
-		for (int i = 0; i < fds.fd_count; ++i) {
+		for (uint32_t i = 0; i < fds.fd_count; ++i) {
 			auto fd = fds.fd_array[i];
 			auto it = select_conn_list_.find(fd);
 			if (it == select_conn_list_.end())
@@ -143,7 +143,7 @@ void TcpServer::Loop() {
 				printf( "ptr is null fd %d is null\n", fd);
 				assert(true);
 			}
-			if (this == it->second) {
+			if (this == it->second && FD_ISSET(fd, &fdr)) {
 				assert(fd == (SOCKET)socket_pair_recv_);
 				char buf[1024] = { 0 };
 				int n = 0;
@@ -156,22 +156,22 @@ void TcpServer::Loop() {
 				ProcessInterMsg();
 				continue;
 			}
-			else {
-				if (FD_ISSET(fd, &fdr)) {
-					//调用recv，接收数据。 
-					((TcpConn*)ptr)->HandleRead();
-				}
-				if (FD_ISSET(fd, &fdw)) {
-					//轮询检查有数据可写。 
-					((TcpConn*)ptr)->HandleWrite();
-				}
-				//if (FD_ISSET(fd, &fde)) {
-				//	ptr->HandleError();
-				//}
-				if (((TcpConn*)ptr)->GetConnState() == TcpConn::CONNSTATE_CLOSED) {
-					close_list.push_back(fd);
-				}
+			
+			if (FD_ISSET(fd, &fdr)) {
+				//调用recv，接收数据。 
+				((TcpConn*)ptr)->HandleRead();
 			}
+			if (FD_ISSET(fd, &fdw)) {
+				//轮询检查有数据可写。 
+				((TcpConn*)ptr)->HandleWrite();
+			}
+			//if (FD_ISSET(fd, &fde)) {
+			//	ptr->HandleError();
+			//}
+			if (((TcpConn*)ptr)->GetConnState() == TcpConn::CONNSTATE_CLOSED) {
+				close_list.push_back(fd);
+			}
+			
 		}
 		for (auto &fd : close_list)
 		{
