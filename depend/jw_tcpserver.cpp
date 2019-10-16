@@ -144,6 +144,7 @@ void TcpServer::Loop() {
 				assert(true);
 			}
 			if (this == it->second && FD_ISSET(fd, &fdr)) {
+
 				assert(fd == (SOCKET)socket_pair_recv_);
 				char buf[1024] = { 0 };
 				int n = 0;
