@@ -116,7 +116,6 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="depend\3rd\base64.cpp" />
-    <ClCompile Include="depend\3rd\HttpParser.cpp" />
     <ClCompile Include="depend\3rd\http_parser.c" />
     <ClCompile Include="depend\3rd\md5calc.cpp" />
     <ClCompile Include="depend\3rd\SHA1.cpp" />
@@ -131,8 +130,6 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="depend\3rd\base64.h" />
-    <ClInclude Include="depend\3rd\HttpFormat.h" />
-    <ClInclude Include="depend\3rd\HttpParser.h" />
     <ClInclude Include="depend\3rd\http_parser.h" />
     <ClInclude Include="depend\3rd\md5calc.h" />
     <ClInclude Include="depend\3rd\SHA1.h" />

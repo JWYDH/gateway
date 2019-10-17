@@ -8,8 +8,6 @@
 #include "WebSocketFormat.h"
 
 
-    class HttpService;
-
     class HTTPParser
     {
     public:
@@ -79,6 +77,6 @@
         WebSocketFormat::WebSocketFrameType     mWSFrameType;
 
     private:
-        friend class HttpService;
+
     };
 
