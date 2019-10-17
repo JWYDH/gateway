@@ -51,6 +51,9 @@
     <ClCompile Include="depend\3rd\http_parser.c">
       <Filter>源文件</Filter>
     </ClCompile>
+    <ClCompile Include="depend\3rd\HttpParser.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="stdafx.h">
@@ -93,6 +96,12 @@
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="depend\3rd\http_parser.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="depend\3rd\HttpParser.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="depend\3rd\HttpFormat.h">
       <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>

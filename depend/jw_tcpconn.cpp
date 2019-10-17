@@ -23,7 +23,7 @@ TcpConn::TcpConn(TcpServer* events): events_(events){
 			, inet_ntoa(local_addr.sin_addr), ntohs(local_addr.sin_port), inet_ntoa(remote_addr.sin_addr), ntohs(remote_addr.sin_port));
 	});
 
-	OnRead([this](TcpConn* conn, char* buf, int32_t len)->bool {
+	OnRead([this](TcpConn* conn, char* buf, int32_t len)->int32_t {
 		sockaddr_in local_addr;
 		sockaddr_in remote_addr;
 		socket_.getLoaclAddr(&local_addr);
@@ -36,10 +36,6 @@ TcpConn::TcpConn(TcpServer* events): events_(events){
 
 TcpConn::~TcpConn() {
 	for (auto& buf : free_data_)
-	{
-		delete buf;
-	}
-	for (auto& buf : recv_data_)
 	{
 		delete buf;
 	}
@@ -74,36 +70,27 @@ void TcpConn::Disconnected() {
 }
 
 void TcpConn::HandleRead() {
+	if (recv_data_.Length() > RECV_MAX_SIZE)
+	{
+		printf("too many data not proc, so close\n");
+		Close();
+		return;
+	}
 	int32_t count = 0;
 	for (;;) {
 		int32_t n = 0;
-		Buffer* data = NULL;
-		if (free_data_.empty())
-		{
-			data = new Buffer(RECV_ONCV_SIZE);
-			n = socket_.Recv(data->MemPtr(), data->Capacity(), 0);
-			if (n > 0) {
-				count += n;
-				data->SetLength(n);
-				recv_data_.push_back(data);
-				continue;
-			}else {
-				free_data_.push_back(data);
-			}
-		}else {
-			data = free_data_.back();
-			data->SetLength(0);
-			n = socket_.Recv(data->MemPtr(), data->Capacity(), 0);
-			if (n > 0) {
-				count += n;
-				data->SetLength(n);
-				free_data_.pop_back();
-				recv_data_.push_back(data);
-				continue;
-			}
+		if (recv_data_.AvaliableCapacity() < RECV_ONCV_SIZE){
+			recv_data_.ResetSize(recv_data_.Capacity() * 2);
 		}
-
+		n = socket_.Recv(recv_data_.DataEndPtr(), recv_data_.AvaliableCapacity(), 0);
+		if (n > 0) {
+			count += n;
+			recv_data_.AdjustDataEnd(n);
+			continue;
+		}
 		if (n == 0) {
+			//这里应该处理完未处理数据再关连接
+			printf("close normal\n");
 			Close();
 			break;
 		}
@@ -117,13 +104,20 @@ void TcpConn::HandleRead() {
 				if (count > 0)
 				{
 					printf("this time recv data sum = %d\n", count);
-					for (auto it = recv_data_.begin(); it != recv_data_.end();++it)
+					printf("this time need proc sum = %d\n", recv_data_.Length());
+					int32_t read_count = read_callback_(this, recv_data_.OffsetPtr(), recv_data_.Length());
+					printf("this time proc data sum = %d\n", read_count);
+					if (read_count > 0)
 					{
-						read_callback_(this, (*it)->OffsetPtr(), (*it)->Length());
-						free_data_.push_back((*it));
-						//recv_data_.erase(it);
+						recv_data_.AdjustOffset(read_count);
+						if ((recv_data_.OffsetPtr() - recv_data_.MemPtr()) > (recv_data_.Capacity() / 2))
+						{
+							int data_len = recv_data_.Length();
+							memcpy(recv_data_.MemPtr(), recv_data_.OffsetPtr(), data_len);
+							recv_data_.SetLength(data_len);
+							recv_data_.Seek(0);
+						}
 					}
-					recv_data_.clear();
 				}
 				break;
 			}
@@ -137,8 +131,9 @@ void TcpConn::HandleRead() {
 #endif
 			else {
 				//第二次写？？？断了连接 管道破裂的异常 SIGPIPE,
+				//这里也应该处理完未处理数据再关连接
+				printf("read expect %d\n", error);
 				Close();
-				printf( "read expect %d\n", error);
 				break;
 			}
 		}

@@ -79,14 +79,38 @@ void Buffer::Seek(int32_t n) {
 
 void Buffer::AdjustOffset(int32_t adjust_offset)
 {
-	offset_ptr_ = mem_end_ptr_ + adjust_offset;
+	if (offset_ptr_ + adjust_offset > mem_end_ptr_)
+	{
+		int32_t need_size = offset_ptr_ + adjust_offset - mem_end_ptr_;
+		int32_t size = mem_end_ptr_ - mem_start_ptr_ + need_size;
+		ResetSize(size);
+
+		offset_ptr_ = mem_end_ptr_;
+		data_end_ptr_ = offset_ptr_;
+		return;
+	}
+	offset_ptr_ = offset_ptr_ + adjust_offset;
+	if (offset_ptr_ < mem_start_ptr_) {
+		offset_ptr_ = mem_start_ptr_;
+	}
 	if (offset_ptr_ > data_end_ptr_)
 	{
 		data_end_ptr_ = offset_ptr_;
-	}else if (offset_ptr_ < mem_start_ptr_)
-	{
-		offset_ptr_ = mem_start_ptr_;
 	}
+}
+
+void Buffer::AdjustDataEnd(uint32_t adjust_offset)
+{
+	if (data_end_ptr_ + adjust_offset > mem_end_ptr_)
+	{
+		int32_t need_size = data_end_ptr_ + adjust_offset - mem_end_ptr_;
+		int32_t size = mem_end_ptr_ - mem_start_ptr_ + need_size;
+		ResetSize(size);
+
+		data_end_ptr_ = offset_ptr_;
+		return;
+	}
+	data_end_ptr_ = data_end_ptr_ + adjust_offset;
 }
 
 int32_t Buffer::ResetSize(int32_t size) {

@@ -33,7 +33,7 @@
         WebSocketFormat::WebSocketFrameType     getWSFrameType() const;
         void                                    cacheWSFrameType(WebSocketFormat::WebSocketFrameType frameType);
 
-    private:
+	public:
         void                                    clearParse();
         size_t                                  tryParse(const char* buffer, size_t len);
         bool                                    isCompleted() const;

@@ -21,6 +21,7 @@ public:
 	void SetLength(int32_t length);
 	void Seek(int32_t n);
 	void AdjustOffset(int32_t adjust_offset);
+	void AdjustDataEnd(uint32_t adjust_offset);
 
 	int32_t ResetSize(int32_t size);
 	int32_t ReadBuf(char* buf, int32_t len);
