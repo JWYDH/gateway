@@ -104,8 +104,8 @@ void TcpConn::HandleRead() {
 				if (count > 0)
 				{
 					printf("this time recv data sum = %d\n", count);
-					printf("this time need proc sum = %d\n", recv_data_.Length());
-					int32_t read_count = read_callback_(this, recv_data_.OffsetPtr(), recv_data_.Length());
+					printf("this time need proc sum = %d\n", recv_data_.AvaliableLength());
+					int32_t read_count = read_callback_(this, recv_data_.OffsetPtr(), recv_data_.AvaliableLength());
 					printf("this time proc data sum = %d\n", read_count);
 					if (read_count > 0)
 					{
