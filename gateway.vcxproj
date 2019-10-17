@@ -22,7 +22,7 @@
     <VCProjectVersion>15.0</VCProjectVersion>
     <ProjectGuid>{1E8225D6-3A4B-4ED6-86B4-4B5A4A5FA066}</ProjectGuid>
     <RootNamespace>gateway</RootNamespace>
-    <WindowsTargetPlatformVersion>10.0.16299.0</WindowsTargetPlatformVersion>
+    <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
@@ -116,6 +116,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="depend\3rd\base64.cpp" />
+    <ClCompile Include="depend\3rd\HttpParser.cpp" />
     <ClCompile Include="depend\3rd\http_parser.c" />
     <ClCompile Include="depend\3rd\md5calc.cpp" />
     <ClCompile Include="depend\3rd\SHA1.cpp" />
@@ -130,6 +131,8 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="depend\3rd\base64.h" />
+    <ClInclude Include="depend\3rd\HttpFormat.h" />
+    <ClInclude Include="depend\3rd\HttpParser.h" />
     <ClInclude Include="depend\3rd\http_parser.h" />
     <ClInclude Include="depend\3rd\md5calc.h" />
     <ClInclude Include="depend\3rd\SHA1.h" />
