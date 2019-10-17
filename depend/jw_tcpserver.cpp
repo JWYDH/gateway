@@ -297,6 +297,13 @@ bool TcpServer::Start(const char *ip, const short port, int back_log/*=256*/){
 				socket_.getLoaclAddr(&local_addr);
 				socket.setLoaclAddr(&local_addr);
 				conn->GetSocket() = socket;//Ä¬ÈÏ¿½±´¹¹Ôì
+
+				if (newsession_callback_)
+				{
+					newsession_callback_(conn);
+				}
+				
+
 				InterMsg msg;
 				msg.msg_id_ = gcAddClient;
 				msg.msg_data_.fd_ = (SOCKET)socket;
