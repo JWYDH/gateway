@@ -148,21 +148,21 @@ void TcpConn::HandleWrite() {
 	int32_t send_count = 0;
 	for (auto it = send_data_.begin(); it != send_data_.end(); ) {
 		auto &data = *it;
-		if (data->Length() > 0) {
+		if (data->AvaliableLength() > 0) {
 			int32_t n = 0;
-			n = socket_.Send(data->OffsetPtr(), data->Length(), 0);
+			n = socket_.Send(data->OffsetPtr(), data->AvaliableLength(), 0);
 			//在非阻塞模式下,send函数的过程仅仅是将数据拷贝到协议栈的缓存区而已,如果缓存区可用空间不够,则尽能力的拷贝,
 			//立即返回成功拷贝的大小;如缓存区可用空间为0,则返回-1,同时设置errno为EAGAIN.
 			if (n > 0) {
 				send_count += n;
 				data->AdjustOffset(n);
-				if (data->Length() == 0) {
+				if (data->AvaliableLength() == 0) {
 					free_data_.push_back(data);
-					send_data_.erase(it);
-					printf("发送一个大包成功");
+					it = send_data_.erase(it);
+					printf("发送一个大包成功\n");
 				}
 				else {
-					printf("数据太大,尽可能拷贝了%d数据到发送缓冲", send_count);
+					printf("数据太大,尽可能拷贝了%d数据到发送缓冲\n", send_count);
 					EnableWrite(true);
 					break;
 				}
@@ -171,11 +171,11 @@ void TcpConn::HandleWrite() {
 				int error = ErrerCode;
 #ifdef _MSC_VER
 				if (error == WSAEINTR) {
-					printf("发送被中断，下次回调再发");
+					printf("发送被中断，下次回调再发\n");
 					break;
 				}
 				else if (error == WSAEWOULDBLOCK) {
-					printf("缓冲区满");
+					printf("缓冲区满\n");
 					break;
 				}
 #else
@@ -194,7 +194,7 @@ void TcpConn::HandleWrite() {
 		}
 	}
 	if (send_data_.empty()) {
-		printf("全发送成功");
+		printf("全发送成功\n");
 	}
 	
 }
