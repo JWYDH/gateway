@@ -15,9 +15,6 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="gateway.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
     <ClCompile Include="stdafx.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
@@ -52,6 +49,12 @@
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="depend\3rd\HttpParser.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="depend\jw_tcpclient.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="client.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>
@@ -102,6 +105,9 @@
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="depend\3rd\HttpFormat.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="depend\jw_tcpclient.h">
       <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>
