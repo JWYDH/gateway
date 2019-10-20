@@ -24,13 +24,8 @@ TcpClient::TcpClient(){
 	});
 
 	OnRead([this](TcpClient* conn, char* buf, int32_t len)->int32_t {
-		sockaddr_in local_addr;
-		sockaddr_in remote_addr;
-		socket_.getLoaclAddr(&local_addr);
-		socket_.getRemoteAddr(&remote_addr);
-		printf("OnRead fd=%d, %s:%d ========= %s:%d\n", (int)socket_
-			, inet_ntoa(local_addr.sin_addr), ntohs(local_addr.sin_port), inet_ntoa(remote_addr.sin_addr), ntohs(remote_addr.sin_port));
-		return true;
+		DoWrite(buf, len);
+		return len;
 	});
 }
 
@@ -94,7 +89,7 @@ void TcpClient::Loop() {
 	memcpy(&fdr, &fdreads_, sizeof(fdreads_));
 	memcpy(&fdw, &fdwrites_, sizeof(fdwrites_));
 	timeval tv;
-	tv.tv_sec = 0;
+	tv.tv_sec = 1;
 	tv.tv_usec = 0;
 	int   nRetAll = select(0/*window可为0*/, &fdr, &fdw, NULL, NULL /*&time*/);//若不设置超时则select为阻塞  
 	if (nRetAll > 0) {
@@ -131,16 +126,7 @@ bool TcpClient::Start(const char* ip, const short port) {
 		return false;
 	}
 	if (!socket_.Create()) {
-		printf("create %d\n", ErrerCode);
-		return false;
-	}
-	if (!socket_.SetRecvBufSize(RECV_BUF_SIZE)) {
-		printf("set recv %d\n", ErrerCode);
-		return false;
-	}
-	if (!socket_.SetSendBufSize(SEND_BUF_SIZE)) {
-		printf("set send %d\n", ErrerCode);
-		return false;
+		printf("creat %d\n", ErrerCode);
 	}
 	auto thread_func = [this, ip, port]() {
 		printf("thread_func\n");
@@ -157,7 +143,6 @@ bool TcpClient::Start(const char* ip, const short port) {
 				else {
 					printf("connnect fial\n");
 					Sleep(1000);
-					
 				}
 			}
 		}
@@ -176,6 +161,13 @@ void TcpClient::Stop()
 void TcpClient::Connected() {
 	printf("Connect success \n");
 	conn_state_ = TcpClient::CONNSTATE_CONNECTED;
+	socket_.SetNoBlock();
+	if (!socket_.SetRecvBufSize(RECV_BUF_SIZE)) {
+		printf("set recv %d\n", ErrerCode);
+	}
+	if (!socket_.SetSendBufSize(SEND_BUF_SIZE)) {
+		printf("set send %d\n", ErrerCode);
+	}
 	connected_callback_(this);
 	AddConvey((SOCKET)socket_);
 }
@@ -187,6 +179,10 @@ void TcpClient::Disconnected() {
 	printf("Connect success \n");
 	conn_state_ == TcpClient::CONNSTATE_CONNECTED;
 	disconnected_callback_(this);
+	socket_.Close();
+	if (!socket_.Create()) {
+		printf("creat %d\n", ErrerCode);
+	}
 }
 
 void TcpClient::HandleRead() {
@@ -261,7 +257,7 @@ void TcpClient::HandleRead() {
 }
 
 void TcpClient::HandleWrite() {
-	if (conn_state_ == TcpClient::CONNSTATE_CONNECTED) {
+	if (conn_state_ == TcpClient::CONNSTATE_CLOSED) {
 		return;
 	}
 	SetWriteEvent((SOCKET)socket_, false);
@@ -271,17 +267,19 @@ void TcpClient::HandleWrite() {
 	int32_t send_count = 0;
 	for (auto it = send_data_.begin(); it != send_data_.end(); ) {
 		auto &data = *it;
-		if (data->Length() > 0) {
+		if (data->AvaliableLength() > 0) {
 			int32_t n = 0;
-			n = socket_.Send(data->OffsetPtr(), data->Length(), 0);
+			n = socket_.Send(data->OffsetPtr(), data->AvaliableLength(), 0);
 			//在非阻塞模式下,send函数的过程仅仅是将数据拷贝到协议栈的缓存区而已,如果缓存区可用空间不够,则尽能力的拷贝,
 			//立即返回成功拷贝的大小;如缓存区可用空间为0,则返回-1,同时设置errno为EAGAIN.
 			if (n > 0) {
 				send_count += n;
 				data->AdjustOffset(n);
-				if (data->Length() == 0) {
+				if (data->AvaliableLength() == 0) {
+					data->SetLength(0);
+					data->Seek(0);
 					free_data_.push_back(data);
-					send_data_.erase(it);
+					it = send_data_.erase(it);
 					printf("发送一个大包成功");
 				}
 				else {

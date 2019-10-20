@@ -57,7 +57,7 @@ JwSocket::operator SOCKET ()
 	return socket_fd_;
 }
 
-bool JwSocket::SetNoBlock()
+bool JwSocket::SetNoBlock(bool enable)
 {
 #ifdef _MSC_VER
 	// Set the socket I/O mode: In this case FIONBIO
@@ -65,7 +65,7 @@ bool JwSocket::SetNoBlock()
 	// socket based on the numerical value of iMode.
 	// If iMode = 0, blocking is enabled; 
 	// If iMode != 0, non-blocking mode is enabled.
-	u_long block = 1;
+	u_long block = enable ? 1 : 0;
 	int ret = ioctlsocket(socket_fd_, FIONBIO, &block);
 	if (ret != NO_ERROR) {
 		printf("ioctlsocket failed with error: %d\n", ErrerCode);
