@@ -130,7 +130,7 @@ void TcpConn::HandleRead() {
 			}
 #endif
 			else {
-				//第二次写？？？断了连接 管道破裂的异常 SIGPIPE,
+				//多次重传失败也会跑到这里
 				//这里也应该处理完未处理数据再关连接
 				printf("read expect %d\n", error);
 				Close();
