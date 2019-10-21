@@ -115,6 +115,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="client.cpp" />
     <ClCompile Include="depend\3rd\base64.cpp" />
     <ClCompile Include="depend\3rd\HttpParser.cpp" />
     <ClCompile Include="depend\3rd\http_parser.c" />
@@ -122,11 +123,11 @@
     <ClCompile Include="depend\3rd\SHA1.cpp" />
     <ClCompile Include="depend\jw_buffer.cpp" />
     <ClCompile Include="depend\jw_lock.cpp" />
+    <ClCompile Include="depend\jw_tcpclient.cpp" />
     <ClCompile Include="depend\jw_tcpconn.cpp" />
     <ClCompile Include="depend\jw_socket.cpp" />
     <ClCompile Include="depend\jw_tcpserver.cpp" />
     <ClCompile Include="depend\jw_thread.cpp" />
-    <ClCompile Include="gateway.cpp" />
     <ClCompile Include="stdafx.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -140,6 +141,7 @@
     <ClInclude Include="depend\jw_buffer.h" />
     <ClInclude Include="depend\jw_lock.h" />
     <ClInclude Include="depend\jw_safe_queue.h" />
+    <ClInclude Include="depend\jw_tcpclient.h" />
     <ClInclude Include="depend\jw_tcpconn.h" />
     <ClInclude Include="depend\jw_socket.h" />
     <ClInclude Include="depend\jw_tcpserver.h" />

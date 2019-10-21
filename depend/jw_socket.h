@@ -32,7 +32,7 @@ public:
 		remote_addr_ = *addr_in;
 	}
 	//============================================
-	bool SetNoBlock();
+	bool SetNoBlock(bool enable = true);
 	int GetRecvBufSize(int* size);
 	bool SetRecvBufSize(int size);
 	int GetSendBufSize(int* size);
