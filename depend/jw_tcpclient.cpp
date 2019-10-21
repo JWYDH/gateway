@@ -63,7 +63,7 @@ void TcpClient::DelConvey(SOCKET fd) {
 
 	FD_CLR(fd, &fds_);
 	FD_CLR(fd, &fdreads_);
-	FD_CLR(fd, &fdwrites_);
+	//FD_CLR(fd, &fdwrites_);
 
 }
 
@@ -91,7 +91,7 @@ void TcpClient::Loop() {
 	timeval tv;
 	tv.tv_sec = 1;
 	tv.tv_usec = 0;
-	int   nRetAll = select(0/*window可为0*/, &fdr, &fdw, NULL, NULL /*&time*/);//若不设置超时则select为阻塞  
+	int   nRetAll = select(0/*window可为0*/, &fdr, NULL, NULL, NULL /*&time*/);//若不设置超时则select为阻塞  
 	if (nRetAll > 0) {
 		for (uint32_t i = 0; i < fds.fd_count; ++i) {
 			auto fd = fds.fd_array[i];
@@ -100,10 +100,10 @@ void TcpClient::Loop() {
 				//调用recv，接收数据。 
 				HandleRead();
 			}
-			if (FD_ISSET(fd, &fdw)) {
-				//轮询检查有数据可写。 
-				HandleWrite();
-			}
+			//if (FD_ISSET(fd, &fdw)) {
+			//	//轮询检查有数据可写。 
+			//	HandleWrite();
+			//}
 			//if (FD_ISSET(fd, &fde)) {
 			//	ptr->HandleError();
 			//}
@@ -149,6 +149,27 @@ bool TcpClient::Start(const char* ip, const short port) {
 		socket_.Close();
 	};
 	thread_.Start(thread_func);
+
+	auto write_thread_func = [this, ip, port]() {
+		printf("thread_func\n");
+
+		while (!stoped_)
+		{
+			if (conn_state_ == TcpClient::CONNSTATE_CONNECTED)
+			{
+				if (this->HandleWrite()) {
+					//printf("write sleep 111\n");
+					Sleep(1);
+				}
+			}
+			else {
+					//printf("write sleep 222\n");
+					Sleep(1);
+			}
+		}
+		socket_.Close();
+	};
+	write_thread_.Start(write_thread_func);
 	return true;
 }
 
@@ -176,8 +197,8 @@ void TcpClient::Connected() {
 
 void TcpClient::Disconnected() {
 	DelConvey((SOCKET)socket_);
-	printf("Connect success \n");
-	conn_state_ == TcpClient::CONNSTATE_CLOSED;
+	printf("Disconnected success \n");
+	conn_state_ = TcpClient::CONNSTATE_CLOSED;
 	disconnected_callback_(this);
 	socket_.Close();
 	if (!socket_.Create()) {
@@ -258,14 +279,15 @@ void TcpClient::HandleRead() {
 	}
 }
 
-void TcpClient::HandleWrite() {
-	if (conn_state_ == TcpClient::CONNSTATE_CLOSED) {
-		return;
-	}
-	SetWriteEvent((SOCKET)socket_, false);
+bool TcpClient::HandleWrite() {
+	//SetWriteEvent((SOCKET)socket_, false);
+
+	
+	inter_msg_.append(send_data_);
 	if (send_data_.empty()) {
-		return;
+		return true;
 	}
+
 	int32_t send_count = 0;
 	for (auto it = send_data_.begin(); it != send_data_.end(); ) {
 		auto &data = *it;
@@ -278,15 +300,16 @@ void TcpClient::HandleWrite() {
 				send_count += n;
 				data->AdjustOffset(n);
 				if (data->AvaliableLength() == 0) {
-					data->SetLength(0);
-					data->Seek(0);
-					free_data_.push_back(data);
+					//data->SetLength(0);
+					//data->Seek(0);
+					//free_data_.push_back(data);
+					delete data;
 					it = send_data_.erase(it);
 					printf("发送一个大包成功");
 				}
 				else {
 					printf("数据太大,尽可能拷贝了%d数据到发送缓冲", send_count);
-					SetWriteEvent((SOCKET)socket_, true);
+					//SetWriteEvent((SOCKET)socket_, true);
 					break;
 				}
 			}
@@ -318,8 +341,9 @@ void TcpClient::HandleWrite() {
 	}
 	if (send_data_.empty()) {
 		printf("全发送成功");
+		return true;
 	}
-	
+	return false;
 }
 
 void TcpClient::HandleError() {
@@ -330,31 +354,40 @@ void TcpClient::HandleError() {
 //减少memcpy，用列表保存要发送的数据包
 //避免发送太快阻塞其他连接发送，每个发送数据包设置发送缓冲区大小
 void TcpClient::DoWrite(const char *buf, int32_t len) {
-	if (send_data_.empty()) {
-		SetWriteEvent((SOCKET)socket_, true);
-	}
-	auto it = send_data_.rbegin();
-	if (it != send_data_.rend())
+	if (stoped_)
 	{
-		auto data = (*it);
-		if (data->AvaliableCapacity() >= len)
-		{
-			data->WriteBuff(buf, len);
-			return;
-		}
+		//停止后不能接受消息
+		printf("PushInterMsgxx fail\n");
+		return;
 	}
+	//if (send_data_.empty()) {
+	//	SetWriteEvent((SOCKET)socket_, true);
+	//}
+	//auto it = send_data_.rbegin();
+	//if (it != send_data_.rend())
+	//{
+	//	auto data = (*it);
+	//	if (data->AvaliableCapacity() >= len)
+	//	{
+	//		data->WriteBuff(buf, len);
+	//		return;
+	//	}
+	//}
 	Buffer* data = NULL;
-	if (free_data_.empty())
-	{
+	//if (free_data_.empty())
+	//{
 		data = new Buffer(RECV_ONCV_SIZE);
-	}
-	else {
-		free_data_.pop_back();
-		data = free_data_.back();
-		data->SetLength(0);
-	}
+	//}
+	//else {
+	//	free_data_.pop_back();
+	//	data = free_data_.back();
+	//	data->SetLength(0);
+	//}
 	data->WriteBuff(buf, len);
-	send_data_.push_back(data);
+	//send_data_.push_back(data);
+
+
+	inter_msg_.push(std::move(data));
 }
 
 void TcpClient::Close() {

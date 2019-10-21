@@ -3,6 +3,7 @@
 #include <condition_variable>
 #include <functional>
 #include <limits>
+
 #include <list>
 #include <mutex>
 #include <thread>
@@ -16,6 +17,7 @@ struct SafeQueue: public std::mutex {
 	bool pop(T *v);
 	int32_t size();
 	bool swap(std::list<T> &items);
+	bool append(std::vector<T>& items);
 private:
 	std::list<T> items_;
 };
@@ -48,6 +50,17 @@ bool SafeQueue<T>::swap(std::list<T> &items) {
 	return true;
 }
 
+template <typename T>
+bool SafeQueue<T>::append(std::vector<T>& items) {
+	std::lock_guard<std::mutex> lk(*this);
+
+	for (auto it = items_.begin(); it != items_.end();)
+	{
+		items.push_back(std::move(*it));
+		it = items_.erase(it);
+	}
+	return true;
+}
 
 
 

@@ -54,7 +54,7 @@
     <ClCompile Include="depend\jw_tcpclient.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="gateway.cpp">
+    <ClCompile Include="client.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>

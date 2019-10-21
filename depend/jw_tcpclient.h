@@ -5,6 +5,7 @@
 #include "jw_socket.h"
 #include "jw_buffer.h"
 #include "jw_thread.h"
+#include "jw_safe_queue.h"
 
 class TcpServer;
 
@@ -35,7 +36,7 @@ private:
 
 public:
 	virtual void HandleRead();
-	virtual void HandleWrite();
+	virtual bool HandleWrite();
 	virtual void HandleError();
 
 	bool Start(const char* ip, const short port);
@@ -57,6 +58,10 @@ private:
 	bool stoped_;
 	BaseThread thread_;
 	Buffer recv_data_;
+	BaseThread write_thread_;
+	SafeQueue<Buffer*> inter_msg_;
+	//std::vector<Buffer*> proc_inter_msg_;
+
 	std::vector<Buffer*> free_data_;
 	std::vector<Buffer*> send_data_;
 	std::function<void(TcpClient*)> connected_callback_;
