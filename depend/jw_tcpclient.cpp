@@ -177,7 +177,7 @@ void TcpClient::Connected() {
 void TcpClient::Disconnected() {
 	DelConvey((SOCKET)socket_);
 	printf("Connect success \n");
-	conn_state_ == TcpClient::CONNSTATE_CONNECTED;
+	conn_state_ == TcpClient::CONNSTATE_CLOSED;
 	disconnected_callback_(this);
 	socket_.Close();
 	if (!socket_.Create()) {
@@ -207,7 +207,8 @@ void TcpClient::HandleRead() {
 		if (n == 0) {
 			//这里应该处理完未处理数据再关连接
 			printf("close normal\n");
-			Close();
+			//Close();
+			Disconnected();
 			break;
 		}
 		if (n < 0) {
@@ -249,7 +250,8 @@ void TcpClient::HandleRead() {
 				//第二次写？？？断了连接 管道破裂的异常 SIGPIPE,
 				//这里也应该处理完未处理数据再关连接
 				printf("read expect %d\n", error);
-				Close();
+				//Close();
+				Disconnected();
 				break;
 			}
 		}
@@ -356,7 +358,5 @@ void TcpClient::DoWrite(const char *buf, int32_t len) {
 }
 
 void TcpClient::Close() {
-	conn_state_ = TcpClient::CONNSTATE_CLOSED;
-	//socket_.Close();
-	Disconnected();
+
 }
