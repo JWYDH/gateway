@@ -305,10 +305,10 @@ bool TcpClient::HandleWrite() {
 					//free_data_.push_back(data);
 					delete data;
 					it = send_data_.erase(it);
-					printf("发送一个大包成功");
+					printf("发送一个大包成功\n");
 				}
 				else {
-					printf("数据太大,尽可能拷贝了%d数据到发送缓冲", send_count);
+					printf("数据太大,尽可能拷贝了%d数据到发送缓冲\n", send_count);
 					//SetWriteEvent((SOCKET)socket_, true);
 					break;
 				}
@@ -317,12 +317,13 @@ bool TcpClient::HandleWrite() {
 				int error = ErrerCode;
 #ifdef _MSC_VER
 				if (error == WSAEINTR) {
-					printf("发送被中断，下次回调再发");
+					printf("发送被中断，下次回调再发\n");
 					break;
 				}
 				else if (error == WSAEWOULDBLOCK) {
-					printf("缓冲区满");
-					break;
+					printf("缓冲区满\n");
+					//break;
+					return true;
 				}
 #else
 				if (error == EINTR) {
@@ -340,8 +341,8 @@ bool TcpClient::HandleWrite() {
 		}
 	}
 	if (send_data_.empty()) {
-		printf("全发送成功");
-		return true;
+		printf("全发送成功\n");
+		//return true;
 	}
 	return false;
 }

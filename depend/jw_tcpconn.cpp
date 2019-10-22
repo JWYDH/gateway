@@ -46,7 +46,7 @@ TcpConn::~TcpConn() {
 }
 
 void TcpConn::EnableWrite(bool enable) {
-	events_->SetWriteEvent((SOCKET)socket_, this, true);
+	events_->SetWriteEvent((SOCKET)socket_, this, enable);
 }
 
 void TcpConn::Connected() {

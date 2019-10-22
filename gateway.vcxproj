@@ -22,7 +22,7 @@
     <VCProjectVersion>15.0</VCProjectVersion>
     <ProjectGuid>{1E8225D6-3A4B-4ED6-86B4-4B5A4A5FA066}</ProjectGuid>
     <RootNamespace>gateway</RootNamespace>
-    <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
+    <WindowsTargetPlatformVersion>10.0.16299.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
@@ -115,7 +115,6 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="client.cpp" />
     <ClCompile Include="depend\3rd\base64.cpp" />
     <ClCompile Include="depend\3rd\HttpParser.cpp" />
     <ClCompile Include="depend\3rd\http_parser.c" />
@@ -128,6 +127,7 @@
     <ClCompile Include="depend\jw_socket.cpp" />
     <ClCompile Include="depend\jw_tcpserver.cpp" />
     <ClCompile Include="depend\jw_thread.cpp" />
+    <ClCompile Include="gateway.cpp" />
     <ClCompile Include="stdafx.cpp" />
   </ItemGroup>
   <ItemGroup>
