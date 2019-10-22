@@ -30,9 +30,9 @@
 //FIN      1bit 表示信息的最后一帧，flag，也就是标记符
 //RSV 1 - 3  1bit each 以后备用的 默认都为 0
 //Opcode   4bit 帧类型
-//Mask     1bit 掩码，是否加密数据，默认必须置为1 
+//Mask     1bit 掩码，是否加密数据，默认必须置为1  表示净荷是否有掩码（只适用于客户端发送给服务器的消息）。
 //Payload  7bit 数据的长度
-//Masking - key      1 or 4 bit 掩码
+//Masking - key      1 or 4 bit 掩码 用于给净荷加掩护，客户端到服务器标记
 //Payload data(x + y) bytes 数据
 //Extension data   x bytes  扩展数据
 //Application data y bytes  程序数据
@@ -169,11 +169,19 @@ class WebSocketFormat
                 return false;
             }
 
+			//最高位用于描述消息是否结束,如果为1则该消息为消息尾部,如果为零则还有后续数据包;
+			//后面3位是用于扩展定义的,如果没有扩展约定的情况则必须为0.
             outfin = (buffer[0] & 0x80) != 0;
+			//最低4位用于描述消息类型,消息类型暂定有15种,其中有几种是预留设置
             outopcode = (WebSocketFrameType)(buffer[0] & 0x0F);
+			//消息的第二个字节主要用一描述掩码和消息长度,最高位用0或1来描述是否有掩码处理,
             const bool isMasking = (buffer[1] & 0x80) != 0;
             uint32_t payloadlen = buffer[1] & 0x7F;
 
+			//剩下的后面7位用来描述消息长度, 由于7位最多只能描述127所以这个值会代表三种情况, 
+			//一种是消息内容少于126存储消息长度, 如果消息长度少于UINT16的情况此值为126, 
+			//当消息长度大于UINT16的情况下此值为127; 这两种情况的消息长度存储到紧随后面的byte[], 
+			//分别是UINT16(2位byte)和UINT64(4位byte).
             uint32_t pos = 2;
             if (payloadlen == 126)
             {
@@ -228,6 +236,7 @@ class WebSocketFormat
                 return false;
             }
 
+			//获取消息体还有一个需要注意的地方就是掩码,如果存在掩码的情况下接收的byte[]要做如下转换处理:
             if (isMasking)
             {
                 payload.reserve(payloadlen);

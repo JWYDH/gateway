@@ -226,9 +226,10 @@ void TcpConn::DoWrite(const char *buf, int32_t len) {
 		data = new Buffer(RECV_ONCV_SIZE);
 	}
 	else {
-		free_data_.pop_back();
+		
 		data = free_data_.back();
 		data->SetLength(0);
+		free_data_.pop_back();
 	}
 	data->WriteBuff(buf, len);
 	send_data_.push_back(data);
