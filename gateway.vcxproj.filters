@@ -57,6 +57,18 @@
     <ClCompile Include="gateway.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
+    <ClCompile Include="depend\3rd\Encrypt.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="depend\3rd\CRC.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="depend\3rd\wrand.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="depend\3rd\aes.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="stdafx.h">
@@ -108,6 +120,18 @@
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="depend\jw_tcpclient.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="depend\3rd\Encrypt.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="depend\3rd\CRC.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="depend\3rd\wrand.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="depend\3rd\aes.h">
       <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>

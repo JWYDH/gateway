@@ -115,11 +115,15 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="depend\3rd\aes.cpp" />
     <ClCompile Include="depend\3rd\base64.cpp" />
+    <ClCompile Include="depend\3rd\CRC.cpp" />
+    <ClCompile Include="depend\3rd\Encrypt.cpp" />
     <ClCompile Include="depend\3rd\HttpParser.cpp" />
     <ClCompile Include="depend\3rd\http_parser.c" />
     <ClCompile Include="depend\3rd\md5calc.cpp" />
     <ClCompile Include="depend\3rd\SHA1.cpp" />
+    <ClCompile Include="depend\3rd\wrand.cpp" />
     <ClCompile Include="depend\jw_buffer.cpp" />
     <ClCompile Include="depend\jw_lock.cpp" />
     <ClCompile Include="depend\jw_tcpclient.cpp" />
@@ -131,13 +135,17 @@
     <ClCompile Include="stdafx.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="depend\3rd\aes.h" />
     <ClInclude Include="depend\3rd\base64.h" />
+    <ClInclude Include="depend\3rd\CRC.h" />
+    <ClInclude Include="depend\3rd\Encrypt.h" />
     <ClInclude Include="depend\3rd\HttpFormat.h" />
     <ClInclude Include="depend\3rd\HttpParser.h" />
     <ClInclude Include="depend\3rd\http_parser.h" />
     <ClInclude Include="depend\3rd\md5calc.h" />
     <ClInclude Include="depend\3rd\SHA1.h" />
     <ClInclude Include="depend\3rd\WebSocketFormat.h" />
+    <ClInclude Include="depend\3rd\wrand.h" />
     <ClInclude Include="depend\jw_buffer.h" />
     <ClInclude Include="depend\jw_lock.h" />
     <ClInclude Include="depend\jw_safe_queue.h" />
