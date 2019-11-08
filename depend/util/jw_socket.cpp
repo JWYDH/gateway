@@ -1,5 +1,10 @@
 #include "jw_socket.h"
 
+#include <stdio.h>
+#ifdef WIN32
+#pragma comment(lib, "wsock32")
+#endif
+
 JwSocket::JwSocket()
 {
 	socket_fd_ = INVALID_SOCKET;
