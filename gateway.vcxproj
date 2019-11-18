@@ -76,6 +76,7 @@
       <Optimization>Disabled</Optimization>
       <SDLCheck>false</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
+      <PreprocessorDefinitions>WIN32;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -131,7 +132,8 @@
     <ClCompile Include="depend\jw_socket.cpp" />
     <ClCompile Include="depend\jw_tcpserver.cpp" />
     <ClCompile Include="depend\jw_thread.cpp" />
-    <ClCompile Include="gateway.cpp" />
+    <ClCompile Include="depend\log\jw_log.cpp" />
+    <ClCompile Include="depend\log\main.cpp" />
     <ClCompile Include="stdafx.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -154,6 +156,7 @@
     <ClInclude Include="depend\jw_socket.h" />
     <ClInclude Include="depend\jw_tcpserver.h" />
     <ClInclude Include="depend\jw_thread.h" />
+    <ClInclude Include="depend\log\jw_log.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="targetver.h" />
   </ItemGroup>

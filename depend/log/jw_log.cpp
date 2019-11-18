@@ -1,4 +1,4 @@
-#include "Log.hh"
+#include "jw_log.h"
 
 #include <time.h>           //strftime
 #include <assert.h>
@@ -45,7 +45,7 @@ bool cmp_file(const file_info& pl, const file_info& pr)
     return pl.mtime > pr.mtime; //½µÐòÅÅÁÐ,¹Ê·µ»Ø>
 }
 
-CLog::CLog(void)
+JWLog::JWLog(void)
 {
     m_log_filename = "app.log";
     m_fp = NULL;
@@ -55,12 +55,12 @@ CLog::CLog(void)
     m_is_cleaning = false;
 }
 
-CLog::~CLog(void)
+JWLog::~JWLog(void)
 {
     FCLOSE(m_fp);
 }
 
-void CLog::rotate_log()
+void JWLog::rotate_log()
 {
     assert(m_log_filename.length() > 0);
 
@@ -79,7 +79,7 @@ void CLog::rotate_log()
     }
 }
 
-bool CLog::mk_dir()
+bool JWLog::mk_dir()
 {
     assert(m_log_filename.length() > 0);
 
@@ -112,7 +112,7 @@ bool CLog::mk_dir()
     return true;
 }
 
-char* CLog::get_time_str(bool is_write)
+char* JWLog::get_time_str(bool is_write)
 {
     time_t now = {0};
     struct tm *ptime = NULL;
@@ -147,13 +147,13 @@ char* CLog::get_time_str(bool is_write)
     return m_time_str;
 }
 
-bool CLog::rename_file()
+bool JWLog::rename_file()
 {
     string new_name = m_log_filename + "-" + get_time_str(false);
     return (0 == rename(m_log_filename.c_str(), new_name.c_str()));
 }
 
-int CLog::get_thread_id()
+int JWLog::get_thread_id()
 {
 #ifdef WIN32
     return GetCurrentThreadId();
@@ -162,7 +162,7 @@ int CLog::get_thread_id()
 #endif
 }
 
-int CLog::writeline(uint level, const char* format_str, ...)
+int JWLog::writeline(uint level, const char* format_str, ...)
 {
     if (m_log_level < level) return 0;
 
@@ -187,7 +187,7 @@ int CLog::writeline(uint level, const char* format_str, ...)
     return write_len;
 }
 
-void CLog::clean_logs()
+void JWLog::clean_logs()
 {
     if (!m_is_cleaning)
     {
@@ -203,12 +203,12 @@ void CLog::clean_logs()
 }
 
 #ifdef WIN32
-void CLog::clean_logs_thread_fun(void* param)
+void JWLog::clean_logs_thread_fun(void* param)
 #else
-void* CLog::clean_logs_thread_fun(void* param)
+void* JWLog::clean_logs_thread_fun(void* param)
 #endif
 {
-    CLog* log_ptr = (CLog*)param;
+    JWLog* log_ptr = (JWLog*)param;
 
     file_list files;
     string log_path = log_ptr->get_log_path();
@@ -242,7 +242,7 @@ void* CLog::clean_logs_thread_fun(void* param)
 }
 
 #ifdef WIN32
-bool CLog::get_log_files(const string& log_path, file_list& files)
+bool JWLog::get_log_files(const string& log_path, file_list& files)
 {
     _finddata_t file_data;
     string file_filter = log_path + "*";
@@ -270,7 +270,7 @@ bool CLog::get_log_files(const string& log_path, file_list& files)
     return true;
 }
 #else
-bool CLog::get_log_files(const string& log_path, file_list& files)
+bool JWLog::get_log_files(const string& log_path, file_list& files)
 {
     string log_dir = get_log_dir(log_path);
     DIR* dir = opendir(log_dir.c_str());
@@ -303,7 +303,7 @@ bool CLog::get_log_files(const string& log_path, file_list& files)
 }
 #endif
 
-string CLog::get_log_dir(const string& log_path)
+string JWLog::get_log_dir(const string& log_path)
 {
     int pos = log_path.find_last_of(PATH_SEPARATER);
     string dir = log_path.substr(0, pos + 1);
@@ -328,9 +328,9 @@ CLogFactory::~CLogFactory(void)
     free_all_inst();
 }
 
-CLog* CLogFactory::get_instance(const char* name)
+JWLog* CLogFactory::get_instance(const char* name)
 {
-    CLog* plog = NULL;
+    JWLog* plog = NULL;
     for (int i = 0; i < m_inst_num; i++)
     {
         if (0 == strcmp(m_inst_list[i].name, name))
@@ -343,7 +343,7 @@ CLog* CLogFactory::get_instance(const char* name)
     if ((NULL == plog) && (m_inst_num < MAX_LOG_INSTANCE))
     {
         m_lock.lock();
-        plog = new CLog();
+        plog = new JWLog();
         strcpy(m_inst_list[m_inst_num].name, name);
         m_inst_list[m_inst_num].plog = plog;
         m_inst_num++;

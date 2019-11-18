@@ -1,13 +1,4 @@
-/*********************************************************************
-* Filename: Log.hh
-* Abstract: Log Class corss-platform(linux and windows)
-*
-* Version : 0.1
-* Author  : js2854
-* Date    : 2013/09/03
-**********************************************************************/
-#ifndef __Log_h__
-#define __Log_h__
+#pragma once
 
 #include <stdio.h>
 #include <vector>
@@ -105,11 +96,11 @@ typedef struct
 
 typedef vector<file_info>   file_list;
 
-class CLog
+class JWLog
 {
 public:
-    CLog(void);
-    ~CLog(void);
+    JWLog(void);
+    ~JWLog(void);
 
     //设置日志文件路径
     void set_log_filepath(const string filepath) {m_log_filename = filepath; mk_dir(); rotate_log();}
@@ -170,7 +161,7 @@ private:
 typedef struct _log_instance
 {
     char  name[MAX_MODULE_LEN];
-    CLog* plog;
+    JWLog* plog;
 }log_inst;
 
 class CLogFactory
@@ -179,7 +170,7 @@ public:
     CLogFactory(void);
     virtual ~CLogFactory(void);
 
-    static CLog* get_instance(const char* name);
+    static JWLog* get_instance(const char* name);
     static void  free_instance(const char* name);
 
 private:
@@ -191,5 +182,5 @@ private:
     static MutexLock    m_lock;                             //同步锁
 };
 
-#endif // __Log_h__
+
 

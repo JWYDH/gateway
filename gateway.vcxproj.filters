@@ -54,9 +54,6 @@
     <ClCompile Include="depend\jw_tcpclient.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="gateway.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
     <ClCompile Include="depend\3rd\Encrypt.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
@@ -67,6 +64,12 @@
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="depend\3rd\aes.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="depend\log\jw_log.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="depend\log\main.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>
@@ -132,6 +135,9 @@
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="depend\3rd\aes.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="depend\log\jw_log.h">
       <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>

@@ -7,7 +7,7 @@
 #endif
 
 
-#include "Log.hh"
+#include "jw_log.h"
 
 #ifdef SINGLE_LOG
 int main()
