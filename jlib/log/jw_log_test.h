@@ -10,7 +10,7 @@
 #include "jw_log.h"
 
 #ifdef SINGLE_LOG
-int main()
+int test_log()
 {
 #ifdef linux
     SET_LOG_NAME("/home/jaxon/some_test/mylog/temp/test.log");
@@ -82,7 +82,7 @@ void* threadfunc(void *param)
     fflush(stdout);
 }
 
-int main()
+int test_log()
 {
 #ifdef linux
     SET_LOG_NAME(TESTMODULE1, "/home/jaxon/some_test/mylog/temp/test1.log");
