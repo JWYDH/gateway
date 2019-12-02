@@ -1,5 +1,5 @@
 #pragma once
-#include "../stdafx.h"
+
 
 #ifdef WIN32
 #include <winsock.h>

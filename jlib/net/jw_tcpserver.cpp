@@ -1,4 +1,4 @@
-#include "../stdafx.h"
+
 #include "jw_tcpserver.h"
 #include "jw_tcpconn.h"
 

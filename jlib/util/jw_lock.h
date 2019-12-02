@@ -1,5 +1,5 @@
 #pragma once
-#include "../stdafx.h"
+
 #ifdef _MSC_VER
 #define pthread_mutex_t					CRITICAL_SECTION
 #define pthread_mutex_init(x,y)			InitializeCriticalSection(x)
