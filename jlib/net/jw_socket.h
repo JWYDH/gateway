@@ -2,7 +2,8 @@
 
 
 #ifdef WIN32
-#include <winsock.h>
+//#include <winsock.h>
+#include <WinSock2.h> 
 typedef int				socklen_t;
 #else
 #include <sys/socket.h>
@@ -21,6 +22,12 @@ typedef int				SOCKET;
 #define SOCKET_ERROR	-1
 //#pragma endregion
 #endif
+
+#ifdef WIN32
+#pragma comment(lib, "wsock32")
+#endif
+
+
 
 class JwSocket {
 

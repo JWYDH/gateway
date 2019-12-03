@@ -25,7 +25,7 @@ link_directories(${LINK_DIR})
 set(SOURCE_FILES
         "jlib.cpp"
 		"./log/jw_log.cpp"
-		
+		"./net/jw_socket.cpp"
         )
 
 add_executable (jlib ${SOURCE_FILES})

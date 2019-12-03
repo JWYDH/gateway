@@ -116,7 +116,12 @@ void TcpClient::Loop() {
 	}
 	else
 	{
+#ifdef WIN32
 		printf("select error!%d\n", WSAGetLastError());
+#else
+		printf("GetRecvBufSize error: %d\n", errno);
+#endif // WIN32
+		
 	}
 }
 
@@ -126,11 +131,14 @@ bool TcpClient::Start(const char* ip, const short port) {
 		return false;
 	}
 	if (!socket_.Create()) {
-		printf("creat %d\n", ErrerCode);
+
+#ifdef WIN32
+		printf("creat error!%d\n", WSAGetLastError());
+#else
+		printf("GetRecvBufSize error: %d\n", errno);
+#endif // WIN32
 	}
 	auto thread_func = [this, ip, port]() {
-		printf("thread_func\n");
-
 		while (!stoped_)
 		{
 			if (conn_state_ == TcpClient::CONNSTATE_CONNECTED)
@@ -151,8 +159,6 @@ bool TcpClient::Start(const char* ip, const short port) {
 	thread_.Start(thread_func);
 
 	auto write_thread_func = [this, ip, port]() {
-		printf("thread_func\n");
-
 		while (!stoped_)
 		{
 			if (conn_state_ == TcpClient::CONNSTATE_CONNECTED)
@@ -184,10 +190,20 @@ void TcpClient::Connected() {
 	conn_state_ = TcpClient::CONNSTATE_CONNECTED;
 	socket_.SetNoBlock();
 	if (!socket_.SetRecvBufSize(RECV_BUF_SIZE)) {
-		printf("set recv %d\n", ErrerCode);
+
+#ifdef WIN32
+		printf("set recv error!%d\n", WSAGetLastError());
+#else
+		printf("set recv error!%d\n", errno);
+#endif // WIN32
 	}
 	if (!socket_.SetSendBufSize(SEND_BUF_SIZE)) {
-		printf("set send %d\n", ErrerCode);
+
+#ifdef WIN32
+		printf("set send error!%d\n", WSAGetLastError());
+#else
+		printf("set send error!%d\n", errno);
+#endif // WIN32
 	}
 	connected_callback_(this);
 	AddConvey((SOCKET)socket_);
@@ -201,9 +217,14 @@ void TcpClient::Disconnected() {
 	conn_state_ = TcpClient::CONNSTATE_CLOSED;
 	disconnected_callback_(this);
 	socket_.Close();
-	if (!socket_.Create()) {
-		printf("creat %d\n", ErrerCode);
-	}
+//	if (!socket_.Create()) {
+//#ifdef WIN32
+//		printf("Disconnected error!%d\n", WSAGetLastError());
+//#else
+//		printf("Disconnected error!%d\n", errno);
+//#endif // WIN32
+//
+//	}
 }
 
 void TcpClient::HandleRead() {

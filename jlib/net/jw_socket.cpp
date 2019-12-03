@@ -1,9 +1,7 @@
 #include "jw_socket.h"
 
 #include <stdio.h>
-#ifdef WIN32
-#pragma comment(lib, "wsock32")
-#endif
+
 
 JwSocket::JwSocket()
 {
@@ -22,7 +20,7 @@ JwSocket::~JwSocket()
 
 int JwSocket::Init()
 {
-#ifdef _MSC_VER
+#ifdef WIN32
 	/*
 	http://msdn.microsoft.com/zh-cn/vstudio/ms741563(en-us,VS.85).aspx
 
@@ -51,7 +49,7 @@ int JwSocket::Init()
 //this is just for windows
 int JwSocket::Clean()
 {
-#ifdef _MSC_VER
+#ifdef WIN32
 		return (WSACleanup());
 #endif
 		return 0;
@@ -64,7 +62,7 @@ JwSocket::operator SOCKET ()
 
 bool JwSocket::SetNoBlock(bool enable)
 {
-#ifdef _MSC_VER
+#ifdef WIN32
 	// Set the socket I/O mode: In this case FIONBIO
 	// enables or disables the blocking mode for the 
 	// socket based on the numerical value of iMode.
@@ -73,7 +71,7 @@ bool JwSocket::SetNoBlock(bool enable)
 	u_long block = enable ? 1 : 0;
 	int ret = ioctlsocket(socket_fd_, FIONBIO, &block);
 	if (ret != NO_ERROR) {
-		printf("ioctlsocket failed with error: %d\n", ErrerCode);
+		printf("ioctlsocket failed with error: %d\n", WSAGetLastError());
 		return false;
 	}
 #else
@@ -88,7 +86,7 @@ bool JwSocket::SetNoBlock(bool enable)
 		printf("fcntl failed 222!\n");
 		return false;
 	}
-#endif // _MSC_VER
+#endif // WIN32
 	return true;
 }
 
@@ -97,7 +95,11 @@ int JwSocket::GetRecvBufSize(int* size)
 	socklen_t oplen = sizeof(*size);
 	int ret = getsockopt(socket_fd_, SOL_SOCKET, SO_RCVBUF, (char*)size, &oplen);
 	if (ret == -1) {
-		printf("GetRecvBufSize error: %d\n", ErrerCode);
+#ifdef WIN32
+		printf("GetRecvBufSize error: %d\n", WSAGetLastError());
+#else
+		printf("GetRecvBufSize error: %d\n", errno);
+#endif // WIN32
 		return false;
 	}
 	return ret;
@@ -107,7 +109,12 @@ bool JwSocket::SetRecvBufSize(int size)
 {
 	int ret = setsockopt(socket_fd_, SOL_SOCKET, SO_RCVBUF, (char*)&size, sizeof(size));
 	if (ret == -1) {
-		printf("ioctlsocket failed with error: %d\n", ErrerCode);
+#ifdef WIN32
+		printf("ioctlsocket failed with error: %d\n", WSAGetLastError());
+#else
+		printf("GetRecvBufSize error: %d\n", errno);
+#endif // WIN32
+		
 		return false;
 	}
 	return true;
@@ -118,7 +125,12 @@ int JwSocket::GetSendBufSize(int* size)
 	socklen_t oplen = sizeof(*size);
 	int ret = getsockopt(socket_fd_, SOL_SOCKET, SO_SNDBUF, (char*)size, &oplen);
 	if (ret == -1) {
-		printf("GetRecvBufSize error: %d\n", ErrerCode);
+#ifdef WIN32
+		printf("GetRecvBufSize error: %d\n", WSAGetLastError());
+#else
+		printf("GetRecvBufSize error: %d\n", errno);
+#endif // WIN32
+		
 		return false;
 	}
 	return ret;
@@ -128,7 +140,12 @@ bool JwSocket::SetSendBufSize(int size)
 {
 	int ret = setsockopt(socket_fd_, SOL_SOCKET, SO_SNDBUF, (char*)&size, sizeof(size));
 	if (ret == -1) {
-		printf("ioctlsocket failed with error: %d\n", ErrerCode);
+#ifdef WIN32
+		printf("ioctlsocket failed with error: %d\n", WSAGetLastError());
+#else
+		printf("GetRecvBufSize error: %d\n", errno);
+#endif // WIN32
+		
 		return false;
 	}
 	return true;
@@ -140,7 +157,12 @@ bool JwSocket::SetNoDelay()
 	int flag = 1;
 	int ret = setsockopt(socket_fd_, IPPROTO_TCP, TCP_NODELAY, (char*)&flag, sizeof(flag));
 	if (ret == -1) {
-		printf("ioctlsocket failed with error: %d\n", ErrerCode);
+#ifdef WIN32
+		printf("ioctlsocket failed with error: %d\n", WSAGetLastError());
+#else
+		printf("GetRecvBufSize error: %d\n", errno);
+#endif // WIN32
+		
 		return false;
 	}
 	return true;
@@ -150,6 +172,11 @@ bool JwSocket::Create(int af, int type, int protocol)
 {
 	socket_fd_ = socket(af, type, protocol);
 	if ( socket_fd_ == INVALID_SOCKET ) {
+#ifdef WIN32
+		printf("socket failed with error: %d\n", WSAGetLastError());
+#else
+		printf("GetRecvBufSize error: %d\n", errno);
+#endif // WIN32
 		return false;
 	}
 	return true;
@@ -163,6 +190,11 @@ bool JwSocket::Connect(const char* ip, unsigned short port)
  	svraddr.sin_port = htons(port);
 	int ret = connect(socket_fd_, (struct sockaddr*)&svraddr, sizeof(svraddr));
 	if ( ret == SOCKET_ERROR ) {
+#ifdef WIN32
+		printf("socket connect failed with error: %d\n", WSAGetLastError());
+#else
+		printf("GetRecvBufSize error: %d\n", errno);
+#endif // WIN32
 		return false;
 	}
 	//|| error == EINPROGRESS
@@ -190,7 +222,12 @@ bool JwSocket::Bind(const char *ip, unsigned short port)
 	int on = 1;
 	int err = setsockopt(socket_fd_, SOL_SOCKET, SO_REUSEADDR, (char*)&on, sizeof(on));
 	if (err != 0) {
-		return ErrerCode;
+#ifdef WIN32
+		return WSAGetLastError();
+#else
+		return errno;
+#endif // WIN32
+		
 	}
 
 	int ret = bind(socket_fd_, (struct sockaddr*)&serveraddr, sizeof(serveraddr));
@@ -244,7 +281,7 @@ int JwSocket::Recv(char* buf, int len, int flags)
 
 void JwSocket::Shutdown(int s) {
 	if (socket_fd_ != -1) {
-#ifdef _MSC_VER
+#ifdef WIN32
 		//SD_RECEIVE（0）：Shutdown receive operations.
 		//SD_SEND（1）：Shutdown send operations.
 		//SD_BOTH（2）：Shutdown both send and receive operations.
@@ -254,14 +291,14 @@ void JwSocket::Shutdown(int s) {
 		//SHUT_WR（1）：关闭sockfd的写功能，此选项将不允许sockfd进行写操作。
 		//SHUT_RDWR（2）：关闭sockfd的读写功能。
 		::shutdown(fd_, SHUT_WR);
-#endif // _MSC_VER
+#endif // WIN32
 
 	}
 }
 
 void JwSocket::Close()
 {
-#ifdef _MSC_VER
+#ifdef WIN32
 	closesocket(socket_fd_);
 #else
 	close(socket_fd_);
