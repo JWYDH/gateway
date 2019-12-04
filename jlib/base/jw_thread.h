@@ -21,10 +21,10 @@ public:
 	BaseThread();
 	virtual ~BaseThread();
 	int Start(std::function<void()> thread_func);
+#ifdef WIN32
 	//等待线程执行完毕，wait_time参数表示等待的最大毫秒数，INFINITE表示无限等待。
 	//注意，调用此函数的线程在此线程执行完毕后会一直处于阻塞状态
 	//参数wait_alert表示调用线程在阻塞期间是否允许进入警告状态（仅对于windows有效)
-#ifdef WIN32
 	int waitFor(unsigned int wait_time = INFINITE, bool wait_alert = true);
 #else
 	int waitFor();

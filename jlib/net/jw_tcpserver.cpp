@@ -1,4 +1,3 @@
-
 #include "jw_tcpserver.h"
 #include "jw_tcpconn.h"
 
@@ -14,18 +13,18 @@ TcpServer::~TcpServer(){
 bool TcpServer::Initialize()
 {
 	stoped_ = false;
-#ifdef _MSC_VER
+#ifdef WIN32
 	FD_ZERO(&fds_);
 	FD_ZERO(&fdreads_);
 	FD_ZERO(&fdwrites_);
 #else
 	listen_fd_ = epoll_create1(EPOLL_CLOEXEC);
-#endif // _MSC_VER
+#endif
 	return true;
 }
 
 void TcpServer::AddConvey(SOCKET fd, void *c) {
-#ifdef _MSC_VER
+#ifdef WIN32
 	auto it = select_conn_list_.find(fd);
 	if (it != select_conn_list_.end())
 	{
@@ -45,12 +44,12 @@ void TcpServer::AddConvey(SOCKET fd, void *c) {
 	if (r) {
 		printf( "epoll_ctl add failed %d %s\n", ErrerCode, strerror(ErrerCode));
 	}
-#endif // _MSC_VER
+#endif //
 
 }
 
 void TcpServer::DelConvey(SOCKET fd) {
-#ifdef _MSC_VER
+#ifdef WIN32
 	auto it = select_conn_list_.find(fd);
 	if (it == select_conn_list_.end())
 	{
@@ -67,11 +66,11 @@ void TcpServer::DelConvey(SOCKET fd) {
 	if (r) {
 		printf( "epoll_ctl del failed %d %s\n", ErrerCode, strerror(ErrerCode));
 	}
-#endif // _MSC_VER
+#endif //
 }
 
 void TcpServer::SetReadEvent(SOCKET fd, void *io, bool enable) {
-#ifdef _MSC_VER
+#ifdef WIN32
 	if (enable)
 	{
 		FD_SET(fd, &fdreads_);
@@ -90,11 +89,11 @@ void TcpServer::SetReadEvent(SOCKET fd, void *io, bool enable) {
 	if (r) {
 		printf( "epoll_ctl mod failed %d %s\n", ErrerCode, strerror(ErrerCode));
 	}
-#endif // _MSC_VER
+#endif //
 }
 
 void TcpServer::SetWriteEvent(SOCKET fd, void *io, bool enable) {
-#ifdef _MSC_VER
+#ifdef WIN32
 	if (enable)
 	{
 		FD_SET(fd, &fdwrites_);
@@ -113,11 +112,11 @@ void TcpServer::SetWriteEvent(SOCKET fd, void *io, bool enable) {
 	if (r) {
 		printf( "epoll_ctl mod failed %d %s\n", ErrerCode, strerror(ErrerCode));
 	}
-#endif // _MSC_VER
+#endif //
 }
 
 void TcpServer::Loop() {
-#ifdef _MSC_VER
+#ifdef WIN32
 	fd_set fds;
 	fd_set fdr;
 	fd_set fdw;
@@ -230,7 +229,7 @@ void TcpServer::Loop() {
 			}
 		}
 	}
-#endif // _MSC_VER
+#endif //
 
 }
 
@@ -240,28 +239,52 @@ bool TcpServer::Start(const char *ip, const short port, int back_log/*=256*/){
 		return false;
 	}
 	if (!socket_.Create()) {
-		printf("create %d\n", ErrerCode);
+#ifdef WIN32
+		printf("create error: %d\n", WSAGetLastError());
+#else
+		printf("create error: %d\n", errno);
+#endif // WIN32
+
 		return false;
 	}
 	if (!socket_.Bind(ip, port)){
 		socket_.Close();
-		printf("bind %d\n", ErrerCode);
+
+#ifdef WIN32
+		printf("bind error: %d\n", WSAGetLastError());
+#else
+		printf("bind error: %d\n", errno);
+#endif // WIN32
 		return false;
 	}
 	if (!socket_.Listen(back_log)) {
 		socket_.Close();
-		printf("listen %d\n", ErrerCode);
+#ifdef WIN32
+		printf("listen error: %d\n", WSAGetLastError());
+#else
+		printf("listen error: %d\n", errno);
+#endif // WIN32
+
 		return false;
 	}
 	if (!socket_pair_send_.Create()) {
 		socket_.Close();
-		printf("create socket_pair_send_ %d\n", ErrerCode);
+#ifdef WIN32
+		printf("create socket_pair_send_ error: %d\n", WSAGetLastError());
+#else
+		printf("create socket_pair_send_ error: %d\n", errno);
+#endif // WIN32
+
 		return false;
 	}
 	if (!socket_pair_recv_.Create()) {
 		socket_.Close();
 		socket_pair_send_.Close();
-		printf("create socket_pair_recv_ %d\n", ErrerCode);
+#ifdef WIN32
+		printf("create socket_pair_send_ error: %d\n", WSAGetLastError());
+#else
+		printf("create socket_pair_send_ error: %d\n", errno);
+#endif // WIN32
 		return false;
 	}
 	if (!socket_pair_send_.Connect(ip, port))
@@ -269,7 +292,12 @@ bool TcpServer::Start(const char *ip, const short port, int back_log/*=256*/){
 		socket_.Close();
 		socket_pair_send_.Close();
 		socket_pair_recv_.Close();
-		printf("Connect fail11 %d\n", ErrerCode);
+#ifdef WIN32
+		printf("Connect fail error: %d\n", WSAGetLastError());
+#else
+		printf("Connect fail error: %d\n", errno);
+#endif // WIN32
+
 		return false;
 	}
 	if (!socket_.Accept(socket_pair_recv_))
@@ -277,7 +305,12 @@ bool TcpServer::Start(const char *ip, const short port, int back_log/*=256*/){
 		socket_.Close();
 		socket_pair_send_.Close();
 		socket_pair_recv_.Close();
-		printf( "Accept fail22 %d\n", ErrerCode);
+#ifdef WIN32
+		printf("Accept fail error: %d\n", WSAGetLastError());
+#else
+		printf("Accept fail error: %d\n", errno);
+#endif // WIN32
+
 		return false;
 	}
 	socket_pair_send_.SetNoDelay();

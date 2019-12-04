@@ -10,9 +10,6 @@
 
 class ThreadMutex;
 class ThreadGuard;
-class Runnable;
-class Thread;
-//class RWLock;
 
 class ThreadMutex{
 public:

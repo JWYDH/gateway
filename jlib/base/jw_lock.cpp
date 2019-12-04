@@ -13,9 +13,6 @@ void ThreadMutex::Lock(){
 	pthread_mutex_lock(&mutex_);
 }
 
-//int ThreadMutex::Trylock(){
-//	return pthread_mutex_trylock(&mutex_);
-//}
 
 void ThreadMutex::Unlock(){
 	pthread_mutex_unlock(&mutex_);

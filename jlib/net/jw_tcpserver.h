@@ -1,13 +1,11 @@
 #pragma once
-
+#include <thread>
 #include <vector>
 #include <map>
 #include <functional>
-#include <thread>
 #include "jw_socket.h"
-#include "jw_thread.h"
-#include "jw_safe_queue.h"
-
+#include "../base/jw_thread.h"
+#include "../base/jw_safe_queue.h"
 
 
 class TcpConn;
@@ -24,14 +22,14 @@ public:
 	void Loop();
 private:
 
-#ifdef _MSC_VER
+#ifdef WIN32
 	fd_set fds_;
 	fd_set fdreads_;
 	fd_set fdwrites_;
 	std::map<SOCKET, void*> select_conn_list_;
 #else
 	SOCKET listen_fd_;
-#endif // _MSC_VER
+#endif
 public:
 	union InterMsgData
 	{

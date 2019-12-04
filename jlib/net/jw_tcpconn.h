@@ -1,9 +1,10 @@
 #pragma once
-
+#include <stdint.h>
 #include <vector>
 #include <functional>
 #include "jw_socket.h"
 #include "jw_buffer.h"
+
 
 class TcpServer;
 

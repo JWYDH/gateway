@@ -52,11 +52,19 @@ void TcpConn::EnableWrite(bool enable) {
 void TcpConn::Connected() {
 	socket_.SetNoBlock();
 	if (!socket_.SetRecvBufSize(RECV_BUF_SIZE)) {
-		printf( "set recv %d\n", ErrerCode);
+#ifdef WIN32
+		printf("set recv error: %d\n", WSAGetLastError());
+#else
+		printf("set recv error: %d\n", errno);
+#endif // WIN32
 		return;
 	}
 	if (!socket_.SetSendBufSize(SEND_BUF_SIZE)) {
-		printf( "set send %d\n", ErrerCode);
+#ifdef WIN32
+		printf("set send error: %d\n", WSAGetLastError());
+#else
+		printf("set send error: %d\n", errno);
+#endif // WIN32
 		return;
 	}
 	conn_state_ = TcpConn::CONNSTATE_CONNECTED;
@@ -95,8 +103,9 @@ void TcpConn::HandleRead() {
 			break;
 		}
 		if (n < 0) {
-			int error = ErrerCode;
-#ifdef _MSC_VER
+			
+#ifdef WIN32
+			int error = WSAGetLastError();
 			if (error == WSAEINTR) {
 				continue;
 			}
@@ -122,6 +131,7 @@ void TcpConn::HandleRead() {
 				break;
 			}
 #else
+			int error = errno;
 			if (error == EINTR) {
 				continue;
 			}
@@ -168,8 +178,8 @@ void TcpConn::HandleWrite() {
 				}
 			}
 			else if (n <= 0) {
-				int error = ErrerCode;
-#ifdef _MSC_VER
+#ifdef WIN32
+				int error = WSAGetLastError();
 				if (error == WSAEINTR) {
 					printf("发送被中断，下次回调再发\n");
 					break;
@@ -179,6 +189,7 @@ void TcpConn::HandleWrite() {
 					break;
 				}
 #else
+				int error = errno;
 				if (error == EINTR) {
 					break;
 				}

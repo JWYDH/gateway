@@ -29,6 +29,8 @@ set(SOURCE_FILES
 		"./net/jw_socket.cpp"
 		"./net/jw_buffer.cpp"
 		"./net/jw_tcpclient.cpp"
+		"./net/jw_tcpconn.cpp"
+		"./net/jw_tcpserver.cpp"
         )
 
 add_executable (jlib ${SOURCE_FILES})
