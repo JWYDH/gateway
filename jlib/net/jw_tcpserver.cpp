@@ -191,7 +191,7 @@ void TcpServer::Loop() {
 	}
 	else if (nRetAll == 0)
 	{
-		//printf("select time out \n");
+		printf("select time out \n");
 	}
 	else
 	{
@@ -331,8 +331,7 @@ bool TcpServer::Start(const char *ip, const short port, int back_log/*=256*/){
 				socket.setLoaclAddr(&local_addr);
 				conn->GetSocket() = socket;//Ä¬ÈÏ¿½±´¹¹Ôì
 
-				if (newsession_callback_)
-				{
+				if (newsession_callback_){
 					newsession_callback_(conn);
 				}
 				

@@ -35,12 +35,10 @@ TcpConn::TcpConn(TcpServer* events): events_(events){
 }
 
 TcpConn::~TcpConn() {
-	for (auto& buf : free_data_)
-	{
+	for (auto& buf : free_data_){
 		delete buf;
 	}
-	for (auto& buf : send_data_)
-	{
+	for (auto& buf : send_data_){
 		delete buf;
 	}
 }
@@ -215,8 +213,6 @@ void TcpConn::HandleError() {
 	Close();
 }
 
-//减少memcpy，用列表保存要发送的数据包
-//避免发送太快阻塞其他连接发送，每个发送数据包设置发送缓冲区大小
 void TcpConn::DoWrite(const char *buf, int32_t len) {
 	if (send_data_.empty()) {
 		EnableWrite(true);
