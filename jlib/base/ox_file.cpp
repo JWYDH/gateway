@@ -15,7 +15,7 @@
 #define MKDIR(dir_name) mkdir(dir_name, 0755)
 #endif
 
-#include <brynet/utils/ox_file.h>
+#include "ox_file.h"
 
 bool ox_dir_create(const char* dir)
 {
