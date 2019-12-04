@@ -4,8 +4,8 @@
 #include <functional>
 #include "jw_socket.h"
 #include "jw_buffer.h"
-#include "jw_thread.h"
-#include "jw_safe_queue.h"
+#include "../base/jw_thread.h"
+#include "../base/jw_safe_queue.h"
 
 class TcpServer;
 
@@ -26,7 +26,6 @@ public:
 	bool Initialize();
 	void AddConvey(SOCKET fd);
 	void DelConvey(SOCKET fd);
-	void SetWriteEvent(SOCKET fd, bool enable);
 	void Loop();
 private:
 	fd_set fds_;
@@ -36,6 +35,25 @@ private:
 
 public:
 	virtual void HandleRead();
+
+	void MyMethod()
+	{
+		printf("this time need proc sum = %d\n", recv_data_.AvaliableLength());
+		int32_t read_count = read_callback_(this, recv_data_.OffsetPtr(), recv_data_.AvaliableLength());
+		printf("this time proc data sum = %d\n", read_count);
+		if (read_count > 0)
+		{
+			recv_data_.AdjustOffset(read_count);
+			if ((recv_data_.OffsetPtr() - recv_data_.MemPtr()) > (recv_data_.Capacity() / 2))
+			{
+				int data_len = recv_data_.Length();
+				memcpy(recv_data_.MemPtr(), recv_data_.OffsetPtr(), data_len);
+				recv_data_.SetLength(data_len);
+				recv_data_.Seek(0);
+			}
+		}
+	}
+
 	virtual bool HandleWrite();
 	virtual void HandleError();
 

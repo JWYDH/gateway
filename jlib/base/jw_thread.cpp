@@ -2,7 +2,7 @@
 
 BaseThread::BaseThread()
 {
-#ifdef _MSC_VER
+#ifdef WIN32
 	thread_ = NULL;
 #endif
 	thread_id_ = 0;
@@ -12,7 +12,7 @@ BaseThread::~BaseThread()
 {
 	if (thread_id_!=0)
 	{
-#ifdef _MSC_VER
+#ifdef WIN32
 		if (thread_)
 		{
 			CloseHandle(thread_);
@@ -53,7 +53,7 @@ int BaseThread::Start(std::function<void()> thread_func) {
 #endif
 }
 
-#ifdef _MSC_VER
+#ifdef WIN32
 int BaseThread::waitFor(unsigned int wait_time, bool wait_alert)
 {
 	return WaitForSingleObjectEx(thread_, wait_time, wait_alert);

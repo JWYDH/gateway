@@ -8,7 +8,7 @@
 
 #ifdef WIN32
 #include <io.h>             //access, _finddata_t, _findfirst, _findnext
-#include <direct.h>         //_mkdir
+#include <direct.h>         //_mkdir getcwd
 #include <process.h>        //_beginthread
 
 #define MKDIR(a)            _mkdir((a))

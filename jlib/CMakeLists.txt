@@ -24,8 +24,11 @@ link_directories(${LINK_DIR})
 
 set(SOURCE_FILES
         "jlib.cpp"
+		"./base/jw_thread.cpp"
 		"./log/jw_log.cpp"
 		"./net/jw_socket.cpp"
+		"./net/jw_buffer.cpp"
+		"./net/jw_tcpclient.cpp"
         )
 
 add_executable (jlib ${SOURCE_FILES})
