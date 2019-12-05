@@ -7,7 +7,7 @@
 #endif
 
 
-#include "jw_log.h"
+#include "log/jw_log.h"
 
 #ifdef SINGLE_LOG
 int test_log()
@@ -31,7 +31,7 @@ int test_log()
 
 	start = clock();
 
-	for (int i = 0; i < 1000000; i++)
+	for (int i = 0; i < 10000; i++)
 	{
 		LOG_TRACE("****%d****", i);
 		LOG_INFO("test INFO");
