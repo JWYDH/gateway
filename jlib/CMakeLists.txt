@@ -1,7 +1,4 @@
-﻿# CMakeList.txt: jlib 的 CMake 项目，包括源和定义
-# 此处特定于项目的逻辑。
-#
-cmake_minimum_required (VERSION 3.8)
+﻿cmake_minimum_required (VERSION 3.8)
 
 set(CMAKE_CXX_STANDARD 11)
 
@@ -28,10 +25,10 @@ set(SOURCE_FILES
 		
 # add_definitions("-O0 -g3 -gdwarf-2 -fnessage-length=0 -MMD -MP")
 
-# MESSAGE(STATUS "################" ${PROJECT_SOURCE_DIR})
+MESSAGE(STATUS "################" ${PROJECT_SOURCE_DIR})
 # MESSAGE(STATUS "################" ${PROJECT_BINARY_DIR})
 SET(EXECUTABLE_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/bin)
 SET(LIBRARY_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/lib)
 
-add_library(jwlib STATIC ${SOURCE_FILES})
+add_library(jlib STATIC ${SOURCE_FILES})
 

@@ -30,7 +30,7 @@ pid_t gettid() {  return syscall(SYS_gettid); }
 
 #define DEFAULT_LOG_SIZE        (10*1024*1024)//10M
 #define DEFAULT_MAX_LOG_SPACE   (500*1024*1024)//500M
-#define MAX_PATH                512
+#define MAX_LOG_PATH                512
 
 #define CLEANLOG_SLEEP_TIME     100000  //100ms
 
@@ -87,7 +87,7 @@ bool JWLog::mk_dir()
     int len = m_log_filename.find_last_of(PATH_SEPARATER);
     if (string::npos == len) return false;//找不到路径分隔符直接返回
 
-    char dir[MAX_PATH] = {0};
+    char dir[MAX_LOG_PATH] = {0};
     strncpy(dir, p_str, ++len);
 
     if (0 != access(dir, 0))
