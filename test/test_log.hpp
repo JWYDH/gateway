@@ -1,3 +1,4 @@
+#pragma once
 #include <time.h> //clock_t,clock(),CLOCKS_PER_SEC
 
 #ifdef WIN32
@@ -42,8 +43,6 @@ int test_log()
 	finish = clock();
 	duration = (double)(finish - start) / CLOCKS_PER_SEC;
 	printf("duration = %.3f.\n", duration);
-
-	getchar();
 
 	return 0;
 }
@@ -114,8 +113,6 @@ int test_log()
 	ret = pthread_create(&handle2, (pthread_attr_t*)0, threadfunc, (void*)TESTMODULE2);
 	printf("create thread 2. ret = %d, handle=%d\n", ret, handle2);
 #endif
-
-	getchar();
 
 	return 0;
 }

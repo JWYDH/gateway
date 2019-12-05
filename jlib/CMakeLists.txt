@@ -24,6 +24,7 @@ set(SOURCE_FILES
         )
 		
 # add_definitions("-O0 -g3 -gdwarf-2 -fnessage-length=0 -MMD -MP")
+add_definitions(-D _WINSOCKAPI_)
 
 MESSAGE(STATUS "################" ${PROJECT_SOURCE_DIR})
 # MESSAGE(STATUS "################" ${PROJECT_BINARY_DIR})

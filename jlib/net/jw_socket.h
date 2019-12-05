@@ -1,8 +1,6 @@
 #pragma once
-
-
 #ifdef WIN32
-//#include <winsock.h>
+//#include <WinSock.h>
 #include <WinSock2.h> 
 typedef int				socklen_t;
 #else
@@ -23,9 +21,7 @@ typedef int				SOCKET;
 //#pragma endregion
 #endif
 
-#ifdef WIN32
-#pragma comment(lib, "wsock32")
-#endif
+
 
 
 

@@ -23,13 +23,14 @@ set(LIBRARY_FILES
 
 # 源文件代码集合
 set(SOURCE_FILES
-		"test_log.hpp"
+#		"test_log.hpp"
 #		"test_mysql.hpp"
 #		"test_tcpclient.hpp"
 #		"test_tcpserver.hpp"
         "main.cpp")
 
 # add_definitions("-O0 -g3 -gdwarf-2 -fnessage-length=0 -MMD -MP")
+add_definitions(-D _WINSOCKAPI_)
 
 MESSAGE(STATUS "################" ${PROJECT_SOURCE_DIR})
 # MESSAGE(STATUS "################" ${PROJECT_BINARY_DIR})
