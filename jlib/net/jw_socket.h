@@ -1,8 +1,7 @@
 #pragma once
 #ifdef WIN32
-//#include <WinSock.h>
-#include <WinSock2.h> 
-typedef int				socklen_t;
+#include <WinSock.h>
+typedef int socklen_t;
 #else
 #include <sys/socket.h>
 #include <netinet/in.h>
@@ -13,8 +12,7 @@ typedef int				socklen_t;
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <arpa/inet.h>
-typedef int				SOCKET;
-
+typedef int	SOCKET;
 //#pragma region define win32 const variable in linux
 #define INVALID_SOCKET	-1
 #define SOCKET_ERROR	-1
@@ -79,8 +77,6 @@ public:
 
 
 	int Recv(char* buf, int len, int flags = 0);
-	
-	void Shutdown(int s);
 
 	void Close();
 

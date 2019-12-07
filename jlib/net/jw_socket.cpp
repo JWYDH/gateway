@@ -280,23 +280,6 @@ int JwSocket::Recv(char* buf, int len, int flags)
 	return (recv(socket_fd_, buf, len, flags));
 }
 
-void JwSocket::Shutdown(int s) {
-	if (socket_fd_ != -1) {
-#ifdef WIN32
-		//SD_RECEIVE（0）：Shutdown receive operations.
-		//SD_SEND（1）：Shutdown send operations.
-		//SD_BOTH（2）：Shutdown both send and receive operations.
-		::shutdown(socket_fd_, SD_BOTH);
-#else
-		//SHUT_RD（0）：关闭sockfd上的读功能，此选项将不允许sockfd进行读操作。
-		//SHUT_WR（1）：关闭sockfd的写功能，此选项将不允许sockfd进行写操作。
-		//SHUT_RDWR（2）：关闭sockfd的读写功能。
-		::shutdown(fd_, SHUT_WR);
-#endif // WIN32
-
-	}
-}
-
 void JwSocket::Close()
 {
 #ifdef WIN32
