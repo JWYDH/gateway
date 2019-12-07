@@ -15,5 +15,8 @@ int test_tcpserver()
 	});
 	server.Start("127.0.0.1", 8000);
 
+	system("pause");
+
+	server.Stop();
 	return 0;
 }

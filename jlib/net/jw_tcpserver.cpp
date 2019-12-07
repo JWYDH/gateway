@@ -347,15 +347,15 @@ bool TcpServer::Start(const char *ip, const short port, int back_log/*=256*/){
 	};
 	accept_thread_.Start(accept_thread_func);
 
-	//auto engine_thread_func = [this]() {
-	//	printf( "engine_thread_func\n");
-	//	while (!stoped_)
-	//	{
-	//		this->Loop();
-	//	}
-	//	socket_pair_recv_.Close();
-	//};
-	//work_thread_.Start(engine_thread_func);
+	auto engine_thread_func = [this]() {
+		printf( "engine_thread_func\n");
+		while (!stoped_)
+		{
+			this->Loop();
+		}
+		socket_pair_recv_.Close();
+	};
+	work_thread_.Start(engine_thread_func);
 	return true;
 }
 
