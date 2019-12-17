@@ -245,6 +245,12 @@ bool JwSocket::Listen(int backlog)
 	if ( ret == SOCKET_ERROR ) {
 		return false;
 	}
+
+	struct sockaddr_in serv;
+	socklen_t serv_len = sizeof(serv);
+	getsockname(socket_fd_, (struct sockaddr*) & serv, &serv_len);
+	printf("host %s:%d", inet_ntoa(serv.sin_addr), ntohs(serv.sin_port));
+
 	return true;
 }
 
@@ -256,6 +262,14 @@ bool JwSocket::Accept(JwSocket& socket)
 	if ( s == SOCKET_ERROR ) {
 		return false;
 	}
+
+	struct sockaddr_in serv, guest;
+	socklen_t serv_len = sizeof(serv);
+	socklen_t guest_len = sizeof(guest);
+	getsockname(socket_fd_, (struct sockaddr*)&serv, &serv_len);
+	getpeername(socket_fd_, (struct sockaddr*)&guest, &guest_len);
+
+	printf("host %s:%d guest %s:%dn", inet_ntoa(serv.sin_addr), ntohs(serv.sin_port), inet_ntoa(guest.sin_addr), ntohs(guest.sin_port));
 	
 	socket = s;
 	socket.setRemoteAddr(&cliaddr);

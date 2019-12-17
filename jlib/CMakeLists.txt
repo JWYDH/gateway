@@ -1,6 +1,14 @@
 ﻿cmake_minimum_required (VERSION 3.8)
 
-set(CMAKE_CXX_STANDARD 11)
+project ("jlib")
+# The version number.
+set(mylib_version_major 1)
+set(mylib_version_minor 0)
+
+configure_file (
+  "${PROJECT_SOURCE_DIR}/config.h.in"
+  "${PROJECT_SOURCE_DIR}/config.h"
+  )
 
 #设置动态链接库的目录，以及头文件目录
 include_directories(
@@ -23,6 +31,7 @@ set(SOURCE_FILES
 		"./net/jw_tcpserver.cpp"
         )
 		
+set(CMAKE_CXX_STANDARD 11)
 # add_definitions("-O0 -g3 -gdwarf-2 -fnessage-length=0 -MMD -MP")
 
 MESSAGE(STATUS "################" ${PROJECT_SOURCE_DIR})

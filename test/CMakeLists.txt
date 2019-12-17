@@ -1,6 +1,6 @@
 ﻿cmake_minimum_required (VERSION 3.8)
 
-set(CMAKE_CXX_STANDARD 11)
+project ("test")
 
 #设置头文件目录
 include_directories(
@@ -29,6 +29,7 @@ set(SOURCE_FILES
 #		"test_tcpserver.hpp"
         "main.cpp")
 
+set(CMAKE_CXX_STANDARD 11)
 # add_definitions("-O0 -g3 -gdwarf-2 -fnessage-length=0 -MMD -MP")
 
 MESSAGE(STATUS "################" ${PROJECT_SOURCE_DIR})
