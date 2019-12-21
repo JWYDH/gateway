@@ -1,7 +1,7 @@
 #ifndef JLIB_CONFIG_H_
 #define JLIB_CONFIG_H_
 
-/* #undef OS_LINUX */
+/* #undef OS_WINDOWS */
 
 class noncopyable
 {  

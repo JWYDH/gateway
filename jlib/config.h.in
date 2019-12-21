@@ -1,7 +1,6 @@
-#ifndef JLIB_CONFIG_H_
-#define JLIB_CONFIG_H_
+#pragma once
 
-#cmakedefine OS_LINUX 1
+#cmakedefine OS_WINDOWS 1
 
 class noncopyable
 {  
@@ -12,5 +11,3 @@ private:
     noncopyable( const noncopyable& ) = delete;  
     const noncopyable& operator=(const noncopyable&) = delete;  
 };
-
-#endif
