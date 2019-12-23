@@ -126,7 +126,7 @@ void TcpServer::Loop() {
 	timeval tv;
 	tv.tv_sec = 0;
 	tv.tv_usec = 0;
-	int   nRetAll = select(0/*window¿ÉÎª0*/, &fdr, &fdw, NULL, NULL /*&time*/);//Èô²»ÉèÖÃ³¬Ê±ÔòselectÎª×èÈû  
+	int   nRetAll = select(0/*windowï¿½ï¿½Îª0*/, &fdr, &fdw, NULL, NULL /*&time*/);//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ã³ï¿½Ê±ï¿½ï¿½selectÎªï¿½ï¿½ï¿½ï¿½  
 	if (nRetAll > 0) {
 		std::vector<SOCKET> close_list;
 		for (uint32_t i = 0; i < fds.fd_count; ++i) {
@@ -160,11 +160,11 @@ void TcpServer::Loop() {
 			}
 			
 			if (FD_ISSET(fd, &fdr)) {
-				//µ÷ÓÃrecv£¬½ÓÊÕÊý¾Ý¡£ 
+				//ï¿½ï¿½ï¿½ï¿½recvï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ý¡ï¿½ 
 				((TcpConn*)ptr)->HandleRead();
 			}
 			if (FD_ISSET(fd, &fdw)) {
-				//ÂÖÑ¯¼ì²éÓÐÊý¾Ý¿ÉÐ´¡£ 
+				//ï¿½ï¿½Ñ¯ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ý¿ï¿½Ð´ï¿½ï¿½ 
 				((TcpConn*)ptr)->HandleWrite();
 			}
 			//if (FD_ISSET(fd, &fde)) {
@@ -324,12 +324,12 @@ bool TcpServer::Start(const char *ip, const short port, int back_log/*=256*/){
 				socket.Close();
 				break;
 			}else {
-				//´´½¨¿Í»§¶ËÁ¬½ÓÀà
+				//ï¿½ï¿½ï¿½ï¿½ï¿½Í»ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 				TcpConn* conn = new TcpConn(this);
 				sockaddr_in local_addr;
 				socket_.getLoaclAddr(&local_addr);
 				socket.setLoaclAddr(&local_addr);
-				conn->GetSocket() = socket;//Ä¬ÈÏ¿½±´¹¹Ôì
+				conn->GetSocket() = socket;//Ä¬ï¿½Ï¿ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 
 				if (newsession_callback_){
 					newsession_callback_(conn);
@@ -363,14 +363,14 @@ bool TcpServer::Start(const char *ip, const short port, int back_log/*=256*/){
 void TcpServer::Stop()
 {
 	stoped_ = true;
-	//·ÀÖ¹accept×èÈûÏß³ÌÍË³ö
+	//ï¿½ï¿½Ö¹acceptï¿½ï¿½ï¿½ï¿½ï¿½ß³ï¿½ï¿½Ë³ï¿½
 	SOCKET fd = socket(AF_INET, SOCK_STREAM, 0);
 	struct sockaddr_in svraddr;
 	socket_.getLoaclAddr(&svraddr);
 	::connect(fd, (struct sockaddr*)&svraddr, sizeof(svraddr));
-	//µÈ´ýacceptÏß³ÌÍË³ö
+	//ï¿½È´ï¿½acceptï¿½ß³ï¿½ï¿½Ë³ï¿½
 	accept_thread_.waitFor();
-	//¹Ø±ÕÁ¬½Ó»½ÐÑselect,·ÀÖ¹×èÈû,²¢´¦ÀíËùÓÐÄÚ²¿ÏûÏ¢
+	//ï¿½Ø±ï¿½ï¿½ï¿½ï¿½Ó»ï¿½ï¿½ï¿½select,ï¿½ï¿½Ö¹ï¿½ï¿½ï¿½ï¿½,ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ú²ï¿½ï¿½ï¿½Ï¢
 	socket_pair_send_.Close();
 	work_thread_.waitFor();
 }
@@ -379,7 +379,7 @@ bool TcpServer::PushInterMsg(InterMsg &msg)
 {
 	if (stoped_)
 	{
-		//Í£Ö¹ºó²»ÄÜ½ÓÊÜÏûÏ¢
+		//Í£Ö¹ï¿½ï¿½ï¿½Ü½ï¿½ï¿½ï¿½ï¿½ï¿½Ï¢
 		printf( "PushInterMsgxx fail\n");
 		return false;
 	}

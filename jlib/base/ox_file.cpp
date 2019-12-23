@@ -1,4 +1,4 @@
-﻿#include <brynet/net/Platform.h>
+#include <brynet/net/Platform.h>
 
 #ifdef PLATFORM_WINDOWS
 #include <direct.h>

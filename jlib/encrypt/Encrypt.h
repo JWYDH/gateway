@@ -15,24 +15,24 @@ public:
 		m_nSelfSalt = 0;
 
 	}
-	void SetSelfSalt(int salt); //ÉèÖÃ×Ô¼ºµÄËæ»úÊı
-	void SetTargetSalt(int salt);  //ÉèÖÃÍ¨ĞÅ·½µÄËæ»úÊı,Í¬Ê±»áÉú³Ékey
+	void SetSelfSalt(int salt); //ï¿½ï¿½ï¿½ï¿½ï¿½Ô¼ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+	void SetTargetSalt(int salt);  //ï¿½ï¿½ï¿½ï¿½Í¨ï¿½Å·ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½,Í¬Ê±ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½key
 
 	int GetSelfSalt()
 	{
-		return m_nSelfSalt;   //»ñÈ¡×ÔÉíµÄËæ»úÊı
+		return m_nSelfSalt;   //ï¿½ï¿½È¡ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 	}
 
-	bool Encode(char* pInBuff, size_t len, char* pOutBuff); //¼ÓÃÜÊı¾İ
+	bool Encode(char* pInBuff, size_t len, char* pOutBuff); //ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 
-	bool Decode(char* pInBuff, size_t len, char* pOutBuff); //½âÃÜÊı¾İ
+	bool Decode(char* pInBuff, size_t len, char* pOutBuff); //ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 
 	inline bool IsKeyCrcCorrect(unsigned short nKeyCRC)  //
 	{
 		return (GetKeyCRC() == nKeyCRC);
 	}
 
-	inline static unsigned short CRC16(const char* lpBuffer, size_t len)  //¼ÆËãCRC-16µÄChecksum
+	inline static unsigned short CRC16(const char* lpBuffer, size_t len)  //ï¿½ï¿½ï¿½ï¿½CRC-16ï¿½ï¿½Checksum
 	{
 		return (unsigned short)CRC16Calc((unsigned char*)lpBuffer, len);
 	}
@@ -40,19 +40,19 @@ public:
 	{
 		return m_nKey;
 	}
-	unsigned int GetKeyCRC() //»ñÈ¡keyµÄcrcÖµ
+	unsigned int GetKeyCRC() //ï¿½ï¿½È¡keyï¿½ï¿½crcÖµ
 	{
 		return (CRC16((const char*)m_sKeybuff, 4));
 	}
 private:
-	void  GenKey();      //²úÉúÃÜÔ¿
+	void  GenKey();      //ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ô¿
 
-	int   GenSalt(); // ²úÉúsalt
+	int   GenSalt(); // ï¿½ï¿½ï¿½ï¿½salt
 private:
-	int m_nSelfSalt;    //×Ô¼º²úÉúµÄËæ»úÊı
-	int m_nTargetSalt;  //Í¨ĞÅ·½µÄËæ»úÊı
-	int m_nKey;         //ÃÜÔ¿
-	unsigned char m_sKeybuff[4] ;  //ÃÜÔ¿µÄbuff£¬Ìí¼ÓÕâ¸öÎªÁË·½±ã¼ÆËã
+	int m_nSelfSalt;    //ï¿½Ô¼ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+	int m_nTargetSalt;  //Í¨ï¿½Å·ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+	int m_nKey;         //ï¿½ï¿½Ô¿
+	unsigned char m_sKeybuff[4] ;  //ï¿½ï¿½Ô¿ï¿½ï¿½buffï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Îªï¿½Ë·ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 };
 
 

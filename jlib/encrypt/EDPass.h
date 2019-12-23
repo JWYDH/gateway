@@ -1,20 +1,20 @@
 #ifndef _ED_PASS_H_
 #define _ED_PASS_H_
 /**
-*	¼ÓÃÜÃÜÂë×Ö·û´®
-*	sDest			¼ÓÃÜÊä³ö»º³åÇø
-*	nDestSize		Êä³ö»º³åÇø³¤¶È(Èç¹û¿Õ¼ä×ã¹»£¬Ôò»áÔÚsDestÄ©Î²Ìí¼ÓÖÕÖ¹×Ö·û)
-*	sPassWord		ÃÜÂë×Ö·û´®
-*	sKey128Bit		16×Ö½ÚµÄÃÜÔ¿×Ö·û´®
+*	ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ö·ï¿½ï¿½ï¿½
+*	sDest			ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+*	nDestSize		ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½(ï¿½ï¿½ï¿½ï¿½Õ¼ï¿½ï¿½ã¹»ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½sDestÄ©Î²ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ö¹ï¿½Ö·ï¿½)
+*	sPassWord		ï¿½ï¿½ï¿½ï¿½ï¿½Ö·ï¿½ï¿½ï¿½
+*	sKey128Bit		16ï¿½Ö½Úµï¿½ï¿½ï¿½Ô¿ï¿½Ö·ï¿½ï¿½ï¿½
 **/
 const char* EncryptPassword(char* sDest, int nDestSize, const unsigned char* sPassWord, const unsigned char* sKey128Bit);
 
 /**
-*	½âÃÜÃÜÂë×Ö·û´®
-*	sDest			½âÃÜÊä³ö»º³åÇø
-*	nDestSize		Êä³ö»º³åÇø³¤¶È(Èç¹û¿Õ¼ä×ã¹»£¬Ôò»áÔÚsDestÄ©Î²Ìí¼ÓÖÕÖ¹×Ö·û)
-*	sPassWord		¼ÓÃÜ¹ýµÄÃÜÂë×Ö·û´®
-*	sKey128Bit		16×Ö½ÚµÄÃÜÔ¿×Ö·û´®
+*	ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ö·ï¿½ï¿½ï¿½
+*	sDest			ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+*	nDestSize		ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½(ï¿½ï¿½ï¿½ï¿½Õ¼ï¿½ï¿½ã¹»ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½sDestÄ©Î²ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ö¹ï¿½Ö·ï¿½)
+*	sPassWord		ï¿½ï¿½ï¿½Ü¹ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ö·ï¿½ï¿½ï¿½
+*	sKey128Bit		16ï¿½Ö½Úµï¿½ï¿½ï¿½Ô¿ï¿½Ö·ï¿½ï¿½ï¿½
 **/
 const char* DecryptPassword(char* sPassword, int nPasswordLen, const unsigned char* sEncrypted, const unsigned char* sKey128Bit);
 

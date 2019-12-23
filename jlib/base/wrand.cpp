@@ -49,10 +49,10 @@ static unsigned long WELLRNG512()
 }
 
 
-//·µ»ØÒ»¸öËæ»úÊı
+//ï¿½ï¿½ï¿½ï¿½Ò»ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 unsigned long wrandvalue()
 {
-	//srandËäÈ»±ÈrandÂı£¬µ«ÊÇÃ¿Ãë¶¼¿ÉÒÔÔËĞĞ¼¸Ç§Íò´Î
+	//srandï¿½ï¿½È»ï¿½ï¿½randï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ã¿ï¿½ë¶¼ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ğ¼ï¿½Ç§ï¿½ï¿½ï¿½
 #if defined(_MSC_VER)
 	srand(WELLRNG512());
 	unsigned long hi16 = rand();

@@ -50,13 +50,13 @@ public:
 	};
 
 	enum {
-		gcAddClient = 1,	//增加一个新的客户端连接
-		gcGWData = 2, //游戏服给客户端发消息
-		gcGWClose = 3,	//游戏服主动关闭客户端
-		gcChBro = 4,//频道广播消息
-		gcChAdd = 5,//频道信息增加
-		gcChDel = 6,//频道信息删除
-		gcGWDisconn = 7,//游戏服断开连接
+		gcAddClient = 1,	//锟斤拷锟斤拷一锟斤拷锟铰的客伙拷锟斤拷锟斤拷锟斤拷
+		gcGWData = 2, //锟斤拷戏锟斤拷锟斤拷锟酵伙拷锟剿凤拷锟斤拷息
+		gcGWClose = 3,	//锟斤拷戏锟斤拷锟斤拷锟斤拷锟截闭客伙拷锟斤拷
+		gcChBro = 4,//频锟斤拷锟姐播锟斤拷息
+		gcChAdd = 5,//频锟斤拷锟斤拷息锟斤拷锟斤拷
+		gcChDel = 6,//频锟斤拷锟斤拷息删锟斤拷
+		gcGWDisconn = 7,//锟斤拷戏锟斤拷锟较匡拷锟斤拷锟斤拷
 	};
 
 	bool Start(const char *ip, const short port, int back_log=256);

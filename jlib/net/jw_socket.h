@@ -38,7 +38,7 @@ public:
 	{
 		*addr_in = local_addr_;
 	}
-	//获取远程的地址和端口的sockaddr_in结构
+	//锟斤拷取远锟教的碉拷址锟酵端口碉拷sockaddr_in锟结构
 	inline void getRemoteAddr(sockaddr_in* addr_in)
 	{
 		*addr_in = remote_addr_;
@@ -48,7 +48,7 @@ public:
 	{
 		local_addr_ = *addr_in;
 	}
-	//设置远程地址信息
+	//锟斤拷锟斤拷远锟教碉拷址锟斤拷息
 	inline void setRemoteAddr(const sockaddr_in* addr_in)
 	{
 		remote_addr_ = *addr_in;
@@ -89,7 +89,7 @@ public:
 	static bool DNSParse(const char* domain, char* ip);
 protected:
 	SOCKET socket_fd_;
-	sockaddr_in	local_addr_;	//绑定的本地地址
-	sockaddr_in	remote_addr_;	//远程地址
+	sockaddr_in	local_addr_;	//锟襟定的憋拷锟截碉拷址
+	sockaddr_in	remote_addr_;	//远锟教碉拷址
 };
 

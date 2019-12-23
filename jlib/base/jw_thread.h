@@ -22,19 +22,19 @@ public:
 	virtual ~BaseThread();
 	int Start(std::function<void()> thread_func);
 #ifdef WIN32
-	//µÈ´ıÏß³ÌÖ´ĞĞÍê±Ï£¬wait_time²ÎÊı±íÊ¾µÈ´ıµÄ×î´óºÁÃëÊı£¬INFINITE±íÊ¾ÎŞÏŞµÈ´ı¡£
-	//×¢Òâ£¬µ÷ÓÃ´Ëº¯ÊıµÄÏß³ÌÔÚ´ËÏß³ÌÖ´ĞĞÍê±Ïºó»áÒ»Ö±´¦ÓÚ×èÈû×´Ì¬
-	//²ÎÊıwait_alert±íÊ¾µ÷ÓÃÏß³ÌÔÚ×èÈûÆÚ¼äÊÇ·ñÔÊĞí½øÈë¾¯¸æ×´Ì¬£¨½ö¶ÔÓÚwindowsÓĞĞ§)
+	//ï¿½È´ï¿½ï¿½ß³ï¿½Ö´ï¿½ï¿½ï¿½ï¿½Ï£ï¿½wait_timeï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ê¾ï¿½È´ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½INFINITEï¿½ï¿½Ê¾ï¿½ï¿½ï¿½ŞµÈ´ï¿½ï¿½ï¿½
+	//×¢ï¿½â£¬ï¿½ï¿½ï¿½Ã´Ëºï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ß³ï¿½ï¿½Ú´ï¿½ï¿½ß³ï¿½Ö´ï¿½ï¿½ï¿½ï¿½Ïºï¿½ï¿½Ò»Ö±ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½×´Ì¬
+	//ï¿½ï¿½ï¿½ï¿½wait_alertï¿½ï¿½Ê¾ï¿½ï¿½ï¿½ï¿½ï¿½ß³ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ú¼ï¿½ï¿½Ç·ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ë¾¯ï¿½ï¿½×´Ì¬ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½windowsï¿½ï¿½Ğ§)
 	int waitFor(unsigned int wait_time = INFINITE, bool wait_alert = true);
 #else
 	int waitFor();
 #endif
 private:
 #ifdef _MSC_VER
-	void*			thread_;			//Ïß³Ì¾ä±ú
-	unsigned long	thread_id_;			//Ïß³ÌID
+	void*			thread_;			//ï¿½ß³Ì¾ï¿½ï¿½
+	unsigned long	thread_id_;			//ï¿½ß³ï¿½ID
 #else
-	//int pid_; //½ø³Ìid
+	//int pid_; //ï¿½ï¿½ï¿½ï¿½id
 	pthread_t		thread_id_;
 #endif
 	std::function<void()> thread_func_;

@@ -1,4 +1,4 @@
-﻿#ifndef _OX_FILE_H
+#ifndef _OX_FILE_H
 #define _OX_FILE_H
 
 bool    ox_dir_create(const char* dir);

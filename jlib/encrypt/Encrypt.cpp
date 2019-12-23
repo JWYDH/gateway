@@ -62,7 +62,7 @@ bool Encrypt::Encode(char* pInBuff, size_t len, char* pOutBuff)
 
 bool Encrypt::Decode(char* pInBuff, size_t len, char* pOutBuff)
 {
-	//µ±Ç°µÄ¼ÓÃÜËã·¨ºÍ½âÃÜËã·¨ÊÇÒ»ÑùµÄ,·´Ïò²Ù×÷
+	//ï¿½ï¿½Ç°ï¿½Ä¼ï¿½ï¿½ï¿½ï¿½ã·¨ï¿½Í½ï¿½ï¿½ï¿½ï¿½ã·¨ï¿½ï¿½Ò»ï¿½ï¿½ï¿½ï¿½,ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 	return Encode(pInBuff, len, pOutBuff);
 }
 

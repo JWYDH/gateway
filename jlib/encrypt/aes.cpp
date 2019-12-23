@@ -269,9 +269,9 @@ void aes_decrypt(struct aes_ctx * ctx, u8 *out, const u8 *in)
 }
 
 /*
-·µ»Ø0±íÊ¾³É¹¦£¬1±íÊ¾Ê§°Ü
-in³¤¶È±ØÐëÎª16ÕûÊý±¶
-resultµÄ¿Õ¼ä±ØÐë×ã¹»´ó£¬ÖÁÉÙin.lenth/16+4
+ï¿½ï¿½ï¿½ï¿½0ï¿½ï¿½Ê¾ï¿½É¹ï¿½ï¿½ï¿½1ï¿½ï¿½Ê¾Ê§ï¿½ï¿½
+inï¿½ï¿½ï¿½È±ï¿½ï¿½ï¿½Îª16ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+resultï¿½Ä¿Õ¼ï¿½ï¿½ï¿½ï¿½ï¿½ã¹»ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½in.lenth/16+4
 */
 int AesEncrypt(struct aes_ctx * ctx,unsigned char* in, unsigned char* result, int len){
 
@@ -303,8 +303,8 @@ int AesEncrypt(struct aes_ctx * ctx,unsigned char* in, unsigned char* result, in
 }
 
 /*
-·µ»Ø0±íÊ¾³É¹¦£¬1±íÊ¾Ê§°Ü
-in³¤¶È±ØÐëÎª16*n+4£¬result³¤¶ÈÖÁÉÙÎª16*n
+ï¿½ï¿½ï¿½ï¿½0ï¿½ï¿½Ê¾ï¿½É¹ï¿½ï¿½ï¿½1ï¿½ï¿½Ê¾Ê§ï¿½ï¿½
+inï¿½ï¿½ï¿½È±ï¿½ï¿½ï¿½Îª16*n+4ï¿½ï¿½resultï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Îª16*n
 */
 int AesDecrypt(struct aes_ctx * ctx,unsigned char* in,unsigned char* result){
 	int inlen = 0;

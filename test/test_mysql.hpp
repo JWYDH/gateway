@@ -4,7 +4,7 @@
 
 int test_mysql() {
 
-	// 使用读取到的参数查询数据库（MysqlClient）
+	// 使锟矫讹拷取锟斤拷锟侥诧拷锟斤拷锟斤拷询锟斤拷锟捷库（MysqlClient锟斤拷
 
 	Events events;
 	TcpServer server(&events);

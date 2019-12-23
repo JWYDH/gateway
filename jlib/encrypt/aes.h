@@ -40,9 +40,9 @@ void aes_encrypt(struct aes_ctx * ctx, u8 *out, const u8 *in);
 void aes_decrypt(struct aes_ctx * ctx, u8 *out, const u8 *in);
 int AesEncrypt(struct aes_ctx * ctx,unsigned char* in, unsigned char* result, int len);
 int AesDecrypt(struct aes_ctx * ctx,unsigned char* in,unsigned char* result);
-/*	如果out为null则返回加密缓冲区需要的字节长度，否则返回加密后实际使用out的字节长度	*/
+/*	锟斤拷锟給ut为null锟津返回硷拷锟杰伙拷锟斤拷锟斤拷锟斤拷要锟斤拷锟街节筹拷锟饺ｏ拷锟斤拷锟津返回硷拷锟杰猴拷实锟斤拷使锟斤拷out锟斤拷锟街节筹拷锟斤拷	*/
 s64 _AESEncrypt(struct aes_ctx *ctx, unsigned char* out, const unsigned char* in, s64 inlen);
-/*	成功返回0，否则返回非0值	*/
+/*	锟缴癸拷锟斤拷锟斤拷0锟斤拷锟斤拷锟津返回凤拷0值	*/
 int _AESDecrypt(struct aes_ctx *ctx, unsigned char* out, const unsigned char* in, s64 inlen);
 
 #ifdef __cplusplus

@@ -3,33 +3,33 @@
 
 /******************************************************************
  *
- *	$ »ùÓÚWELLËã·¨ÊµÏÖµÄ¿ìËÙËæ»úº¯Êý¿â $
+ *	$ ï¿½ï¿½ï¿½ï¿½WELLï¿½ã·¨Êµï¿½ÖµÄ¿ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ $
  *  
- *  - Ö÷Òª¹¦ÄÜ - 
+ *  - ï¿½ï¿½Òªï¿½ï¿½ï¿½ï¿½ - 
  *
- *	ÊµÏÖ¿ìËÙµÄ²¨¶¯¸üÎÞ¹æÂÉµÄËæ»úÊýËã·¨
+ *	Êµï¿½Ö¿ï¿½ï¿½ÙµÄ²ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Þ¹ï¿½ï¿½Éµï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ã·¨
  *
  *****************************************************************/
 
 /*
-* Comments: Ê¹ÓÃWELLËã·¨²úÉúÒ»¸öËæ»úÊý£¬²úÉúµÄËæ»úÊýÔÚ0µ½maxÒÔÄÚ¡£
-* Param unsigned long max: Ëæ»úÊýÉÏÏÞ
+* Comments: Ê¹ï¿½ï¿½WELLï¿½ã·¨ï¿½ï¿½ï¿½ï¿½Ò»ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½0ï¿½ï¿½maxï¿½ï¿½ï¿½Ú¡ï¿½
+* Param unsigned long max: ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 * @Return unsigned long:
 */
 //#ifdef __cplusplus
 //extern "C" {
 //#endif
 
-//·¶Î§Ò»¸ö[0,max)Ö®¼äµÄËæ»úÊý
+//ï¿½ï¿½Î§Ò»ï¿½ï¿½[0,max)Ö®ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 unsigned long wrand(unsigned long max);
 /*
-* Comments: ³õÊ¼»¯Ëæ»úÖÖ×Ó±í
-* Param unsigned int seed: ÖÖ×ÓÖµ£¬Èç¹ûÖµÎª0Ôò×Ô¶¯Ê¹ÓÃtime()Öµ×÷ÎªÖÖ×Ó
-* ¸Ãº¯ÊýÔÚÕû¸ö³ÌÐòÖÐµ÷ÓÃÒ»´Î¼´¿É¡£Ò²¿ÉÒÔ²»µ÷ÓÃ£¬Ö»ÊÇÃ¿´ÎÔËÐÐµÚN´ÎËæ»ú²úÉúµÄÖµ¶¼Ò»Ñù¡£
+* Comments: ï¿½ï¿½Ê¼ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ó±ï¿½
+* Param unsigned int seed: ï¿½ï¿½ï¿½ï¿½Öµï¿½ï¿½ï¿½ï¿½ï¿½ÖµÎª0ï¿½ï¿½ï¿½Ô¶ï¿½Ê¹ï¿½ï¿½time()Öµï¿½ï¿½Îªï¿½ï¿½ï¿½ï¿½
+* ï¿½Ãºï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ðµï¿½ï¿½ï¿½Ò»ï¿½Î¼ï¿½ï¿½É¡ï¿½Ò²ï¿½ï¿½ï¿½Ô²ï¿½ï¿½ï¿½ï¿½Ã£ï¿½Ö»ï¿½ï¿½Ã¿ï¿½ï¿½ï¿½ï¿½ï¿½Ðµï¿½Nï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Öµï¿½ï¿½Ò»ï¿½ï¿½ï¿½ï¿½
 */
 void winitseed(unsigned int seed);
 
-//·µ»ØÒ»¸öËæ»úÊý
+//ï¿½ï¿½ï¿½ï¿½Ò»ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 unsigned long wrandvalue();
 
 //#ifdef __cplusplus
