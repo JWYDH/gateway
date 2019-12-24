@@ -14,7 +14,7 @@ struct DiskLogFile
 
     char file_name[_MAX_PATH];
     jw::mutex_t lock;
-    const char *level_name[L_MAXIMUM_LEVEL];
+    const char *level_name[MAXIMUM];
     LOG_LEVEL level_threshold;
     bool logpath_created;
 
