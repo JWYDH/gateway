@@ -8,6 +8,7 @@
 #include <assert.h>
 #include <errno.h>
 
+#include <atomic>
 #include <functional>
 #include <thread>
 
@@ -71,6 +72,22 @@ typedef int socket_t;
 
 namespace jw
 {
+
+//----------------------
+// atomic functions
+//----------------------
+
+typedef std::atomic<int32_t>	atomic_int32_t;
+typedef std::atomic<int64_t>	atomic_int64_t;
+typedef std::atomic<uint32_t>	atomic_uint32_t;
+typedef std::atomic<uint64_t>	atomic_uint64_t;
+typedef std::atomic<void*>		atomic_ptr_t;
+typedef std::atomic<bool>		atomic_bool_t;
+
+template<typename T>
+inline bool atomicCompareExchange(std::atomic<T>& obj, T expected, T desired) {
+	return obj.compare_exchange_weak(expected, desired);
+}
 
 //----------------------
 // dir functions
