@@ -52,7 +52,7 @@ socket_t create_socket(void)
 	socket_t sockfd = ::socket(AF_INET, SOCK_STREAM, 0);
 	if (sockfd == INVALID_SOCKET)
 	{
-		JW_LOG(L_FATAL, "socket_api::create_socket, err=%d", get_lasterror());
+		JW_LOG(ERROR, "socket_api::create_socket, err=%d", get_lasterror());
 	}
 
 	return sockfd;
@@ -67,7 +67,7 @@ void close_socket(socket_t s)
 	if (SOCKET_ERROR == ::close(s))
 #endif
 	{
-		JW_LOG(L_ERROR, "socket_api::close_socket, err=%d", get_lasterror());
+		JW_LOG(ERROR, "socket_api::close_socket, err=%d", get_lasterror());
 	}
 }
 
@@ -84,7 +84,7 @@ bool set_nonblock(socket_t s, bool enable)
 		SOCKET_ERROR == ::fcntl(s, F_SETFL, enable ? (flags | O_NONBLOCK) : (flags & ~O_NONBLOCK)))
 #endif
 	{
-		JW_LOG(L_FATAL, "socket_api::set_nonblock, err=%d", get_lasterror());
+		JW_LOG(ERROR, "socket_api::set_nonblock, err=%d", get_lasterror());
 		return false;
 	}
 
@@ -104,7 +104,7 @@ bool set_close_onexec(socket_t s, bool enable)
 	if (SOCKET_ERROR == flags ||
 		SOCKET_ERROR == ::fcntl(s, F_SETFD, enable ? (flags | FD_CLOEXEC) : (flags & ~FD_CLOEXEC)))
 	{
-		JW_LOG(L_FATAL, "socket_api::set_close_onexec, err=%d", get_lasterror());
+		JW_LOG(ERROR, "socket_api::set_close_onexec, err=%d", get_lasterror());
 		return false;
 	}
 #endif
@@ -116,7 +116,7 @@ bool bind(socket_t s, const struct sockaddr_in &addr)
 {
 	if (SOCKET_ERROR == ::bind(s, (const sockaddr *)(&addr), static_cast<socklen_t>(sizeof addr)))
 	{
-		JW_LOG(L_FATAL, "socket_api::bind, err=%d", get_lasterror());
+		JW_LOG(ERROR, "socket_api::bind, err=%d", get_lasterror());
 		return false;
 	}
 	return true;
@@ -127,7 +127,7 @@ bool listen(socket_t s)
 {
 	if (SOCKET_ERROR == ::listen(s, SOMAXCONN))
 	{
-		JW_LOG(L_FATAL, "socket_api::listen, err=%d", get_lasterror());
+		JW_LOG(ERROR, "socket_api::listen, err=%d", get_lasterror());
 		return false;
 	}
 	return true;
@@ -151,7 +151,7 @@ bool connect(socket_t s, const struct sockaddr_in &addr)
 			return true;
 #endif
 
-		JW_LOG(L_FATAL, "socket_api::connect, err=%d", get_lasterror());
+		JW_LOG(ERROR, "socket_api::connect, err=%d", get_lasterror());
 		return false;
 	}
 	return true;
@@ -167,7 +167,7 @@ bool inet_pton(const char *ip, struct in_addr &a)
 	if (::inet_pton(AF_INET, ip, &a) != 1)
 #endif
 	{
-		JW_LOG(L_FATAL, "socket_api::inet_pton, err=%d", get_lasterror());
+		JW_LOG(ERROR, "socket_api::inet_pton, err=%d", get_lasterror());
 		return false;
 	}
 	return true;
@@ -185,7 +185,7 @@ bool inet_ntop(const struct in_addr &a, char *dst, socklen_t size)
 	if (::inet_ntop(AF_INET, &a, dst, size) == 0)
 #endif
 	{
-		JW_LOG(L_FATAL, "socket_api::inet_ntop, err=%d", get_lasterror());
+		JW_LOG(ERROR, "socket_api::inet_ntop, err=%d", get_lasterror());
 		return false;
 	}
 	return true;
@@ -223,7 +223,7 @@ bool shutdown(socket_t s)
 	if (SOCKET_ERROR == ::shutdown(s, SHUT_RDWR))
 #endif
 	{
-		JW_LOG(L_FATAL, "socket_api::shutdown, err=%d", get_lasterror());
+		JW_LOG(ERROR, "socket_api::shutdown, err=%d", get_lasterror());
 		return false;
 	}
 	return true;
@@ -234,7 +234,7 @@ bool setsockopt(socket_t s, int level, int optname, const void *optval, size_t o
 {
 	if (SOCKET_ERROR == ::setsockopt(s, level, optname, (const char *)optval, (socklen_t)optlen))
 	{
-		JW_LOG(L_ERROR, "socket_api::setsockopt, level=%d, optname=%d, err=%d", get_lasterror());
+		JW_LOG(ERROR, "socket_api::setsockopt, level=%d, optname=%d, err=%d", get_lasterror());
 		return false;
 	}
 	return true;
@@ -254,7 +254,7 @@ bool set_reuse_port(socket_t s, bool on)
 	(void)s;
 	(void)on;
 	//NOT SUPPORT
-	JW_LOG(L_WARN, "socket_api::set_reuse_port, System do NOT support REUSEPORT issue!");
+	JW_LOG(WARN, "socket_api::set_reuse_port, System do NOT support REUSEPORT issue!");
 	return false;
 #else
 	int optval = on ? 1 : 0;
@@ -311,7 +311,7 @@ socket_t accept(socket_t s, struct sockaddr_in *addr)
 
 	if (connfd == INVALID_SOCKET)
 	{
-		JW_LOG(L_FATAL, "socket_api::accept, err=%d", get_lasterror());
+		JW_LOG(ERROR, "socket_api::accept, err=%d", get_lasterror());
 	}
 	return connfd;
 }
@@ -324,7 +324,7 @@ bool getsockname(socket_t s, struct sockaddr_in &addr)
 
 	if (SOCKET_ERROR == ::getsockname(s, (struct sockaddr *)(&addr), &addrlen))
 	{
-		JW_LOG(L_FATAL, "socket_api::getsockname, err=%d", get_lasterror());
+		JW_LOG(ERROR, "socket_api::getsockname, err=%d", get_lasterror());
 		return false;
 	}
 	return true;
@@ -338,7 +338,7 @@ bool getpeername(socket_t s, struct sockaddr_in &addr)
 
 	if (SOCKET_ERROR == ::getpeername(s, (struct sockaddr *)(&addr), &addrlen))
 	{
-		JW_LOG(L_FATAL, "socket_api::getpeername, err=%d", get_lasterror());
+		JW_LOG(ERROR, "socket_api::getpeername, err=%d", get_lasterror());
 		return false;
 	}
 	return true;
@@ -358,7 +358,7 @@ bool resolve_hostname(const char *hostname, struct sockaddr_in &addr)
 	struct addrinfo *result = nullptr;
 	if (getaddrinfo(hostname, nullptr, &hints, &result) != 0)
 	{
-		JW_LOG(L_ERROR, "socket_api::resolve %s failed, errno=%d", hostname, socket_api::get_lasterror());
+		JW_LOG(ERROR, "socket_api::resolve %s failed, errno=%d", hostname, socket_api::get_lasterror());
 		return false;
 	}
 
@@ -376,7 +376,7 @@ bool resolve_hostname(const char *hostname, struct sockaddr_in &addr)
 
 	if (!find_ipv4_address)
 	{
-		JW_LOG(L_ERROR, "socket_api::resolve %s failed, IPV4 address not found", hostname);
+		JW_LOG(ERROR, "socket_api::resolve %s failed, IPV4 address not found", hostname);
 	}
 
 	freeaddrinfo(result);

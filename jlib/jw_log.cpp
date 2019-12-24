@@ -25,36 +25,34 @@ struct DiskLogFile
 #endif
         //get process name
         char process_name[256] = {0};
-        sys_api::process_get_module_name(process_name, 256);
+        jw::process_get_module_name(process_name, 256);
 
         //get host name
         char host_name[256];
         ::gethostname(host_name, 256);
 
         //get process id
-        pid_t process_id = sys_api::process_get_id();
+        pid_t process_id = jw::process_get_id();
 
         //log filename patten
         char name_patten[256] = {0};
         snprintf(name_patten, 256, LOG_PATH "%s.%%Y%%m%%d-%%H%%M%%S.%s.%d.log", process_name, host_name, process_id);
-        sys_api::local_time_now(file_name, 256, name_patten);
+        jw::local_time_now(file_name, 256, name_patten);
 
         //create lock
-        lock = sys_api::mutex_create();
+        lock = jw::mutex_create();
 
         //default level(all level will be writed)
-        level_threshold = L_TRACE;
+        level_threshold = DEBUG;
 
         //log path didn't created
         logpath_created = false;
 
         //set level name
-        level_name[L_TRACE] = "[T]";
-        level_name[L_DEBUG] = "[D]";
-        level_name[L_INFO] = "[I]";
-        level_name[L_WARN] = "[W]";
-        level_name[L_ERROR] = "[E]";
-        level_name[L_FATAL] = "[F]";
+        level_name[DEBUG] = "[D]";
+        level_name[INFO] = "[I]";
+        level_name[WARN] = "[W]";
+        level_name[ERROR] = "[E]";
     }
 };
 
@@ -75,12 +73,12 @@ const char *getLogFileName(void)
 //-------------------------------------------------------------------------------------
 void setLogThreshold(LOG_LEVEL level)
 {
-    assert(level >= 0 && level <= L_MAXIMUM_LEVEL);
-    if (level < 0 || level > L_MAXIMUM_LEVEL)
+    assert(level >= 0 && level <= MAXIMUM);
+    if (level < 0 || level > MAXIMUM)
         return;
 
     DiskLogFile &thefile = _getDiskLog();
-    sys_api::auto_mutex guard(thefile.lock);
+    jw::auto_mutex guard(thefile.lock);
 
     thefile.level_threshold = level;
 }
@@ -88,12 +86,12 @@ void setLogThreshold(LOG_LEVEL level)
 //-------------------------------------------------------------------------------------
 void diskLog(LOG_LEVEL level, const char *message, ...)
 {
-    assert(level >= 0 && level < L_MAXIMUM_LEVEL);
-    if (level < 0 || level >= L_MAXIMUM_LEVEL)
+    assert(level >= 0 && level < MAXIMUM);
+    if (level < 0 || level >= MAXIMUM)
         return;
 
     DiskLogFile &thefile = _getDiskLog();
-    sys_api::auto_mutex guard(thefile.lock);
+    jw::auto_mutex guard(thefile.lock);
 
     //check the level
     if (level < thefile.level_threshold)
@@ -126,7 +124,7 @@ void diskLog(LOG_LEVEL level, const char *message, ...)
         return;
 
     char timebuf[32] = {0};
-    sys_api::local_time_now(timebuf, 32, "%Y_%m_%d-%H:%M:%S");
+    jw::local_time_now(timebuf, 32, "%Y_%m_%d-%H:%M:%S");
 
     static const int32_t STATIC_BUF_LENGTH = 2048;
 
@@ -141,7 +139,7 @@ void diskLog(LOG_LEVEL level, const char *message, ...)
         len = vsnprintf(0, 0, message, ptr);
         if (len > 0)
         {
-            p = (char *)CY_MALLOC((size_t)(len + 1));
+            p = (char *)malloc((size_t)(len + 1));
             va_start(ptr, message);
             vsnprintf(p, (size_t)len + 1, message, ptr);
             p[len] = 0;
@@ -149,7 +147,7 @@ void diskLog(LOG_LEVEL level, const char *message, ...)
     }
     else if (len >= STATIC_BUF_LENGTH)
     {
-        p = (char *)CY_MALLOC((size_t)(len + 1));
+        p = (char *)malloc((size_t)(len + 1));
         va_start(ptr, message);
         vsnprintf(p, (size_t)len + 1, message, ptr);
         p[len] = 0;
@@ -159,20 +157,20 @@ void diskLog(LOG_LEVEL level, const char *message, ...)
     fprintf(fp, "%s %s [%s] %s\n",
             timebuf,
             thefile.level_name[level],
-            sys_api::thread_get_current_name(),
+            jw::thread_get_current_name(),
             p);
     fclose(fp);
 
     //print to stand output last
-    fprintf(level >= L_ERROR ? stderr : stdout, "%s %s [%s] %s\n",
+    fprintf(level >= ERROR ? stderr : stdout, "%s %s [%s] %s\n",
             timebuf,
             thefile.level_name[level],
-            sys_api::thread_get_current_name(),
+            jw::thread_get_current_name(),
             p);
 
     if (p != szTemp)
     {
-        CY_FREE(p);
+        free(p);
     }
 }
 
