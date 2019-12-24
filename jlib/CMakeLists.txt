@@ -13,7 +13,7 @@ configure_file (
 #设置动态链接库的目录，以及头文件目录
 include_directories(
 	./encrypt
-	./log
+	./container
 	./net)
 link_directories(
 	${PROJECT_SOURCE_DIR}/lib)
@@ -22,6 +22,8 @@ link_directories(
 # 将源添加到此项目的可执行文件。
 set(SOURCE_FILES
 		"jw_api.cpp"
+		"jw_log.cpp"
+		"jw_socket_api.cpp"
 #		"./log/jw_log.cpp"
 #		"./net/jw_socket.cpp"
 #		"./net/jw_buffer.cpp"
