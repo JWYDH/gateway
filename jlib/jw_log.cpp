@@ -20,9 +20,6 @@ struct DiskLogFile
 
     DiskLogFile()
     {
-#ifdef OS_WIN
-        socket_api::global_init();
-#endif
         //get process name
         char process_name[256] = {0};
         jw::process_get_module_name(process_name, 256);
@@ -64,14 +61,14 @@ static DiskLogFile &_getDiskLog(void)
 }
 
 //-------------------------------------------------------------------------------------
-const char *getLogFileName(void)
+const char *get_log_filename(void)
 {
     DiskLogFile &thefile = _getDiskLog();
     return thefile.file_name;
 }
 
 //-------------------------------------------------------------------------------------
-void setLogThreshold(LOG_LEVEL level)
+void set_log_level(LOG_LEVEL level)
 {
     assert(level >= 0 && level <= MAXIMUM);
     if (level < 0 || level > MAXIMUM)
@@ -84,7 +81,7 @@ void setLogThreshold(LOG_LEVEL level)
 }
 
 //-------------------------------------------------------------------------------------
-void diskLog(LOG_LEVEL level, const char *message, ...)
+void log_file(LOG_LEVEL level, const char *message, ...)
 {
     assert(level >= 0 && level < MAXIMUM);
     if (level < 0 || level >= MAXIMUM)
