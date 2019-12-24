@@ -20,7 +20,7 @@ struct DiskLogFile
 
     DiskLogFile()
     {
-#ifdef CY_SYS_WINDOWS
+#ifdef OS_WIN
         socket_api::global_init();
 #endif
         //get process name
@@ -100,7 +100,7 @@ void diskLog(LOG_LEVEL level, const char *message, ...)
         return;
 
         //check dir
-#ifdef CY_SYS_WINDOWS
+#ifdef OS_WIN
     if (!thefile.logpath_created && PathFileExists(LOG_PATH) != TRUE)
     {
         if (0 == CreateDirectory(LOG_PATH, NULL))
