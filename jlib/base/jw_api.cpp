@@ -1,3 +1,29 @@
+#include "jw_api.h"
+
+namespace jw
+{
+
+bool ox_dir_create(const char *dir)
+{
+    bool ret = false;
+    if (ox_file_access(dir))
+    {
+        ret = true;
+    }
+    else
+    {
+        ret = (MKDIR(dir)) == 0;
+    }
+
+    return ret;
+}
+
+bool ox_file_access(const char *filename)
+{
+    return ACCESS(filename, 0) == 0;
+}
+
+} // namespace jw
 
 //
 ////-------------------------------------------------------------------------------------
@@ -35,7 +61,7 @@
 //	signal_wait(data->resume_signal);
 //	signal_destroy(data->resume_signal);
 //	data->resume_signal = 0;
-//	
+//
 //	//set random seed
 //	srand((uint32_t)::time(0));
 //
@@ -62,7 +88,7 @@
 //
 //	//detached thread
 //	if (data->detached) data->thandle.detach();
-//	
+//
 //	//resume thread
 //	signal_notify(data->resume_signal);
 //	return data;
@@ -228,7 +254,7 @@
 //	timespec ts;
 //	ts.tv_sec = (time_t)(nanoseconds / kNanoSecondsPerSecond);
 //	ts.tv_nsec = (long int)(nanoseconds - ((uint64_t)ts.tv_sec) * kNanoSecondsPerSecond);
-//	
+//
 //	//wait...
 //	while(0 == sig->predicate.load()) {
 //		if (pthread_cond_timedwait(&(sig->cond), &(sig->mutex), &ts) != 0)
@@ -286,7 +312,7 @@
 //	uint64_t time = ((uint64_t)ftm.dwLowDateTime) + ((uint64_t)ftm.dwHighDateTime << 32);
 //
 //	// This magic number is the number of 100 nanosecond intervals since January 1, 1601 (UTC)
-//	// until 00:00:00 January 1, 1970 
+//	// until 00:00:00 January 1, 1970
 //	static const int64_t EPOCH = ((int64_t)116444736000000000LL);
 //
 //	//1 micro second =10 * (100 nano second)
