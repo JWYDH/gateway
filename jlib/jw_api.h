@@ -8,6 +8,9 @@
 #include <assert.h>
 #include <errno.h>
 
+#include <functional>
+#include <thread>
+
 #ifdef OS_WIN
 #include <direct.h>
 #include <io.h>
@@ -19,6 +22,27 @@
 #include <unistd.h>
 #define ACCESS access
 #define MKDIR(dir_name) mkdir(dir_name, 0755)
+#endif
+
+#ifdef OS_WIN
+#include <process.h>
+#include <Shlwapi.h>
+#else
+#include <sys/syscall.h>
+#include <sys/time.h>
+#include <sched.h>
+#endif
+
+#ifndef OS_WIN
+#include <pthread.h>
+#endif
+
+#ifdef OS_WIN
+#define pthread_mutex_t CRITICAL_SECTION
+#define pthread_mutex_init(x, y) InitializeCriticalSection(x)
+#define pthread_mutex_destroy(x) DeleteCriticalSection(x)
+#define pthread_mutex_lock(x) EnterCriticalSection(x)
+#define pthread_mutex_unlock(x) LeaveCriticalSection(x)
 #endif
 
 #ifdef OS_WIN
@@ -43,28 +67,6 @@ typedef int socket_t;
 #ifndef SOCKET_ERROR
 #define SOCKET_ERROR (-1)
 #endif
-#endif
-
-#ifndef OS_WIN
-#include <pthread.h>
-#endif
-
-#ifdef OS_WIN
-#include <process.h>
-#include <Shlwapi.h>
-#else
-#include <sys/syscall.h>
-#include <sys/time.h>
-#include <pthread.h>
-#include <sched.h>
-#endif
-
-#ifdef OS_WIN
-#define pthread_mutex_t CRITICAL_SECTION
-#define pthread_mutex_init(x, y) InitializeCriticalSection(x)
-#define pthread_mutex_destroy(x) DeleteCriticalSection(x)
-#define pthread_mutex_lock(x) EnterCriticalSection(x)
-#define pthread_mutex_unlock(x) LeaveCriticalSection(x)
 #endif
 
 namespace jw
@@ -98,6 +100,8 @@ void process_get_module_name(char *module_name, size_t max_size);
 // thread functions
 //----------------------
 
+typedef void* thread_t;
+typedef std::thread::id thread_id_t;
 //// thread entry function
 typedef std::function<void(void *)> thread_function;
 

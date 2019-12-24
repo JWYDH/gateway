@@ -35,8 +35,8 @@ add_definitions("-O0 -g3 -gdwarf-2 -fmessage-length=0 -MMD -MP")
 
 MESSAGE(STATUS "################" ${PROJECT_SOURCE_DIR})
 MESSAGE(STATUS "################" ${PROJECT_BINARY_DIR})
-SET(EXECUTABLE_OUTPUT_PATH ${PROJECT_BINARY_DIR}/out/bin)
-SET(LIBRARY_OUTPUT_PATH ${PROJECT_BINARY_DIR}/out/lib)
+SET(EXECUTABLE_OUTPUT_PATH ${PROJECT_BINARY_DIR}/out)
+SET(LIBRARY_OUTPUT_PATH ${PROJECT_BINARY_DIR}/out)
 
 add_executable(test ${SOURCE_FILES})
 add_dependencies(test jlib)
