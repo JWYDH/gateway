@@ -1,7 +1,9 @@
 #pragma once
 
 /* #undef OS_WINDOWS */
-/* #undef JW_ENABLE_LOG */
+
+#define OS_WINDOWS 1
+#define JW_ENABLE_LOG 1
 
 class noncopyable
 {  

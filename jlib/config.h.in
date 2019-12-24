@@ -1,7 +1,9 @@
 #pragma once
 
 #cmakedefine OS_WINDOWS 1
-#cmakedefine JW_ENABLE_LOG 1
+
+#define OS_WINDOWS 1
+#define JW_ENABLE_LOG 1
 
 class noncopyable
 {  

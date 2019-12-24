@@ -30,13 +30,13 @@ set(SOURCE_FILES
         "main.cpp")
 
 SET(CMAKE_CXX_COMPILER "g++")
-set(CMAKE_CXX_STANDARD 11)
-add_definitions("-O0 -g3 -gdwarf-2 -fmessage-length=0 -MMD -MP")
+add_definitions("-std=c++11 -O0 -g3 -gdwarf-2 -fmessage-length=0 -MMD -MP")
 
 MESSAGE(STATUS "################" ${PROJECT_SOURCE_DIR})
 MESSAGE(STATUS "################" ${PROJECT_BINARY_DIR})
-SET(EXECUTABLE_OUTPUT_PATH ${PROJECT_BINARY_DIR}/out)
-SET(LIBRARY_OUTPUT_PATH ${PROJECT_BINARY_DIR}/out)
+MESSAGE(STATUS "################" ${CMAKE_SOURCE_DIR})
+SET(EXECUTABLE_OUTPUT_PATH ${CMAKE_SOURCE_DIR}/out)
+SET(LIBRARY_OUTPUT_PATH ${CMAKE_SOURCE_DIR}/out)
 
 add_executable(test ${SOURCE_FILES})
 add_dependencies(test jlib)
