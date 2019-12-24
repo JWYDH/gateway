@@ -224,7 +224,6 @@ signal_t signal_create(void)
 #endif
 }
 
-//-------------------------------------------------------------------------------------
 void signal_destroy(signal_t s)
 {
 #ifdef OS_WIN
