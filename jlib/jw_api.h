@@ -21,6 +21,7 @@
 #include <stdarg.h>
 #include <sys/stat.h>
 #include <unistd.h>
+#include <dirent.h>
 #define ACCESS access
 #define MKDIR(dir_name) mkdir(dir_name, 0755)
 #endif

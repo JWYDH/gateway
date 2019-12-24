@@ -1,4 +1,5 @@
 #pragma once
+#include "jw_api.h"
 
 namespace jw
 {
