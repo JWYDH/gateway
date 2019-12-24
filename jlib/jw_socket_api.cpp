@@ -1,4 +1,5 @@
 #include "jw_socket_api.h"
+#include "jw_log.h"
 #ifdef OS_WIN
 #include <io.h>
 #else

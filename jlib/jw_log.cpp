@@ -1,5 +1,5 @@
 #include "jw_log.h"
-#include "jw_api.h"
+
 namespace jw
 {
 
