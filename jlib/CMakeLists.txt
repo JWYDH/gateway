@@ -13,18 +13,19 @@ configure_file (
 #设置动态链接库的目录，以及头文件目录
 include_directories(
 	.
-	./encrypt
-	./container
-	./net)
+	./api)
 link_directories(
 	${PROJECT_SOURCE_DIR}/lib)
 
 
 # 将源添加到此项目的可执行文件。
 set(SOURCE_FILES
-#		"jw_api.cpp"
-#		"jw_log.cpp"
-#		"jw_socket_api.cpp"
+#	"./api/jw_log.cpp"
+#	"./api/jw_file.cpp"
+#	"./api/jw_process.cpp"
+#	"./api/jw_thread.cpp"
+#	"./api/jw_mutex.cpp"
+#	"./api/jw_cond.cpp"
 #		"jw_socket_api.cpp"
 #		"./log/jw_log.cpp"
 #		"./net/jw_socket.cpp"
@@ -32,7 +33,7 @@ set(SOURCE_FILES
 #		"./net/jw_tcpclient.cpp"
 #		"./net/jw_tcpconn.cpp"
 #		"./net/jw_tcpserver.cpp"
-		)
+	)
 
 set(CMAKE_CXX_COMPILER "g++")
 add_definitions("-std=c++11 -O0 -g3 -gdwarf-2 -fmessage-length=0 -MMD -MP")
