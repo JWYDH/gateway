@@ -2,6 +2,7 @@
 
 #include <stdio.h>
 #include <string.h>
+#include <stdarg.h>
 #include <assert.h>
 #include <stdlib.h>
 
@@ -15,6 +16,7 @@ namespace jw
 
 #define LOG_PATH "./logs/"
 #define LOG_MAX_PATH 256
+#define LOG_FILENAME_MAX 256
 
 class LogFile
 {
@@ -57,8 +59,8 @@ public:
 			process_name = "unknown";
 		}
 
-		//log filename 
-		snprintf(file_name, LOG_MAX_PATH, LOG_PATH "%s.log", process_name);
+		//log filename
+		snprintf(file_name, LOG_FILENAME_MAX, LOG_PATH "%s.log", process_name);
 		//log path didn't created
 		logpath_created_ = false;
 	}
@@ -108,7 +110,7 @@ void log_file(LOG_LEVEL level, const char *message, ...)
 		return;
 
 	char timebuf[32] = {0};
-	jw::local_time_now(timebuf, 32, "%Y_%m_%d-%H:%M:%S");
+	//jw::local_time_now(timebuf, 32, "%Y_%m_%d-%H:%M:%S");
 
 	static const int32_t STATIC_BUF_LENGTH = 2048;
 
