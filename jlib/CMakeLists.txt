@@ -24,8 +24,6 @@ set(SOURCE_FILES
 #	"./api/jw_file.cpp"
 #	"./api/jw_process.cpp"
 #	"./api/jw_thread.cpp"
-#	"./api/jw_mutex.cpp"
-#	"./api/jw_cond.cpp"
 #		"jw_socket_api.cpp"
 #		"./log/jw_log.cpp"
 #		"./net/jw_socket.cpp"

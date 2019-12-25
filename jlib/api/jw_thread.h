@@ -39,4 +39,54 @@ const char *thread_get_current_name(void);
 //// yield the processor
 void thread_yield(void);
 
+//----------------------
+// mutex functions
+//----------------------
+typedef pthread_mutex_t *mutex_t;
+
+/// create a mutex
+mutex_t mutex_create(void);
+
+/// destroy a mutex
+void mutex_destroy(mutex_t m);
+
+/// lock mutex(wait other owner unlock)
+void mutex_lock(mutex_t m);
+
+/// unlock mutex
+void mutex_unlock(mutex_t m);
+
+/// auto lock
+struct auto_mutex
+{
+	auto_mutex(mutex_t m) : _m(m) { mutex_lock(_m); }
+	~auto_mutex() { mutex_unlock(_m); }
+	mutex_t _m;
+};
+
+//----------------------
+// signal/semaphone functions
+//----------------------
+
+#ifdef OS_WIN
+typedef HANDLE signal_t;
+#else
+typedef void *signal_t;
+#endif
+
+//// create a signal
+signal_t signal_create(void);
+
+//// destroy a signal
+void signal_destroy(signal_t s);
+
+//// wait a signal inifinite
+void signal_wait(signal_t s);
+
+//// wait a signal in [t] millisecond(second*1000), return true immediately if the signal is lighted, if false if timeout or other error
+bool signal_timewait(signal_t s, uint32_t ms);
+
+//// light the signal
+void signal_notify(signal_t s);
+
 } // namespace jw
