@@ -77,7 +77,7 @@ private:
 	BaseThread thread_;
 	Buffer recv_data_;
 	BaseThread write_thread_;
-	SafeQueue<Buffer*> inter_msg_;
+	LockQueue<Buffer*> inter_msg_;
 	//std::vector<Buffer*> proc_inter_msg_;
 
 	std::vector<Buffer*> free_data_;

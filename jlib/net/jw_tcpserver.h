@@ -67,8 +67,8 @@ public:
 	void OnNewSession(std::function<void(TcpConn*)> newsession_callback) { newsession_callback_ = newsession_callback; }
 private:
 	bool stoped_;
-	SafeQueue<InterMsg> inter_msg_;
-	SafeQueue<InterMsg> proc_inter_msg_;
+	LockQueue<InterMsg> inter_msg_;
+	LockQueue<InterMsg> proc_inter_msg_;
 	JwSocket socket_;
 	JwSocket socket_pair_send_;
 	JwSocket socket_pair_recv_;
