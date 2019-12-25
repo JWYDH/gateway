@@ -1,15 +1,15 @@
 #pragma once
-#include "jw_api.h"
+
 namespace jw
 {
 
 enum LOG_LEVEL
 {
-	DEBUG,
-	INFO,
-	WARN,
-	ERROR,
-	MAXIMUM,
+	LL_DEBUG,
+	LL_INFO,
+	LL_WARN,
+	LL_ERROR,
+	LL_MAX,
 };
 
 //----------------------

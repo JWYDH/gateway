@@ -1,13 +1,16 @@
 #include "jw_process.h"
 
+#include <string.h>
+#include <sys/types.h>
+#include <unistd.h>
 
 
 namespace jw
 {
 
-pid_t process_get_id(void)
+int process_get_id(void)
 {
-	return ::getpid();
+	return (int)::getpid();
 }
 
 void process_get_module_name(char *module_name, size_t max_size)
