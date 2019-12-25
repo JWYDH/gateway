@@ -17,17 +17,10 @@ enum LOG_LEVEL
 //----------------------
 
 //log to a disk file
-//filename = process_name.date-time24h.hostname.pid.log
+//filename = process_name.date-time24h.pid.log
 // like "test.20150302-1736.server1.63581.log"
 // the time part is the time(LOCAL) of first log be written
 void log_file(LOG_LEVEL level, const char *message, ...);
-
-//get current log filename
-const char *get_log_filename(void);
-
-//set the a global log level, default is DEBUG,
-//all the log message lower than this level will be ignored
-void set_log_level(LOG_LEVEL level);
 
 } // namespace jw
 

@@ -2,32 +2,50 @@
 
 #include <stdio.h>
 #include <string.h>
-#include <sys/types.h>
+#include <assert.h>
+#include <stdlib.h>
+
 #include <unistd.h>
+#include <sys/types.h>
+#include <sys/stat.h>
 #include <pthread.h>
 
 namespace jw
 {
 
 #define LOG_PATH "./logs/"
+#define LOG_MAX_PATH 256
 
-//-------------------------------------------------------------------------------------
-struct LogFile
+class LogFile
 {
-	char file_name[256];
+public:
+	LOG_LEVEL level_;
 	pthread_mutex_t *lock_;
 	const char *level_name[LL_MAX];
-	LOG_LEVEL level_;
+	char file_name[LOG_MAX_PATH];
 	bool logpath_created_;
 
 	LogFile()
 	{
-		//get process name
-		//char process_name[256] = {0};
-		char process_path_name[256] = {0};
-		if (readlink("/proc/self/exe", process_path_name, 256) < 0)
+		//default level(all level will be writed)
+		level_ = LL_DEBUG;
+
+		//create lock
+		lock_ = (pthread_mutex_t *)malloc(sizeof(pthread_mutex_t));
+		::pthread_mutex_init(lock_, 0);
+
+		//set level name
+		level_name[LL_DEBUG] = "[D]";
+		level_name[LL_INFO] = "[I]";
+		level_name[LL_WARN] = "[W]";
+		level_name[LL_ERROR] = "[E]";
+
+		//pid_t process_id = ::getpid();
+
+		char process_path_name[LOG_MAX_PATH] = {0};
+		if (readlink("/proc/self/exe", process_path_name, LOG_MAX_PATH) < 0)
 		{
-			strncpy(process_path_name, "unknown", 256);
+			strncpy(process_path_name, "unknown", LOG_MAX_PATH);
 		}
 		const char *process_name = strrchr(process_path_name, '/');
 		if (process_name != 0)
@@ -38,88 +56,46 @@ struct LogFile
 		{
 			process_name = "unknown";
 		}
-		//strncpy(module_name, process_name, max_size);
 
-		//get host name
-		//char host_name[256];
-		//::gethostname(host_name, 256);
-
-		//get process id
-		pid_t process_id = ::getpid();
-
-		//log filename patten
-		char name_patten[256] = {0};
-		snprintf(name_patten, 256, LOG_PATH "%s.%%Y%%m%%d-%%H%%M%%S.%d.log", process_name, process_id);
-		jw::local_time_now(file_name, 256, name_patten);
-
-		//create lock
-		lock = jw::mutex_create();
-
-		//default level(all level will be writed)
-		level_threshold = DEBUG;
-
+		//log filename 
+		snprintf(file_name, LOG_MAX_PATH, LOG_PATH "%s.log", process_name);
 		//log path didn't created
-		logpath_created = false;
+		logpath_created_ = false;
+	}
 
-		//set level name
-		level_name[LL_DEBUG] = "[D]";
-		level_name[LL_INFO] = "[I]";
-		level_name[LL_WARN] = "[W]";
-		level_name[LL_ERROR] = "[E]";
+	~LogFile()
+	{
+		::pthread_mutex_destroy(lock_);
+		free(lock_);
+	}
+
+	static LogFile &instance()
+	{
+		static LogFile file;
+		return file;
 	}
 };
 
-//-------------------------------------------------------------------------------------
-static DiskLogFile &_getDiskLog(void)
-{
-	static DiskLogFile thefile;
-	return thefile;
-}
-
-//-------------------------------------------------------------------------------------
-const char *get_log_filename(void)
-{
-	DiskLogFile &thefile = _getDiskLog();
-	return thefile.file_name;
-}
-
-//-------------------------------------------------------------------------------------
-void set_log_level(LOG_LEVEL level)
-{
-	assert(level >= 0 && level <= MAXIMUM);
-	if (level < 0 || level > MAXIMUM)
-		return;
-
-	DiskLogFile &thefile = _getDiskLog();
-	jw::auto_mutex guard(thefile.lock);
-
-	thefile.level_threshold = level;
-}
-
-//-------------------------------------------------------------------------------------
 void log_file(LOG_LEVEL level, const char *message, ...)
 {
-	assert(level >= 0 && level < MAXIMUM);
-	if (level < 0 || level >= MAXIMUM)
+	assert(level >= LL_DEBUG && level < LL_MAX);
+	if (level < LL_DEBUG || level >= LL_MAX)
 		return;
 
-	DiskLogFile &thefile = _getDiskLog();
-	jw::auto_mutex guard(thefile.lock);
+	LogFile &thefile = LogFile::instance();
 
-	//check the level
-	if (level < thefile.level_threshold)
-		return;
+	::pthread_mutex_lock(thefile.lock_);
 
-		//check dir
+	//check dir
 
-	if (!thefile.logpath_created && access(LOG_PATH, F_OK) != 0)
+	if (!thefile.logpath_created_ && access(LOG_PATH, F_OK) != 0)
 	{
 		if (mkdir(LOG_PATH, 0755) != 0)
 		{
 			//create log path failed!
 			return;
 		}
-		thefile.logpath_created = true;
+		thefile.logpath_created_ = true;
 	}
 
 	FILE *fp = fopen(thefile.file_name, "a");
