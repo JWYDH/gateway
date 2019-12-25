@@ -20,7 +20,7 @@ link_directories(
 
 # 将源添加到此项目的可执行文件。
 set(SOURCE_FILES
-#	"./api/jw_log.cpp"
+	"./api/jw_log.cpp"
 #	"./api/jw_file.cpp"
 #	"./api/jw_process.cpp"
 #	"./api/jw_thread.cpp"
