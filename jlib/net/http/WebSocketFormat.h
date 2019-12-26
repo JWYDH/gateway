@@ -8,35 +8,34 @@
 #include "SHA1.h"
 #include "base64.h"
 
- // 0                   1                   2                   3
- // 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
- //+-+-+-+-+-------+-+-------------+-------------------------------+
- //|F|R|R|R| opcode|M| Payload len |    Extended payload length    |
- //|I|S|S|S|  (4)  |A|     (7)     |             (16/64)           |
- //|N|V|V|V|       |S|             |   (if payload len==126/127)   |
- //| |1|2|3|       |K|             |                               |
- //+-+-+-+-+-------+-+-------------+ - - - - - - - - - - - - - - - +
- //|     Extended payload length continued, if payload len == 127  |
- //+ - - - - - - - - - - - - - - - +-------------------------------+
- //|                               |Masking-key, if MASK set to 1  |
- //+-------------------------------+-------------------------------+
- //| Masking-key (continued)       |          Payload Data         |
- //+-------------------------------- - - - - - - - - - - - - - - - +
- //:                     Payload Data continued ...                :
- //+ - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - +
- //|                     Payload Data continued ...                |
- //+---------------------------------------------------------------+
+// 0                   1                   2                   3
+// 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+//+-+-+-+-+-------+-+-------------+-------------------------------+
+//|F|R|R|R| opcode|M| Payload len |    Extended payload length    |
+//|I|S|S|S|  (4)  |A|     (7)     |             (16/64)           |
+//|N|V|V|V|       |S|             |   (if payload len==126/127)   |
+//| |1|2|3|       |K|             |                               |
+//+-+-+-+-+-------+-+-------------+ - - - - - - - - - - - - - - - +
+//|     Extended payload length continued, if payload len == 127  |
+//+ - - - - - - - - - - - - - - - +-------------------------------+
+//|                               |Masking-key, if MASK set to 1  |
+//+-------------------------------+-------------------------------+
+//| Masking-key (continued)       |          Payload Data         |
+//+-------------------------------- - - - - - - - - - - - - - - - +
+//:                     Payload Data continued ...                :
+//+ - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - +
+//|                     Payload Data continued ...                |
+//+---------------------------------------------------------------+
 
-//FIN      1bit ±íÊ¾ĞÅÏ¢µÄ×îºóÒ»Ö¡£¬flag£¬Ò²¾ÍÊÇ±ê¼Ç·û
-//RSV 1 - 3  1bit each ÒÔºó±¸ÓÃµÄ Ä¬ÈÏ¶¼Îª 0
-//Opcode   4bit Ö¡ÀàĞÍ
-//Mask     1bit ÑÚÂë£¬ÊÇ·ñ¼ÓÃÜÊı¾İ£¬Ä¬ÈÏ±ØĞëÖÃÎª1  ±íÊ¾¾»ºÉÊÇ·ñÓĞÑÚÂë£¨Ö»ÊÊÓÃÓÚ¿Í»§¶Ë·¢ËÍ¸ø·şÎñÆ÷µÄÏûÏ¢£©¡£
-//Payload  7bit Êı¾İµÄ³¤¶È
-//Masking - key      1 or 4 bit ÑÚÂë ÓÃÓÚ¸ø¾»ºÉ¼ÓÑÚ»¤£¬¿Í»§¶Ëµ½·şÎñÆ÷±ê¼Ç
-//Payload data(x + y) bytes Êı¾İ
-//Extension data   x bytes  À©Õ¹Êı¾İ
-//Application data y bytes  ³ÌĞòÊı¾İ
-
+//FIN      1bit è¡¨ç¤ºä¿¡æ¯çš„æœ€åä¸€å¸§ï¼Œflagï¼Œä¹Ÿå°±æ˜¯æ ‡è®°ç¬¦
+//RSV 1 - 3  1bit each ä»¥åå¤‡ç”¨çš„ é»˜è®¤éƒ½ä¸º 0
+//Opcode   4bit å¸§ç±»å‹
+//Mask     1bit æ©ç ï¼Œæ˜¯å¦åŠ å¯†æ•°æ®ï¼Œé»˜è®¤å¿…é¡»ç½®ä¸º1  è¡¨ç¤ºå‡€è·æ˜¯å¦æœ‰æ©ç ï¼ˆåªé€‚ç”¨äºå®¢æˆ·ç«¯å‘é€ç»™æœåŠ¡å™¨çš„æ¶ˆæ¯ï¼‰ã€‚
+//Payload  7bit æ•°æ®çš„é•¿åº¦
+//Masking - key      1 or 4 bit æ©ç  ç”¨äºç»™å‡€è·åŠ æ©æŠ¤ï¼Œå®¢æˆ·ç«¯åˆ°æœåŠ¡å™¨æ ‡è®°
+//Payload data(x + y) bytes æ•°æ®
+//Extension data   x bytes  æ‰©å±•æ•°æ®
+//Application data y bytes  ç¨‹åºæ•°æ®
 
 // |Opcode  | Meaning                             | Reference |
 //-+--------+-------------------------------------+-----------|
@@ -53,206 +52,204 @@
 // | 10     | Pong Frame                          | RFC 6455  |
 //-+--------+-------------------------------------+-----------|
 class WebSocketFormat
-    {
-    public:
-        enum class WebSocketFrameType {
-            ERROR_FRAME = 0xff,
-            CONTINUATION_FRAME = 0x00,
-            TEXT_FRAME = 0x01,
-            BINARY_FRAME = 0x02,
-            CLOSE_FRAME = 0x08,
-            PING_FRAME = 0x09,
-            PONG_FRAME = 0x0A
-        };
+{
+public:
+	enum class WebSocketFrameType
+	{
+		ERROR_FRAME = 0xff,
+		CONTINUATION_FRAME = 0x00,
+		TEXT_FRAME = 0x01,
+		BINARY_FRAME = 0x02,
+		CLOSE_FRAME = 0x08,
+		PING_FRAME = 0x09,
+		PONG_FRAME = 0x0A
+	};
 
-        static std::string wsHandshake(std::string secKey)
-        {
-            secKey.append("258EAFA5-E914-47DA-95CA-C5AB0DC85B11");
+	static std::string wsHandshake(std::string secKey)
+	{
+		secKey.append("258EAFA5-E914-47DA-95CA-C5AB0DC85B11");
 
-            CSHA1 s1;
-            s1.Update((unsigned char*)secKey.c_str(), static_cast<unsigned int>(secKey.size()));
-            s1.Final();
-            unsigned char puDest[20];
-            s1.GetHash(puDest);
+		CSHA1 s1;
+		s1.Update((unsigned char *)secKey.c_str(), static_cast<unsigned int>(secKey.size()));
+		s1.Final();
+		unsigned char puDest[20];
+		s1.GetHash(puDest);
 
-            std::string base64Str = base64_encode((const unsigned char *)puDest, 20);
+		std::string base64Str = base64_encode((const unsigned char *)puDest, 20);
 
-            std::string response = "HTTP/1.1 101 Switching Protocols\r\n"
-                "Upgrade: websocket\r\n"
-                "Connection: Upgrade\r\n"
-                "Sec-WebSocket-Accept: ";
+		std::string response = "HTTP/1.1 101 Switching Protocols\r\n"
+							   "Upgrade: websocket\r\n"
+							   "Connection: Upgrade\r\n"
+							   "Sec-WebSocket-Accept: ";
 
-            response += base64Str;
-            response += "\r\n\r\n";
+		response += base64Str;
+		response += "\r\n\r\n";
 
-            return response;
-        }
+		return response;
+	}
 
-        static bool wsFrameBuild(const char* payload,
-            size_t payloadLen,
-            std::string& frame,
-            WebSocketFrameType frame_type = WebSocketFrameType::TEXT_FRAME,
-            bool isFin = true,
-            bool masking = false)
-        {
-            static std::mt19937 random(time(0));
+	static bool wsFrameBuild(const char *payload,
+							 size_t payloadLen,
+							 std::string &frame,
+							 WebSocketFrameType frame_type = WebSocketFrameType::TEXT_FRAME,
+							 bool isFin = true,
+							 bool masking = false)
+	{
+		static std::mt19937 random(time(0));
 
-            static_assert(std::is_same<std::string::value_type, char>::value, "");
+		static_assert(std::is_same<std::string::value_type, char>::value, "");
 
-            const uint8_t head = static_cast<uint8_t>(frame_type) | (isFin ? 0x80 : 0x00);
+		const uint8_t head = static_cast<uint8_t>(frame_type) | (isFin ? 0x80 : 0x00);
 
-            frame.clear();
-            frame.push_back(static_cast<char>(head));
-            if (payloadLen <= 125)
-            {
-                // mask << 7 | payloadLen, mask = 0
-                frame.push_back(static_cast<uint8_t>(payloadLen));
-            }
-            else if (payloadLen <= 0xFFFF)
-            {
-                // 126 + 16bit len
-                frame.push_back(126);
-                frame.push_back((payloadLen & 0xFF00) >> 8);
-                frame.push_back(payloadLen & 0x00FF);
-            }
-            else
-            {
-                // 127 + 64bit len
-                frame.push_back(127);
-                // assume payload len is less than u_int32_max
-                frame.push_back(0x00);
-                frame.push_back(0x00);
-                frame.push_back(0x00);
-                frame.push_back(0x00);
-                frame.push_back(static_cast<char>((payloadLen & 0xFF000000) >> 24));
-                frame.push_back(static_cast<char>((payloadLen & 0x00FF0000) >> 16));
-                frame.push_back(static_cast<char>((payloadLen & 0x0000FF00) >> 8));
-                frame.push_back(static_cast<char>(payloadLen & 0x000000FF));
-            }
+		frame.clear();
+		frame.push_back(static_cast<char>(head));
+		if (payloadLen <= 125)
+		{
+			// mask << 7 | payloadLen, mask = 0
+			frame.push_back(static_cast<uint8_t>(payloadLen));
+		}
+		else if (payloadLen <= 0xFFFF)
+		{
+			// 126 + 16bit len
+			frame.push_back(126);
+			frame.push_back((payloadLen & 0xFF00) >> 8);
+			frame.push_back(payloadLen & 0x00FF);
+		}
+		else
+		{
+			// 127 + 64bit len
+			frame.push_back(127);
+			// assume payload len is less than u_int32_max
+			frame.push_back(0x00);
+			frame.push_back(0x00);
+			frame.push_back(0x00);
+			frame.push_back(0x00);
+			frame.push_back(static_cast<char>((payloadLen & 0xFF000000) >> 24));
+			frame.push_back(static_cast<char>((payloadLen & 0x00FF0000) >> 16));
+			frame.push_back(static_cast<char>((payloadLen & 0x0000FF00) >> 8));
+			frame.push_back(static_cast<char>(payloadLen & 0x000000FF));
+		}
 
-            if (masking)
-            {
-                frame[1] = ((uint8_t)frame[1]) | 0x80;
-                uint8_t mask[4];
-                for (auto& m : mask)
-                {
-                    m = random();
-                    frame.push_back(m);
-                }
+		if (masking)
+		{
+			frame[1] = ((uint8_t)frame[1]) | 0x80;
+			uint8_t mask[4];
+			for (auto &m : mask)
+			{
+				m = random();
+				frame.push_back(m);
+			}
 
-                frame.reserve(frame.size() + payloadLen);
+			frame.reserve(frame.size() + payloadLen);
 
-                for (size_t i = 0; i < payloadLen; i++)
-                {
-                    frame.push_back(static_cast<uint8_t>(payload[i]) ^ mask[i % 4]);
-                }
-            }
-            else
-            {
-                frame.append(payload, payloadLen);
-            }
+			for (size_t i = 0; i < payloadLen; i++)
+			{
+				frame.push_back(static_cast<uint8_t>(payload[i]) ^ mask[i % 4]);
+			}
+		}
+		else
+		{
+			frame.append(payload, payloadLen);
+		}
 
-            return true;
-        }
+		return true;
+	}
 
-        static bool wsFrameExtractBuffer(const char* inbuffer,
-            const size_t bufferSize,
-            std::string& payload,
-            WebSocketFrameType& outopcode,
-            size_t& frameSize,
-            bool& outfin)
-        {
-            const auto buffer = (const unsigned char*)inbuffer;
+	static bool wsFrameExtractBuffer(const char *inbuffer,
+									 const size_t bufferSize,
+									 std::string &payload,
+									 WebSocketFrameType &outopcode,
+									 size_t &frameSize,
+									 bool &outfin)
+	{
+		const auto buffer = (const unsigned char *)inbuffer;
 
-            if (bufferSize < 2)
-            {
-                return false;
-            }
+		if (bufferSize < 2)
+		{
+			return false;
+		}
 
-			//×î¸ßÎ»ÓÃÓÚÃèÊöÏûÏ¢ÊÇ·ñ½áÊø,Èç¹ûÎª1Ôò¸ÃÏûÏ¢ÎªÏûÏ¢Î²²¿,Èç¹ûÎªÁãÔò»¹ÓĞºóĞøÊı¾İ°ü;
-			//ºóÃæ3Î»ÊÇÓÃÓÚÀ©Õ¹¶¨ÒåµÄ,Èç¹ûÃ»ÓĞÀ©Õ¹Ô¼¶¨µÄÇé¿öÔò±ØĞëÎª0.
-            outfin = (buffer[0] & 0x80) != 0;
-			//×îµÍ4Î»ÓÃÓÚÃèÊöÏûÏ¢ÀàĞÍ,ÏûÏ¢ÀàĞÍÔİ¶¨ÓĞ15ÖÖ,ÆäÖĞÓĞ¼¸ÖÖÊÇÔ¤ÁôÉèÖÃ
-            outopcode = (WebSocketFrameType)(buffer[0] & 0x0F);
-			//ÏûÏ¢µÄµÚ¶ş¸ö×Ö½ÚÖ÷ÒªÓÃÒ»ÃèÊöÑÚÂëºÍÏûÏ¢³¤¶È,×î¸ßÎ»ÓÃ0»ò1À´ÃèÊöÊÇ·ñÓĞÑÚÂë´¦Àí,
-            const bool isMasking = (buffer[1] & 0x80) != 0;
-            uint32_t payloadlen = buffer[1] & 0x7F;
+		//æœ€é«˜ä½ç”¨äºæè¿°æ¶ˆæ¯æ˜¯å¦ç»“æŸ,å¦‚æœä¸º1åˆ™è¯¥æ¶ˆæ¯ä¸ºæ¶ˆæ¯å°¾éƒ¨,å¦‚æœä¸ºé›¶åˆ™è¿˜æœ‰åç»­æ•°æ®åŒ…;
+		//åé¢3ä½æ˜¯ç”¨äºæ‰©å±•å®šä¹‰çš„,å¦‚æœæ²¡æœ‰æ‰©å±•çº¦å®šçš„æƒ…å†µåˆ™å¿…é¡»ä¸º0.
+		outfin = (buffer[0] & 0x80) != 0;
+		//æœ€ä½4ä½ç”¨äºæè¿°æ¶ˆæ¯ç±»å‹,æ¶ˆæ¯ç±»å‹æš‚å®šæœ‰15ç§,å…¶ä¸­æœ‰å‡ ç§æ˜¯é¢„ç•™è®¾ç½®
+		outopcode = (WebSocketFrameType)(buffer[0] & 0x0F);
+		//æ¶ˆæ¯çš„ç¬¬äºŒä¸ªå­—èŠ‚ä¸»è¦ç”¨ä¸€æè¿°æ©ç å’Œæ¶ˆæ¯é•¿åº¦,æœ€é«˜ä½ç”¨0æˆ–1æ¥æè¿°æ˜¯å¦æœ‰æ©ç å¤„ç†,
+		const bool isMasking = (buffer[1] & 0x80) != 0;
+		uint32_t payloadlen = buffer[1] & 0x7F;
 
-			//Ê£ÏÂµÄºóÃæ7Î»ÓÃÀ´ÃèÊöÏûÏ¢³¤¶È, ÓÉÓÚ7Î»×î¶àÖ»ÄÜÃèÊö127ËùÒÔÕâ¸öÖµ»á´ú±íÈıÖÖÇé¿ö, 
-			//Ò»ÖÖÊÇÏûÏ¢ÄÚÈİÉÙÓÚ126´æ´¢ÏûÏ¢³¤¶È, Èç¹ûÏûÏ¢³¤¶ÈÉÙÓÚUINT16µÄÇé¿ö´ËÖµÎª126, 
-			//µ±ÏûÏ¢³¤¶È´óÓÚUINT16µÄÇé¿öÏÂ´ËÖµÎª127; ÕâÁ½ÖÖÇé¿öµÄÏûÏ¢³¤¶È´æ´¢µ½½ôËæºóÃæµÄbyte[], 
-			//·Ö±ğÊÇUINT16(2Î»byte)ºÍUINT64(4Î»byte).
-            uint32_t pos = 2;
-            if (payloadlen == 126)
-            {
-                if (bufferSize < 4)
-                {
-                    return false;
-                }
+		//å‰©ä¸‹çš„åé¢7ä½ç”¨æ¥æè¿°æ¶ˆæ¯é•¿åº¦, ç”±äº7ä½æœ€å¤šåªèƒ½æè¿°127æ‰€ä»¥è¿™ä¸ªå€¼ä¼šä»£è¡¨ä¸‰ç§æƒ…å†µ,
+		//ä¸€ç§æ˜¯æ¶ˆæ¯å†…å®¹å°‘äº126å­˜å‚¨æ¶ˆæ¯é•¿åº¦, å¦‚æœæ¶ˆæ¯é•¿åº¦å°‘äºUINT16çš„æƒ…å†µæ­¤å€¼ä¸º126,
+		//å½“æ¶ˆæ¯é•¿åº¦å¤§äºUINT16çš„æƒ…å†µä¸‹æ­¤å€¼ä¸º127; è¿™ä¸¤ç§æƒ…å†µçš„æ¶ˆæ¯é•¿åº¦å­˜å‚¨åˆ°ç´§éšåé¢çš„byte[],
+		//åˆ†åˆ«æ˜¯UINT16(2ä½byte)å’ŒUINT64(4ä½byte).
+		uint32_t pos = 2;
+		if (payloadlen == 126)
+		{
+			if (bufferSize < 4)
+			{
+				return false;
+			}
 
-                payloadlen = (buffer[2] << 8) + buffer[3];
-                pos = 4;
-            }
-            else if (payloadlen == 127)
-            {
-                if (bufferSize < 10)
-                {
-                    return false;
-                }
+			payloadlen = (buffer[2] << 8) + buffer[3];
+			pos = 4;
+		}
+		else if (payloadlen == 127)
+		{
+			if (bufferSize < 10)
+			{
+				return false;
+			}
 
-                if (buffer[2] != 0 ||
-                    buffer[3] != 0 ||
-                    buffer[4] != 0 ||
-                    buffer[5] != 0)
-                {
-                    return false;
-                }
+			if (buffer[2] != 0 ||
+				buffer[3] != 0 ||
+				buffer[4] != 0 ||
+				buffer[5] != 0)
+			{
+				return false;
+			}
 
-                if ((buffer[6] & 0x80) != 0)
-                {
-                    return false;
-                }
+			if ((buffer[6] & 0x80) != 0)
+			{
+				return false;
+			}
 
-                payloadlen = (buffer[6] << 24) + (buffer[7] << 16) + (buffer[8] << 8) + buffer[9];
-                pos = 10;
-            }
+			payloadlen = (buffer[6] << 24) + (buffer[7] << 16) + (buffer[8] << 8) + buffer[9];
+			pos = 10;
+		}
 
-            uint8_t mask[4];
-            if (isMasking)
-            {
-                if (bufferSize < (pos + 4))
-                {
-                    return false;
-                }
+		uint8_t mask[4];
+		if (isMasking)
+		{
+			if (bufferSize < (pos + 4))
+			{
+				return false;
+			}
 
-                mask[0] = buffer[pos++];
-                mask[1] = buffer[pos++];
-                mask[2] = buffer[pos++];
-                mask[3] = buffer[pos++];
-            }
+			mask[0] = buffer[pos++];
+			mask[1] = buffer[pos++];
+			mask[2] = buffer[pos++];
+			mask[3] = buffer[pos++];
+		}
 
-            if (bufferSize < (pos + payloadlen))
-            {
-                return false;
-            }
+		if (bufferSize < (pos + payloadlen))
+		{
+			return false;
+		}
 
-			//»ñÈ¡ÏûÏ¢Ìå»¹ÓĞÒ»¸öĞèÒª×¢ÒâµÄµØ·½¾ÍÊÇÑÚÂë,Èç¹û´æÔÚÑÚÂëµÄÇé¿öÏÂ½ÓÊÕµÄbyte[]Òª×öÈçÏÂ×ª»»´¦Àí:
-            if (isMasking)
-            {
-                payload.reserve(payloadlen);
-                for (size_t i = pos, j = 0; j < payloadlen; i++, j++)
-                    payload.push_back(buffer[i] ^ mask[j % 4]);
-            }
-            else
-            {
-                payload.append((const char*)(buffer + pos), payloadlen);
-            }
+		//è·å–æ¶ˆæ¯ä½“è¿˜æœ‰ä¸€ä¸ªéœ€è¦æ³¨æ„çš„åœ°æ–¹å°±æ˜¯æ©ç ,å¦‚æœå­˜åœ¨æ©ç çš„æƒ…å†µä¸‹æ¥æ”¶çš„byte[]è¦åšå¦‚ä¸‹è½¬æ¢å¤„ç†:
+		if (isMasking)
+		{
+			payload.reserve(payloadlen);
+			for (size_t i = pos, j = 0; j < payloadlen; i++, j++)
+				payload.push_back(buffer[i] ^ mask[j % 4]);
+		}
+		else
+		{
+			payload.append((const char *)(buffer + pos), payloadlen);
+		}
 
-            frameSize = payloadlen + pos;
+		frameSize = payloadlen + pos;
 
-            return true;
-        }
-
-
-    };
-
+		return true;
+	}
+};
