@@ -6,10 +6,7 @@
 #include <assert.h>
 #include <stdlib.h>
 
-#include <unistd.h>
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <pthread.h>
+#include "jw_thread.h"
 
 namespace jw
 {
@@ -33,8 +30,7 @@ public:
 		level_ = LL_DEBUG;
 
 		//create lock
-		lock_ = (pthread_mutex_t *)malloc(sizeof(pthread_mutex_t));
-		::pthread_mutex_init(lock_, 0);
+		lock_ = jw:mutex_create();
 
 		//set level name
 		level_name[LL_DEBUG] = "[D]";
