@@ -24,6 +24,7 @@ void log_file(LOG_LEVEL level, const char *message, ...);
 
 } // namespace jw
 
+#define JW_ENABLE_LOG 1
 //userful macro
 #ifdef JW_ENABLE_LOG
 #define JW_LOG jw::log_file
