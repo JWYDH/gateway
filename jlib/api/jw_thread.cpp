@@ -8,12 +8,11 @@ namespace jw
 struct thread_data_s
 {
 	thread_id_t tid;
-	std::thread thandle;
 	thread_function entry_func;
 	void *param;
 	std::string name;
 	bool detached;
-	signal_t resume_signal;
+	//signal_t resume_signal;
 };
 
 static thread_local thread_data_s *thread_data = nullptr;

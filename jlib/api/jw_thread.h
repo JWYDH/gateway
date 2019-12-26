@@ -1,5 +1,9 @@
 #pragma once
 
+#include <stdint.h>
+
+#include <functional>
+
 namespace jw
 {
 
@@ -8,7 +12,7 @@ namespace jw
 //----------------------
 
 typedef void *thread_t;
-typedef std::thread::id thread_id_t;
+typedef pthread_t thread_id_t;
 //// thread entry function
 typedef std::function<void(void *)> thread_function;
 
@@ -56,20 +60,16 @@ void mutex_unlock(mutex_t m);
 /// auto lock
 struct auto_mutex
 {
-	auto_mutex(mutex_t m) : _m(m) { mutex_lock(_m); }
-	~auto_mutex() { mutex_unlock(_m); }
-	mutex_t _m;
+	auto_mutex(mutex_t m) : m_(m) { mutex_lock(m_); }
+	~auto_mutex() { mutex_unlock(m_); }
+	mutex_t m_;
 };
 
 //----------------------
 // signal/semaphone functions
 //----------------------
 
-#ifdef OS_WIN
-typedef HANDLE signal_t;
-#else
 typedef void *signal_t;
-#endif
 
 //// create a signal
 signal_t signal_create(void);
