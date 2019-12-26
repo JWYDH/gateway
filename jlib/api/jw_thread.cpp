@@ -3,6 +3,10 @@
 #include <unistd.h>
 #include <pthread.h>
 
+#include <sys/time.h>
+
+#include "jw_atomic.h"
+
 namespace jw
 {
 
@@ -12,14 +16,17 @@ struct thread_data_s
 	thread_function entry_func;
 	void *param;
 	std::string name;
-	bool detached;
-	//signal_t resume_signal;
 };
 static __thread thread_data_s *thread_local_data = nullptr;
 
 thread_id_t thread_get_current_id(void)
 {
-	return thread_local_data == 0 ? pthread_self() : thread_local_data->tid;
+	return thread_local_data == nullptr ? ::pthread_self() : thread_local_data->tid;
+}
+
+const char *thread_get_current_name(void)
+{
+	return thread_local_data == nullptr ? "<UNNAME>" : thread_local_data->name.c_str();
 }
 
 thread_id_t thread_get_id(thread_t t)
@@ -28,178 +35,125 @@ thread_id_t thread_get_id(thread_t t)
 	return data->tid;
 }
 
-void* _thread_entry(void *data)
+void *_thread_entry(void *data)
 {
-	thread_data_s *thread_data = (thread_data_s *)data;
-	//signal_wait(data->resume_signal);
-	//signal_destroy(data->resume_signal);
-	//data->resume_signal = 0;
+	thread_local_data = (thread_data_s *)data;
 
 	//set random seed
-	//srand((uint32_t)::time(0));
+	::srand((uint32_t)::time(0));
 
-	if (thread_data->entry_func)
-		thread_data->entry_func(thread_data->param);
-
-	if (thread_data->detached)
-	{
-		delete data;
-	}
+	if (thread_local_data->entry_func)
+		thread_local_data->entry_func(thread_local_data->param);
 }
 
-thread_t thread_create(thread_function func, void *param, const char *name, bool detached=false)
+thread_t thread_create(thread_function func, void *param, const char *name)
 {
 	thread_data_s *data = new thread_data_s;
 	data->entry_func = func;
 	data->param = param;
 	data->name = name ? name : "";
-	data->detached = detached;
+	::pthread_create(&data->tid, NULL, _thread_entry, data);
 	
-	int ret = pthread_create(&data->tid, NULL, _thread_entry, data);
-	//data->resume_signal = signal_create();
-
-	//detached thread
-	//if (data->detached)
-	//	data->thandle.detach();
-
-	//resume thread
-	//signal_notify(data->resume_signal);
 	return data;
 }
 
-//not thread safe
 void thread_sleep(int32_t msec)
 {
-	usleep(msec);
+	struct timeval time;
+	time.tv_sec = msec / 1000;
+	time.tv_usec = msec % 1000 * 1000;
+	select(0, NULL, NULL, NULL, &time);
 }
 
 void thread_join(thread_t thread)
 {
 	thread_data_s *data = (thread_data_s *)thread;
-	pthread_join(data->tid, nullptr);
-	if (!(data->detached))
-	{
-		delete data;
-	}
-}
-
-const char *thread_get_current_name(void)
-{
-	return (thread_local_data == nullptr) ? "<UNNAME>" : thread_local_data->name.c_str();
+	::pthread_join(data->tid, nullptr);
+	delete data;
 }
 
 void thread_yield(void)
 {
-	std::this_thread::yield();
+	::sched_yield();
 }
 
 mutex_t mutex_create(void)
 {
-#ifdef OS_WIN
-	LPCRITICAL_SECTION cs = (LPCRITICAL_SECTION)malloc(sizeof(CRITICAL_SECTION));
-	::InitializeCriticalSection(cs);
-	return cs;
-#else
-	pthread_mutex_t* pm = (pthread_mutex_t*)malloc(sizeof(pthread_mutex_t));
+	pthread_mutex_t *pm = (pthread_mutex_t *)malloc(sizeof(pthread_mutex_t));
 	::pthread_mutex_init(pm, 0);
 	return pm;
-#endif
 }
 
-//-------------------------------------------------------------------------------------
+
 void mutex_destroy(mutex_t m)
 {
-#ifdef OS_WIN
-	::DeleteCriticalSection(m);
-#else
 	::pthread_mutex_destroy(m);
 	free(m);
-#endif
 }
 
-//-------------------------------------------------------------------------------------
+
 void mutex_lock(mutex_t m)
 {
-#ifdef OS_WIN
-	::EnterCriticalSection(m);
-#else
 	::pthread_mutex_lock(m);
-#endif
 }
 
-//-------------------------------------------------------------------------------------
+
 void mutex_unlock(mutex_t m)
 {
-#ifdef OS_WIN
-	::LeaveCriticalSection(m);
-#else
 	::pthread_mutex_unlock(m);
-#endif
 }
 
-
-#ifndef OS_WIN
 struct signal_s
 {
 	pthread_mutex_t mutex;
-	pthread_cond_t	cond;
-	atomic_int32_t  predicate;
+	pthread_cond_t cond;
+	atomic_int32_t predicate;
 };
-#endif
 
-//-------------------------------------------------------------------------------------
+
 signal_t signal_create(void)
 {
-#ifdef OS_WIN
-	return ::CreateEvent(0, FALSE, FALSE, 0);
-#else
-	signal_s *sig = (signal_s*)malloc(sizeof(*sig));
+	signal_s *sig = (signal_s *)malloc(sizeof(*sig));
 	sig->predicate = 0;
 	pthread_mutex_init(&(sig->mutex), 0);
 	pthread_cond_init(&(sig->cond), 0);
 	return (signal_t)sig;
-#endif
 }
 
 void signal_destroy(signal_t s)
 {
-#ifdef OS_WIN
-	::CloseHandle(s);
-#else
-	signal_s* sig = (signal_s*)s;
+	signal_s *sig = (signal_s *)s;
 	pthread_cond_destroy(&(sig->cond));
 	pthread_mutex_destroy(&(sig->mutex));
 	free(sig);
-#endif
 }
 
 void signal_wait(signal_t s)
 {
-#ifdef OS_WIN
-	::WaitForSingleObject(s, INFINITE);
-#else
-	signal_s* sig = (signal_s*)s;
+	signal_s *sig = (signal_s *)s;
 	pthread_mutex_lock(&(sig->mutex));
-	while (0==sig->predicate.load()) {
+	while (0 == sig->predicate.load())
+	{
 		pthread_cond_wait(&(sig->cond), &(sig->mutex));
 	}
 	sig->predicate = 0;
 	pthread_mutex_unlock(&(sig->mutex));
-#endif
 }
 
-#ifndef OS_WIN
-bool _signal_unlock_wait(signal_s* sig, uint32_t ms)
+bool _signal_unlock_wait(signal_s *sig, uint32_t ms)
 {
 	const uint64_t kNanoSecondsPerSecond = 1000ll * 1000ll * 1000ll;
 
-	if (sig->predicate.load() == 1) { //It's light!
+	if (sig->predicate.load() == 1)
+	{ //It's light!
 		sig->predicate = 0;
 		return true;
 	}
 
 	//need wait...
-	if (ms == 0) return  false;	//zero-timeout event state check optimization
+	if (ms == 0) {
+		return false; //zero-timeout event state check optimization
+	}
 
 	timeval tv;
 	gettimeofday(&tv, 0);
@@ -208,29 +162,29 @@ bool _signal_unlock_wait(signal_s* sig, uint32_t ms)
 	timespec ts;
 	ts.tv_sec = (time_t)(nanoseconds / kNanoSecondsPerSecond);
 	ts.tv_nsec = (long int)(nanoseconds - ((uint64_t)ts.tv_sec) * kNanoSecondsPerSecond);
-	
+
 	//wait...
-	while(0 == sig->predicate.load()) {
-		if (pthread_cond_timedwait(&(sig->cond), &(sig->mutex), &ts) != 0)
+	while (0 == sig->predicate.load())
+	{
+		if (pthread_cond_timedwait(&(sig->cond), &(sig->mutex), &ts) != 0){
 			return false; //time out
+		}
 	}
 
 	sig->predicate = 0;
 	return true;
 }
-#endif
 
 bool signal_timewait(signal_t s, uint32_t ms)
 {
-#ifdef OS_WIN
-	return (WAIT_OBJECT_0 == ::WaitForSingleObject(s, ms));
-#else
-	signal_s* sig = (signal_s*)s;
-	if (ms == 0) {
+	signal_s *sig = (signal_s *)s;
+	if (ms == 0)
+	{
 		if (EBUSY == pthread_mutex_trylock(&(sig->mutex)))
 			return false;
 	}
-	else {
+	else
+	{
 		pthread_mutex_lock(&(sig->mutex));
 	}
 
@@ -238,20 +192,15 @@ bool signal_timewait(signal_t s, uint32_t ms)
 
 	pthread_mutex_unlock(&(sig->mutex));
 	return ret;
-#endif
 }
 
 void signal_notify(signal_t s)
 {
-#ifdef OS_WIN
-	::SetEvent(s);
-#else
-	signal_s* sig = (signal_s*)s;
+	signal_s *sig = (signal_s *)s;
 	pthread_mutex_lock(&(sig->mutex));
 	sig->predicate = 1;
 	pthread_cond_signal(&(sig->cond));
 	pthread_mutex_unlock(&(sig->mutex));
-#endif
 }
 
 } // namespace jw

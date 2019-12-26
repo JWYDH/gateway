@@ -1,6 +1,6 @@
 #pragma once
 #include <stdint.h>
-#include <atomic>
+#include "jw_atomic.h"
 
 namespace jw
 {
@@ -23,13 +23,13 @@ private:
 	//array to keep the elements
 	T m_queue[LF_SIZE];
 	//number of elements in the queue
-	mutable std::atomic<uint32_t> m_count;
+	mutable atomic_uint32_t m_count;
 	//where a new element will be inserted
-	std::atomic<uint32_t> m_writeIndex;
+	atomic_uint32_t m_writeIndex;
 	//where the next element where be extracted from
-	std::atomic<uint32_t> m_readIndex;
+	atomic_uint32_t m_readIndex;
 	//maximum read index for multiple producer queues
-	std::atomic<uint32_t> m_maximumReadIndex;
+	atomic_uint32_t m_maximumReadIndex;
 
 private:
 	/// calculate the index in the circular array that corresponds to a particular "count" value
@@ -63,7 +63,7 @@ bool LockFreeQueue<T, LF_SIZE>::push(const T &data)
 				//maybe this thread was blocked between m_write_index.get() and m_read_index.get(), cause other threads write and read
 				continue;
 		}
-	} while (!m_writeIndex.atomicCompareExchange(currentWriteIndex, (currentWriteIndex + 1)));
+	} while (!atomicCompareExchange(m_writeIndex, currentWriteIndex, (currentWriteIndex + 1)));
 
 	// We know now that this index is reserved for us. Use it to save the data
 	m_queue[_countToIndex(currentWriteIndex)] = data;
@@ -71,7 +71,7 @@ bool LockFreeQueue<T, LF_SIZE>::push(const T &data)
 	// update the maximum read index after saving the data. It wouldn't fail if there is only one thread
 	// inserting in the queue. It might fail if there are more than 1 producer threads because this
 	// operation has to be done in the same order as the previous CAS
-	while (!m_maximumReadIndex.atomicCompareExchange(currentWriteIndex, (currentWriteIndex + 1)))
+	while (!atomicCompareExchange(m_maximumReadIndex, currentWriteIndex, (currentWriteIndex + 1)))
 	{
 		// this is a good place to yield the thread in case there are more
 		// software threads than hardware processors and you have more
@@ -113,7 +113,7 @@ bool LockFreeQueue<T, LF_SIZE>::pop(T &data)
 		// try to perfrom now the CAS operation on the read index. If we succeed
 		// data already contains what m_readIndex pointed to before we
 		// increased it
-		if (m_readIndex.atomicCompareExchange(currentReadIndex, (currentReadIndex + 1)))
+		if (atomicCompareExchange(m_readIndex, currentReadIndex, (currentReadIndex + 1)))
 		{
 			// got here. The value was retrieved from the queue. Note that the
 			// data inside the m_queue array is not deleted nor reseted

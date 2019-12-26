@@ -16,9 +16,11 @@ typedef pthread_t thread_id_t;
 //// thread entry function
 typedef std::function<void(void *)> thread_function;
 
-
 //// get current thread id
 thread_id_t thread_get_current_id(void);
+
+//// get current thread name
+const char *thread_get_current_name(void);
 
 //// get the system id of thread
 thread_id_t thread_get_id(thread_t t);
@@ -31,9 +33,6 @@ void thread_sleep(int32_t msec);
 
 //// wait the thread to terminate
 void thread_join(thread_t t);
-
-//// get current thread name
-const char *thread_get_current_name(void);
 
 //// yield the processor
 void thread_yield(void);
