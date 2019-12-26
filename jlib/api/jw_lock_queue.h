@@ -8,7 +8,7 @@
 namespace {
 
 template <typename T>
-struct LockQueue {
+class LockQueue {
 	LockQueue() {}
 	bool push(T &&v);
 	bool pop(T *v);
