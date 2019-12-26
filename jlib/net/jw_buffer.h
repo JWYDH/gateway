@@ -2,33 +2,87 @@
 
 #include <stdint.h>
 
-struct Buffer{
-	
+namespace jw {
+	class RingBuf
+{
 public:
-	Buffer(int default_size = 1024);
-	virtual ~Buffer();
+	enum { kDefaultCapacity = 1024 - 1 };
 
-	char *MemPtr();
-	char *EndPtr();
-	char *DataEndPtr();
-	char *OffsetPtr();
-	
-	int32_t Capacity();
-	int32_t AvaliableCapacity();
-	int32_t Length();
-	int32_t AvaliableLength();
+	/// return the size of the internal buffer, in bytes.
+	size_t size(void) const {
+		return (m_write >= m_read) ? (m_write - m_read) : (m_end - m_read + m_write);
+	}
 
-	void SetLength(int32_t length);
-	void Seek(int32_t n);
-	void AdjustOffset(int32_t adjust_offset);
-	void AdjustDataEnd(uint32_t adjust_offset);
+	/// reset a ring buffer to its initial state (empty).
+	void reset(void) {
+		m_write = m_read = 0;
+	}
 
-	int32_t ResetSize(int32_t size);
-	int32_t ReadBuf(char* buf, int32_t len);
-	int32_t WriteBuff(const char* buf, int32_t len);
+	/// return the usable capacity of the ring buffer, in bytes.
+	size_t capacity(void) const {
+		return m_end-1;
+	}
+
+	//// return the number of free/available bytes in the ring buffer.
+	size_t get_free_size(void) const {
+		return (m_write >= m_read) ? (m_end - m_write + m_read - 1) : (m_read - m_write - 1);
+	}
+
+	//// return is empty
+	bool empty(void) const {
+		return (m_write == m_read);
+	}
+
+	/// return is full
+	bool full(void) const {
+		return get_free_size() == 0;
+	}
+
+	////  copy n bytes from a contiguous memory area into the ring buffer
+	void memcpy_into(const void *src, size_t count);
+
+	//// copy n bytes from the ring buffer into a contiguous memory area dst
+	size_t memcpy_out(void *dst, size_t count);
+
+	//// copy data to another ringbuf dst
+	size_t copyto(RingBuf* dst, size_t count);
+
+	//// copy n bytes from the ring bufffer into a contiguous memory, but 
+	//// do not change current buf
+	size_t peek(size_t off, void* dst, size_t count) const;
+
+	//// just discard at least n bytes data, return size that abandon actually
+	size_t discard(size_t count);
+
+	//// call read on the socket descriptor(fd), using the ring buffer rb as the 
+	//// destination buffer for the read, and read as more data as impossible data.
+	//// set extra_read to false if you don't want expand this ringbuf
+	ssize_t read_socket(socket_t fd, bool extra_read=true);
+
+	//// call write on the socket descriptor(fd), using the ring buffer rb as the 
+	//// source buffer for writing, In Linux platform, it will only call writev
+	//// once, and may return a short count.
+	ssize_t write_socket(socket_t fd);
+
+	//// caculate the checksum(adler32) of data from off to off+len
+	//// if off greater than size() or off+count greater than size() 
+	//// or len equ 0 return initial adler value (1)
+	uint32_t checksum(size_t off, size_t count) const;
+
+	//// move all data to a flat memory block and return point
+	const uint8_t* normalize(void);
+
+public:
+	RingBuf(size_t capacity = kDefaultCapacity);
+	~RingBuf();
+
 private:
-	char *mem_start_ptr_;
-	char *mem_end_ptr_;
-	char *data_end_ptr_;
-	char *offset_ptr_;
+	uint8_t* m_buf;
+	size_t m_end;
+	size_t m_read;
+	size_t m_write;
+
+private:
+	void _auto_resize(size_t need_size);
 };
+}
