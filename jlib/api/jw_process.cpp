@@ -8,9 +8,9 @@
 namespace jw
 {
 
-int process_get_id(void)
+pid_t process_get_id(void)
 {
-	return (int)::getpid();
+	return ::getpid();
 }
 
 void process_get_module_name(char *module_name, size_t max_size)

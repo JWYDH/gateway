@@ -1,5 +1,7 @@
 #include "jw_thread.h"
 
+#include <pthread.h>
+
 namespace jw
 {
 
@@ -18,7 +20,7 @@ static thread_local thread_data_s *thread_data = nullptr;
 
 thread_id_t thread_get_current_id(void)
 {
-	return thread_data == 0 ? std::this_thread::get_id() : thread_data->tid;
+	return thread_data == 0 ? pthread_self() : thread_data->tid;
 }
 
 thread_id_t thread_get_id(thread_t t)

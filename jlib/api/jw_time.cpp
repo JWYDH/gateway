@@ -1,8 +1,5 @@
 #include "jw_time.h"
 
-#include <sys/time.h>
-
-#include <time.h>
 #include <string.h>
 
 namespace jw
@@ -22,7 +19,7 @@ int64_t utc_time_now()
 	return t.tv_sec;
 }
 
-int64_t local_time_now()
+time_t local_time_now()
 {
 	time_t local_time = time(nullptr);
 	struct tm tm_now;
@@ -39,7 +36,7 @@ void time_tostring(time_t t, char *time_dest, size_t max_size, const char *forma
 	strftime(time_dest, max_size, format, &r);
 }
 
-int64_t time_encode(char *str)
+time_t time_encode(char *str)
 {
 	if (str == nullptr || strlen(str) != 14)
 	{

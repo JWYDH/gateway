@@ -23,7 +23,7 @@ bool dir_create(const char *dir)
 
 bool file_access(const char *filename)
 {
-	return access(filename, 0) == 0;
+	return access(filename, F_OK) == 0;
 }
 
 } // namespace jw

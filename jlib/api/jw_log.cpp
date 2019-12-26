@@ -6,73 +6,59 @@
 #include <assert.h>
 #include <stdlib.h>
 
+#include "jw_process.h"
 #include "jw_thread.h"
+#include "jw_file.h"
+#include "jw_time.h"
 
 namespace jw
 {
 
 #define LOG_PATH "./logs/"
-#define LOG_MAX_PATH 256
 #define LOG_FILENAME_MAX 256
+#define LOG_FILE_MAX_SIZE 512 * 1024 * 1024
 
 class LogFile
 {
+private:
+	static LogFile *singleton_;
+
 public:
-	LOG_LEVEL level_;
-	pthread_mutex_t *lock_;
-	const char *level_name[LL_MAX];
-	char file_name[LOG_MAX_PATH];
-	bool logpath_created_;
+	char process_name_[LOG_FILENAME_MAX];
+	mutex_t lock_;
+	const char *level_name_[LL_MAX];
 
 	LogFile()
 	{
-		//default level(all level will be writed)
-		level_ = LL_DEBUG;
+		//pid_t process_id = jw::process_get_id();
+
+		//get process name
+		char process_name[LOG_FILENAME_MAX] = {0};
+		jw::process_get_module_name(process_name, LOG_FILENAME_MAX);
 
 		//create lock
-		lock_ = jw:mutex_create();
+		lock_ = jw::mutex_create();
 
-		//set level name
-		level_name[LL_DEBUG] = "[D]";
-		level_name[LL_INFO] = "[I]";
-		level_name[LL_WARN] = "[W]";
-		level_name[LL_ERROR] = "[E]";
-
-		//pid_t process_id = ::getpid();
-
-		char process_path_name[LOG_MAX_PATH] = {0};
-		if (readlink("/proc/self/exe", process_path_name, LOG_MAX_PATH) < 0)
-		{
-			strncpy(process_path_name, "unknown", LOG_MAX_PATH);
-		}
-		const char *process_name = strrchr(process_path_name, '/');
-		if (process_name != 0)
-		{
-			process_name++;
-		}
-		else
-		{
-			process_name = "unknown";
-		}
-
-		//log filename
-		snprintf(file_name, LOG_FILENAME_MAX, LOG_PATH "%s.log", process_name);
-		//log path didn't created
-		logpath_created_ = false;
+		// //set level name
+		level_name_[LL_DEBUG] = "[D]";
+		level_name_[LL_INFO] = "[I]";
+		level_name_[LL_WARN] = "[W]";
+		level_name_[LL_ERROR] = "[E]";
 	}
 
 	~LogFile()
 	{
-		::pthread_mutex_destroy(lock_);
-		free(lock_);
+		jw::mutex_destroy(lock_);
 	}
 
 	static LogFile &instance()
 	{
-		static LogFile file;
-		return file;
+		return *singleton_;
 	}
 };
+
+//thread safe init singleton
+LogFile *LogFile::singleton_ = new LogFile;
 
 void log_file(LOG_LEVEL level, const char *message, ...)
 {
@@ -82,36 +68,44 @@ void log_file(LOG_LEVEL level, const char *message, ...)
 
 	LogFile &thefile = LogFile::instance();
 
-	::pthread_mutex_lock(thefile.lock_);
+	jw::auto_mutex(thefile.lock_);
 
 	//check dir
-
-	if (!thefile.logpath_created_ && access(LOG_PATH, F_OK) != 0)
+	if (!jw::file_access(LOG_PATH))
 	{
-		if (mkdir(LOG_PATH, 0755) != 0)
+		if (jw::dir_create(LOG_PATH))
 		{
 			//create log path failed!
 			return;
 		}
-		thefile.logpath_created_ = true;
 	}
 
-	FILE *fp = fopen(thefile.file_name, "a");
+	char file_name[LOG_FILENAME_MAX] = {0};
+	char time_buf[32] = {0};
+
+	time_t now = jw::local_time_now();
+	jw::time_tostring(now, time_buf, 32, "%s%Y%m%d");
+	snprintf(file_name, LOG_FILENAME_MAX, "%s-%s", thefile.process_name_, time_buf);
+	
+	
+
+	FILE *fp = fopen(file_name, "a");
 	if (fp == 0)
 	{
 		//create the log file first
-		fp = fopen(thefile.file_name, "w");
+		fp = fopen(file_name, "w");
 	}
 	if (fp == 0)
+	{
+		//open the log file fail
 		return;
-
-	char timebuf[32] = {0};
-	//jw::local_time_now(timebuf, 32, "%Y_%m_%d-%H:%M:%S");
-
+	}
+	
 	static const int32_t STATIC_BUF_LENGTH = 2048;
 
-	char szTemp[STATIC_BUF_LENGTH] = {0};
-	char *p = szTemp;
+	char log_string[STATIC_BUF_LENGTH] = {0};
+	char *p = log_string;
+
 	va_list ptr;
 	va_start(ptr, message);
 	int len = vsnprintf(p, STATIC_BUF_LENGTH, message, ptr);
@@ -136,21 +130,23 @@ void log_file(LOG_LEVEL level, const char *message, ...)
 	}
 	va_end(ptr);
 
+	jw::time_tostring(now, time_buf, 32, "%Y_%m_%d-%H:%M:%S");
+
 	fprintf(fp, "%s %s [%s] %s\n",
-			timebuf,
-			thefile.level_name[level],
+			time_buf,
+			thefile.level_name_[level],
 			jw::thread_get_current_name(),
 			p);
 	fclose(fp);
 
 	//print to stand output last
-	fprintf(level >= ERROR ? stderr : stdout, "%s %s [%s] %s\n",
-			timebuf,
-			thefile.level_name[level],
+	fprintf(level >= LL_ERROR ? stderr : stdout, "%s %s [%s] %s\n",
+			time_buf,
+			thefile.level_name_[level],
 			jw::thread_get_current_name(),
 			p);
 
-	if (p != szTemp)
+	if (p != log_string)
 	{
 		free(p);
 	}
