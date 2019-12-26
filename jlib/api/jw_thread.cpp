@@ -14,8 +14,7 @@ struct thread_data_s
 	bool detached;
 	//signal_t resume_signal;
 };
-
-static thread_local thread_data_s *thread_data = nullptr;
+static __thread thread_data_s *thread_data = nullptr;
 
 thread_id_t thread_get_current_id(void)
 {
@@ -48,7 +47,7 @@ void _thread_entry(thread_data_s *data)
 	}
 }
 
-thread_t _thread_create(thread_function func, void *param, const char *name, bool detached)
+thread_t thread_create(thread_function func, void *param, const char *name, bool detached=false)
 {
 	thread_data_s *data = new thread_data_s;
 	data->param = param;
@@ -66,16 +65,6 @@ thread_t _thread_create(thread_function func, void *param, const char *name, boo
 	//resume thread
 	signal_notify(data->resume_signal);
 	return data;
-}
-
-thread_t thread_create(thread_function func, void *param, const char *name)
-{
-	return _thread_create(func, param, name, false);
-}
-
-void thread_create_detached(thread_function func, void *param, const char *name)
-{
-	_thread_create(func, param, name, true);
 }
 
 void thread_sleep(int32_t msec)

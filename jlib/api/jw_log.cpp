@@ -22,12 +22,25 @@ class LogFile
 {
 private:
 	static LogFile *singleton_;
-
+	
+	class GC
+	{
+	public:
+		~GC()
+		{
+			if (singleton_ != nullptr)
+			{
+				delete singleton_;
+				singleton_ = nullptr;
+			}
+		}
+	};
+	static GC gc;
 public:
 	char process_name_[LOG_FILENAME_MAX];
-	mutex_t lock_;
 	const char *level_name_[LL_MAX];
-
+	mutex_t lock_;
+	
 	LogFile()
 	{
 		//pid_t process_id = jw::process_get_id();
@@ -36,29 +49,29 @@ public:
 		char process_name[LOG_FILENAME_MAX] = {0};
 		jw::process_get_module_name(process_name, LOG_FILENAME_MAX);
 
-		//create lock
-		lock_ = jw::mutex_create();
-
-		// //set level name
+		//set level name
 		level_name_[LL_DEBUG] = "[D]";
 		level_name_[LL_INFO] = "[I]";
 		level_name_[LL_WARN] = "[W]";
 		level_name_[LL_ERROR] = "[E]";
+
+		//create lock
+		lock_ = jw::mutex_create();
 	}
 
 	~LogFile()
 	{
 		jw::mutex_destroy(lock_);
 	}
-
-	static LogFile &instance()
+	static LogFile *instance()
 	{
-		return *singleton_;
+		return singleton_;
 	}
 };
 
 //thread safe init singleton
 LogFile *LogFile::singleton_ = new LogFile;
+LogFile ::GC LogFile ::gc;
 
 void log_file(LOG_LEVEL level, const char *message, ...)
 {
@@ -66,9 +79,9 @@ void log_file(LOG_LEVEL level, const char *message, ...)
 	if (level < LL_DEBUG || level >= LL_MAX)
 		return;
 
-	LogFile &thefile = LogFile::instance();
+	LogFile *thefile = LogFile::instance();
 
-	jw::auto_mutex(thefile.lock_);
+	jw::auto_mutex(thefile->lock_);
 
 	//check dir
 	if (!jw::file_access(LOG_PATH))
@@ -85,9 +98,7 @@ void log_file(LOG_LEVEL level, const char *message, ...)
 
 	time_t now = jw::local_time_now();
 	jw::time_tostring(now, time_buf, 32, "%s%Y%m%d");
-	snprintf(file_name, LOG_FILENAME_MAX, "%s-%s", thefile.process_name_, time_buf);
-	
-	
+	snprintf(file_name, LOG_FILENAME_MAX, "%s_%s", thefile->process_name_, time_buf);
 
 	FILE *fp = fopen(file_name, "a");
 	if (fp == 0)
@@ -100,7 +111,7 @@ void log_file(LOG_LEVEL level, const char *message, ...)
 		//open the log file fail
 		return;
 	}
-	
+
 	static const int32_t STATIC_BUF_LENGTH = 2048;
 
 	char log_string[STATIC_BUF_LENGTH] = {0};
@@ -134,7 +145,7 @@ void log_file(LOG_LEVEL level, const char *message, ...)
 
 	fprintf(fp, "%s %s [%s] %s\n",
 			time_buf,
-			thefile.level_name_[level],
+			thefile->level_name_[level],
 			jw::thread_get_current_name(),
 			p);
 	fclose(fp);
@@ -142,7 +153,7 @@ void log_file(LOG_LEVEL level, const char *message, ...)
 	//print to stand output last
 	fprintf(level >= LL_ERROR ? stderr : stdout, "%s %s [%s] %s\n",
 			time_buf,
-			thefile.level_name_[level],
+			thefile->level_name_[level],
 			jw::thread_get_current_name(),
 			p);
 
