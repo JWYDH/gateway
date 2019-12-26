@@ -26,7 +26,7 @@ time_t local_time_now()
 	//time zone;
 	localtime_r(&local_time, &tm_now);
 	local_time = mktime(&tm_now);
-	return local_time
+	return local_time;
 }
 
 void time_tostring(time_t t, char *time_dest, size_t max_size, const char *format)

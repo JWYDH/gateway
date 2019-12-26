@@ -25,7 +25,7 @@ set(SOURCE_FILES
 	"./api/jw_process.cpp"
 	"./api/jw_thread.cpp"
 	"./api/jw_log.cpp"
-#	"./api/jw_socket.cpp"
+	"./api/jw_socket.cpp"
 	)
 
 set(CMAKE_CXX_COMPILER "g++")
