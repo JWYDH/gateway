@@ -1,16 +1,46 @@
 #pragma once
 
+#include <stdio.h>
+#include <string.h>
+#include <stdlib.h>
+#include <errno.h>
+
+
+#include <netinet/in.h>
+#include <sys/socket.h>
+#include <netinet/tcp.h>
+#include <netdb.h>
+#include <fcntl.h>
+#include <unistd.h>
+#include <sys/stat.h>
+#include <sys/types.h>
+#include <arpa/inet.h>
+typedef int	socket_t;
+//#pragma region define win32 const variable in linux
+#ifndef INVALID_SOCKET
+	#define INVALID_SOCKET	(-1)
+#endif
+#ifndef SOCKET_ERROR
+	#define SOCKET_ERROR	(-1)
+#endif	
+//#pragma endregion
+
 namespace jw
 {
 
-//// init global socket data( call WSAStartup at windows system)
-void global_init(void);
+bool DNS_parse(const char* domain, char* ip);
 
 /// Creates a blocking socket file descriptor, return INVALID_SOCKET if failed
 socket_t create_socket(void);
 
 /// Close socket
 void close_socket(socket_t s);
+
+/// set_recv_buf_size
+bool set_recv_buf_size(int size);
+
+/// set_send_buf_size
+bool set_send_buf_size(int size);
 
 /// enable/disable socket non-block mode
 bool set_nonblock(socket_t s, bool enable);

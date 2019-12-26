@@ -1,26 +1,25 @@
 #pragma once
-#ifdef WIN32
-#include <WinSock.h>
-typedef int socklen_t;
-#else
+
+#include <stdlib.h>
+#include <errno.h>
+
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <netdb.h>
 #include <fcntl.h>
-#include "errno.h"
 #include <unistd.h>
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <arpa/inet.h>
-typedef int	SOCKET;
+typedef int	socket_t;
 //#pragma region define win32 const variable in linux
-#define INVALID_SOCKET	-1
-#define SOCKET_ERROR	-1
-//#pragma endregion
+#ifndef INVALID_SOCKET
+	#define INVALID_SOCKET	(-1)
 #endif
-
-
-
+#ifndef SOCKET_ERROR
+	#define SOCKET_ERROR	(-1)
+#endif	
+//#pragma endregion
 
 
 class JwSocket {
