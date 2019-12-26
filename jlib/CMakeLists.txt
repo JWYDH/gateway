@@ -20,17 +20,12 @@ link_directories(
 
 # 将源添加到此项目的可执行文件。
 set(SOURCE_FILES
+	"./api/jw_file.cpp"
+	"./api/jw_time.cpp"
+	"./api/jw_process.cpp"
+	"./api/jw_thread.cpp"
 	"./api/jw_log.cpp"
-#	"./api/jw_file.cpp"
-#	"./api/jw_process.cpp"
-#	"./api/jw_thread.cpp"
-#		"jw_socket_api.cpp"
-#		"./log/jw_log.cpp"
-#		"./net/jw_socket.cpp"
-#		"./net/jw_buffer.cpp"
-#		"./net/jw_tcpclient.cpp"
-#		"./net/jw_tcpconn.cpp"
-#		"./net/jw_tcpserver.cpp"
+#	"./api/jw_socket.cpp"
 	)
 
 set(CMAKE_CXX_COMPILER "g++")
