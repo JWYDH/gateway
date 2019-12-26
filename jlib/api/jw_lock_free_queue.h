@@ -4,7 +4,7 @@
 
 namespace jw
 {
-template <typename ELEM_T, uint32_t Q_SIZE = 65536> //default 2^16, it must be a power of 2 value
+template <typename T, uint32_t LF_SIZE = 65536> //default 2^16, it must be a power of 2 value
 class LockFreeQueue
 {
 public:
@@ -14,14 +14,14 @@ public:
 	uint32_t size(void) const { return m_count.load(); }
 
 	//push an element at the tail of the queue, returns true if the element was inserted in the queue. False if the queue was full
-	bool push(const ELEM_T &data);
+	bool push(const T &data);
 
 	//pop the element at the head of the queue, returns true if the element was successfully extracted from the queue. False if the queue was empty
-	bool pop(ELEM_T &data);
+	bool pop(T &data);
 
 private:
 	//array to keep the elements
-	ELEM_T m_queue[Q_SIZE];
+	T m_queue[LF_SIZE];
 	//number of elements in the queue
 	mutable std::atomic<uint32_t> m_count;
 	//where a new element will be inserted
@@ -33,7 +33,7 @@ private:
 
 private:
 	/// calculate the index in the circular array that corresponds to a particular "count" value
-	inline uint32_t _countToIndex(uint32_t count) { return (count & (Q_SIZE - 1)); }
+	inline uint32_t _countToIndex(uint32_t count) { return (count & (LF_SIZE - 1)); }
 
 public:
 	LockFreeQueue() : m_count(0), m_writeIndex(0), m_readIndex(0), m_maximumReadIndex(0) {}
@@ -43,8 +43,8 @@ public:
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //Impl
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-template <typename ELEM_T, uint32_t Q_SIZE>
-bool LockFreeQueue<ELEM_T, Q_SIZE>::push(const ELEM_T &data)
+template <typename T, uint32_t LF_SIZE>
+bool LockFreeQueue<T, LF_SIZE>::push(const T &data)
 {
 	uint32_t currentReadIndex;
 	uint32_t currentWriteIndex;
@@ -56,7 +56,7 @@ bool LockFreeQueue<ELEM_T, Q_SIZE>::push(const ELEM_T &data)
 		if (_countToIndex(currentWriteIndex + 1) ==
 			_countToIndex(currentReadIndex))
 		{
-			if (m_count > (Q_SIZE >> 1))
+			if (m_count > (LF_SIZE >> 1))
 				// the queue is full
 				return false;
 			else
@@ -85,8 +85,8 @@ bool LockFreeQueue<ELEM_T, Q_SIZE>::push(const ELEM_T &data)
 }
 
 //-------------------------------------------------------------------------------------
-template <typename ELEM_T, uint32_t Q_SIZE>
-bool LockFreeQueue<ELEM_T, Q_SIZE>::pop(ELEM_T &a_data)
+template <typename T, uint32_t LF_SIZE>
+bool LockFreeQueue<T, LF_SIZE>::pop(T &data)
 {
 	uint32_t currentMaximumReadIndex;
 	uint32_t currentReadIndex;
@@ -108,10 +108,10 @@ bool LockFreeQueue<ELEM_T, Q_SIZE>::pop(ELEM_T &a_data)
 		}
 
 		// retrieve the data from the queue
-		a_data = m_queue[_countToIndex(currentReadIndex)];
+		data = m_queue[_countToIndex(currentReadIndex)];
 
 		// try to perfrom now the CAS operation on the read index. If we succeed
-		// a_data already contains what m_readIndex pointed to before we
+		// data already contains what m_readIndex pointed to before we
 		// increased it
 		if (m_readIndex.atomicCompareExchange(currentReadIndex, (currentReadIndex + 1)))
 		{
