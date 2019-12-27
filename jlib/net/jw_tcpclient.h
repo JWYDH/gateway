@@ -2,10 +2,11 @@
 
 #include <vector>
 #include <functional>
-#include "jw_socket.h"
 #include "jw_buffer.h"
-#include "../base/jw_thread.h"
-#include "../base/jw_safe_queue.h"
+#include "../api/jw_log.h"
+#include "../api/jw_socket.h"
+#include "../api/jw_lock_queue.h"
+#include "../api/jw_lock_free_queue.h"
 
 class TcpServer;
 
@@ -24,8 +25,8 @@ public:
 	virtual ~TcpClient();
 	TcpClient& operator=(const TcpClient&) = delete;
 	bool Initialize();
-	void AddConvey(SOCKET fd);
-	void DelConvey(SOCKET fd);
+	void AddConvey(socket_t fd);
+	void DelConvey(socket_t fd);
 	void Loop();
 private:
 	fd_set fds_;
@@ -72,7 +73,7 @@ public:
 	void OnRead(std::function<int32_t(TcpClient*, char*, int32_t)> read_callback) { read_callback_ = read_callback; }
 private:
 	int conn_state_;
-	JwSocket socket_;
+	socket_t socket_;
 	bool stoped_;
 	BaseThread thread_;
 	Buffer recv_data_;

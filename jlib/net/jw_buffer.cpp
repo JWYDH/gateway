@@ -1,139 +1,165 @@
 #include "jw_buffer.h"
 #include <string.h>
-#include <stdlib.h>
-#include <assert.h>
-#include <algorithm>
 
-namespace jw
-{
+Buffer::Buffer(int default_size)
+: mem_start_ptr_(nullptr)
+, mem_end_ptr_(nullptr)
+, data_end_ptr_(nullptr)
+, offset_ptr_(nullptr) {
 
-//-------------------------------------------------------------------------------------
-RingBuf::RingBuf(size_t capacity)
-{
-	/* One byte is used for detecting the full condition. */
-	m_buf = (uint8_t *)malloc(capacity);
-	m_end = capacity;
-	reset();
+	mem_start_ptr_ = new char[default_size];
+	data_end_ptr_ = mem_start_ptr_;
+	offset_ptr_ = mem_start_ptr_;
+	mem_end_ptr_ = mem_start_ptr_ + default_size;
 }
 
-//-------------------------------------------------------------------------------------
-RingBuf::~RingBuf()
-{
-	free(this->m_buf);
-}
-
-//-------------------------------------------------------------------------------------
-void RingBuf::_auto_resize(size_t need_size)
-{
-	//auto inc size
-	size_t new_size = 2;
-	while (new_size < need_size)
+Buffer::~Buffer(){
+	if (mem_start_ptr_)
 	{
-		new_size *= 2;
+		delete[] mem_start_ptr_;
 	}
-
-	//copy old data
-	size_t old_size = size();
-	uint8_t *buf = (uint8_t *)malloc(new_size);
-	this->write(buf, old_size);
-
-	//free old buf
-	free(m_buf);
-
-	//reset
-	m_buf = buf;
-	m_end = new_size;
-	m_read = 0;
-	m_write = old_size;
 }
 
-void RingBuf::write(const void *src, size_t count)
+char* Buffer::MemPtr() {
+	return mem_start_ptr_;
+}
+
+char* Buffer::EndPtr() {
+	return mem_end_ptr_;
+}
+
+char* Buffer::DataEndPtr() {
+	return data_end_ptr_;
+}
+
+char* Buffer::OffsetPtr() {
+	return offset_ptr_;
+}
+
+int32_t Buffer::Capacity() {
+	return mem_end_ptr_ - mem_start_ptr_;
+}
+
+int32_t Buffer::AvaliableCapacity() {
+	return mem_end_ptr_ - data_end_ptr_;
+}
+
+int32_t Buffer::Length() {
+	return data_end_ptr_ - mem_start_ptr_;
+}
+
+int32_t Buffer::AvaliableLength() {
+	return data_end_ptr_ - offset_ptr_;
+}
+
+
+void Buffer::SetLength(int32_t length)
 {
-	if (get_free_size() < count)
-	{
-		_auto_resize(size() + count);
+	if (length > (mem_end_ptr_ - mem_start_ptr_)) {
+		ResetSize(length);
 	}
-
-	char *csrc = (char *)src;
-
-	//write data
-	size_t nwritten = 0;
-	while (nwritten != count)
+	data_end_ptr_ = mem_start_ptr_ + length;
+	if (offset_ptr_ > data_end_ptr_)
 	{
-		size_t n = (size_t)std::min((size_t)(m_end - m_write), count - nwritten);
-		memcpy(m_buf + m_write, csrc + nwritten, n);
-		m_write += n;
-		nwritten += n;
+		offset_ptr_ = data_end_ptr_;
+	}
+}
 
-		// wrap
-		assert(m_write <= m_end);
-		if (m_write == m_end)
-		{
-			m_write = 0;
+void Buffer::Seek(int32_t n) {
+	if (n > (mem_end_ptr_ - mem_start_ptr_)){
+		ResetSize(n);
+	}
+	offset_ptr_ = mem_start_ptr_ + n;
+	if (offset_ptr_ > data_end_ptr_)
+	{
+		data_end_ptr_ = offset_ptr_;
+	}
+}
+
+
+void Buffer::AdjustOffset(int32_t adjust_offset)
+{
+	if (offset_ptr_ + adjust_offset > mem_end_ptr_)
+	{
+		int32_t need_size = offset_ptr_ + adjust_offset - mem_end_ptr_;
+		int32_t size = mem_end_ptr_ - mem_start_ptr_ + need_size;
+		ResetSize(size);
+
+		offset_ptr_ = mem_end_ptr_;
+		data_end_ptr_ = offset_ptr_;
+		return;
+	}
+	offset_ptr_ = offset_ptr_ + adjust_offset;
+	if (offset_ptr_ < mem_start_ptr_) {
+		offset_ptr_ = mem_start_ptr_;
+	}
+	if (offset_ptr_ > data_end_ptr_)
+	{
+		data_end_ptr_ = offset_ptr_;
+	}
+}
+
+void Buffer::AdjustDataEnd(uint32_t adjust_offset)
+{
+	if (data_end_ptr_ + adjust_offset > mem_end_ptr_)
+	{
+		int32_t need_size = data_end_ptr_ + adjust_offset - mem_end_ptr_;
+		int32_t size = mem_end_ptr_ - mem_start_ptr_ + need_size;
+		ResetSize(size);
+
+		data_end_ptr_ = offset_ptr_;
+		return;
+	}
+	data_end_ptr_ = data_end_ptr_ + adjust_offset;
+}
+
+int32_t Buffer::ResetSize(int32_t size) {
+	char *tmp_mem_ptr = new char[size];
+	int32_t data_len = data_end_ptr_ - mem_start_ptr_;
+	int32_t offset_len = offset_ptr_ - mem_start_ptr_;
+	memcpy(tmp_mem_ptr, mem_start_ptr_, data_len);
+	delete[] mem_start_ptr_;
+	mem_start_ptr_ = tmp_mem_ptr;
+	mem_end_ptr_ = mem_start_ptr_ + size;
+	data_end_ptr_ = mem_start_ptr_ + data_len;
+	offset_ptr_ = mem_start_ptr_ + offset_len;
+	return size;
+}
+
+int32_t Buffer::WriteBuff(const char* buf, int32_t len) {
+	int32_t avaliable_length = mem_end_ptr_ - data_end_ptr_;
+	if (avaliable_length < len) {
+		int32_t need_size = len - avaliable_length;
+		int32_t size = mem_end_ptr_ - mem_start_ptr_ + need_size;
+		ResetSize(size);
+	}
+	memcpy(data_end_ptr_, buf, len);
+	data_end_ptr_ += len;
+	return len;
+}
+
+int32_t Buffer::ReadBuf(char* buf, int32_t len) {
+	if (!mem_start_ptr_){
+		return 0;
+	}
+	int32_t avaliable_len = data_end_ptr_ - offset_ptr_;
+	if (len > avaliable_len){
+		len = avaliable_len;
+	}
+	if (len > 0){
+		memcpy(buf, offset_ptr_, len);
+		offset_ptr_ += len;
+		if ( (offset_ptr_ - mem_start_ptr_) > (mem_end_ptr_ - mem_start_ptr_)/2 ){
+			int data_len = data_end_ptr_ - offset_ptr_;
+			memcpy(mem_start_ptr_, offset_ptr_, data_len);
+			offset_ptr_ = 0;
+			data_end_ptr_ = mem_start_ptr_ + data_len;
 		}
 	}
+	return len;
 }
 
-size_t RingBuf::read(void *dst, size_t count)
-{
-	size_t bytes_used = size();
-	if (count > bytes_used)
-	{
-		count = bytes_used;
-	}
 
-	char *cdst = (char *)dst;
-	size_t nread = 0;
-	while (nread != count)
-	{
-		size_t n = std::min((size_t)(m_end - m_read), count - nread);
-		memcpy(cdst + nread, m_buf + m_read, n);
-		m_read += n;
-		nread += n;
 
-		assert(m_read <= m_end);
-		// wrap
-		if (m_read == m_end)
-		{
-			m_read = 0;
-		}
-	}
 
-	//reset read and write index to zero
-	if (empty())
-		reset();
-	return count;
-}
 
-size_t RingBuf::copyto(RingBuf *dst, size_t count)
-{
-	size_t bytes_used = size();
-	if (count > bytes_used)
-		count = bytes_used;
-
-	size_t nread = 0;
-	while (nread != count)
-	{
-		size_t n = std::min((size_t)(m_end - m_read), count - nread);
-		dst->read(m_buf + m_read, n);
-		m_read += n;
-		nread += n;
-
-		assert(m_read <= m_end);
-		// wrap
-		if (m_read == m_end)
-		{
-			m_read = 0;
-		}
-	}
-
-	//reset read and write index to zero
-	if (empty())
-	{
-		reset();
-	}
-
-	return count;
-}
-
-} // namespace jw

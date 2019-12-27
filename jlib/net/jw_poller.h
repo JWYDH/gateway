@@ -7,8 +7,14 @@ namespace jw
 // poller functions
 //----------------------
 
-//// create dir
-bool dir_create(const char *dir);
+//// 
+void poller_create();
+
+//// 
+void poller_init();
+
+//// 
+void poller_init();
 
 
 } // namespace jw

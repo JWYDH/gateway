@@ -61,7 +61,7 @@ void TcpClient::Loop() {
 	fd_set fdr;
 	memcpy(&fds, &fds_, sizeof(fds_));
 	memcpy(&fdr, &fdreads_, sizeof(fdreads_));
-	int   nRetAll = select(0/*window��Ϊ0*/, &fdr, NULL, NULL, NULL);//�������ó�ʱ��selectΪ����  
+	int   nRetAll = select(0/*window��Ϊ0*/, &fdr, NULL, NULL, NULL);
 	if (nRetAll > 0) {
 		for (uint32_t i = 0; i < fds.fd_count; ++i) {
 			auto fd = fds.fd_array[i];

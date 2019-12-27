@@ -2,86 +2,33 @@
 
 #include <stdint.h>
 
-///
-/// A byte-addressable ring buffer FIFO implementation.
-///
-///    +-------------------+------------------+------------------+
-///    |  writable bytes   |  readable bytes  |  writable bytes  |
-///    |                   |     (CONTENT)    |                  |
-///    +-------------------+------------------+------------------+
-///    |                   |                  |                  |
-/// m_beginPoint <=     m_readIndex   <=   m_writeIndex    <=  m_endIndex
-///
-///  wrap
-///    +-------------------+------------------+------------------+
-///    |  readable bytes   |  writable bytes  |  readable bytes  |
-///    |  (CONTENT PART2)  |                  | (CONTENT PART1)  |
-///    +-------------------+------------------+------------------+
-///    |                   |                  |                  |
-/// m_beginPoint <=     m_writeIndex   <=   m_readIndex   <=  m_endIndex
-///
-
-namespace jw
-{
-class RingBuf
-{
+struct Buffer{
+	
 public:
-	/// return the size of the internal buffer, in bytes.
-	size_t size(void) const
-	{
-		return (m_write >= m_read) ? (m_write - m_read) : (m_end - m_read + m_write);
-	}
+	Buffer(int default_size = 1024);
+	virtual ~Buffer();
 
-	/// reset a ring buffer to its initial state (empty).
-	void reset(void)
-	{
-		m_write = m_read = 0;
-	}
+	char *MemPtr();
+	char *EndPtr();
+	char *DataEndPtr();
+	char *OffsetPtr();
+	
+	int32_t Capacity();
+	int32_t AvaliableCapacity();
+	int32_t Length();
+	int32_t AvaliableLength();
 
-	/// return the usable capacity of the ring buffer, in bytes.
-	size_t capacity(void) const
-	{
-		return m_end - 1;
-	}
+	void SetLength(int32_t length);
+	void Seek(int32_t n);
+	void AdjustOffset(int32_t adjust_offset);
+	void AdjustDataEnd(uint32_t adjust_offset);
 
-	//// return the number of free/available bytes in the ring buffer.
-	size_t get_free_size(void) const
-	{
-		return (m_write >= m_read) ? (m_end - m_write + m_read) : (m_read - m_write);
-	}
-
-	//// return is empty
-	bool empty(void) const
-	{
-		return (m_write == m_read);
-	}
-
-	/// return is full
-	bool full(void) const
-	{
-		return get_free_size() == 0;
-	}
-
-	////  copy n bytes from a contiguous memory area into the ring buffer
-	void write(const void *src, size_t count);
-
-	//// copy n bytes from the ring buffer into a contiguous memory area dst
-	size_t read(void *dst, size_t count);
-
-	//// copy data to another ringbuf dst
-	size_t copyto(RingBuf *dst, size_t count);
-
-public:
-	RingBuf(size_t capacity = 1024);
-	~RingBuf();
-
+	int32_t ResetSize(int32_t size);
+	int32_t ReadBuf(char* buf, int32_t len);
+	int32_t WriteBuff(const char* buf, int32_t len);
 private:
-	uint8_t *m_buf;
-	size_t m_end;
-	size_t m_read;
-	size_t m_write;
-
-private:
-	void _auto_resize(size_t need_size);
+	char *mem_start_ptr_;
+	char *mem_end_ptr_;
+	char *data_end_ptr_;
+	char *offset_ptr_;
 };
-} // namespace jw
