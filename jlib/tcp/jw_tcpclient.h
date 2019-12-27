@@ -35,11 +35,7 @@ public:
 	TcpClient &operator=(const TcpClient &) = delete;
 
 private:
-	fd_set fds_;
-	fd_set fdreads_;
-	fd_set fdwrites_;
-
-private:
+	void _read_thread_func();
 	virtual void HandleRead();
 
 	void MyMethod()
@@ -59,9 +55,8 @@ private:
 			}
 		}
 	}
-
+	void _write_thread_func();
 	virtual bool HandleWrite();
-	virtual void HandleError();
 
 	void Connected();
 	void Disconnected();

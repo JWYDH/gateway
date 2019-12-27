@@ -6,9 +6,6 @@ TcpClient::TcpClient()
 {
 	stoped_ = false;
 
-	FD_ZERO(&fds_);
-	FD_ZERO(&fdreads_);
-
 	memset(&local_addr_, 0, sizeof(local_addr_));
 	memset(&remote_addr_, 0, sizeof(remote_addr_));
 
@@ -36,23 +33,19 @@ TcpClient::~TcpClient()
 	}
 }
 
-void TcpClient::Loop()
+void TcpClient::_read_thread_func()
 {
 	fd_set fds;
-	fd_set fdr;
-	memcpy(&fds, &fds_, sizeof(fds_));
-	memcpy(&fdr, &fdreads_, sizeof(fdreads_));
-	int nRetAll = select(0 /*window¿ÉÎª0*/, &fdr, NULL, NULL, NULL); //Èô²»ÉèÖÃ³¬Ê±ÔòselectÎª×èÈû
+	FD_ZERO(&fds);
+	FD_SET(socket_, &fds);
+	int nRetAll = select(socket_ + 1, &fds, NULL, NULL, NULL);
 	if (nRetAll > 0)
 	{
-		for (uint32_t i = 0; i < fds.fd_count; ++i)
+		if (FD_ISSET(socket_, &fds))
 		{
-			auto fd = fds.fd_array[i];
-			if (FD_ISSET(fd, &fdr))
-			{
-				HandleRead();
-			}
-		}
+			
+
+		} // end if break;
 	}
 	else if (nRetAll == 0)
 	{
@@ -126,25 +119,22 @@ void TcpClient::Connected()
 	jw::set_nonblock(socket_, true);
 	jw::set_recv_buf_size(socket_, BUFF_SIZE::RECV_BUF_SIZE);
 	jw::set_send_buf_size(socket_, BUFF_SIZE::SEND_BUF_SIZE);
-	JW_LOG(LL_INFO, "OnConnected fd=%d, %s:%d ========= %s:%d\n",
-		   (int)socket_,
+	JW_LOG(LL_INFO, "connected fd=%d, %s:%d ========= %s:%d\n",
+		   socket_,
 		   inet_ntoa(local_addr_.sin_addr), ntohs(local_addr_.sin_port),
 		   inet_ntoa(remote_addr_.sin_addr), ntohs(remote_addr_.sin_port));
 	connected_callback_(this);
-	FD_SET(socket_, &fds_);
-	FD_SET(socket_, &fdreads_);
 }
 
 void TcpClient::Disconnected()
 {
-	FD_CLR(socket_, &fds_);
-	FD_CLR(socket_, &fdreads_);
 
-	conn_state_ = TcpClient::CONNSTATE_CLOSED;
-	JW_LOG(LL_INFO, "OnDisconnected fd=%d, %s:%d ========= %s:%d\n",
-		   (int)socket_, inet_ntoa(local_addr_.sin_addr), ntohs(local_addr_.sin_port),
-		   inet_ntoa(remote_addr_.sin_addr), ntohs(remote_addr_.sin_port));
 	disconnected_callback_(this);
+	conn_state_ = TcpClient::CONNSTATE_CLOSED;
+	JW_LOG(LL_INFO, "disconnected fd=%d, %s:%d ========= %s:%d\n",
+		   socket_, inet_ntoa(local_addr_.sin_addr), ntohs(local_addr_.sin_port),
+		   inet_ntoa(remote_addr_.sin_addr), ntohs(remote_addr_.sin_port));
+
 	jw::close_socket(socket_)
 }
 
@@ -253,11 +243,6 @@ bool TcpClient::HandleWrite()
 		printf("È«·¢ËÍ³É¹¦\n");
 	}
 	return false;
-}
-
-void TcpClient::HandleError()
-{
-	printf("TcpConn HandleError\n");
 }
 
 void TcpClient::DoWrite(const char *buf, int32_t len)
