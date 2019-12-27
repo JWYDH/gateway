@@ -1,5 +1,6 @@
 #pragma once
 
+#include <errno.h>
 #include <vector>
 #include <functional>
 #include "../core/jw_thread.h"
@@ -9,10 +10,9 @@
 #include "../core/jw_lock_queue.h"
 #include "../core/jw_lock_free_queue.h"
 
-#define RECV_ONCV_SIZE 1024
-#define RECV_MAX_SIZE 1024 * 1024 * 8
-#define RECV_BUF_SIZE 1024 * 1024
-#define SEND_BUF_SIZE 1024 * 1024
+
+namespace jw
+{
 class TcpClient
 {
 public:
@@ -21,12 +21,25 @@ public:
 		CONNSTATE_CLOSED,
 		CONNSTATE_CONNECTED
 	};
+	enum BUFF_SIZE
+	{
+		RECV_ONCV_SIZE = 1024,
+		RECV_MAX_SIZE = 1024 * 1024 * 8,
+		RECV_BUF_SIZE = 1024 * 1024,
+		SEND_BUF_SIZE = 1024 * 1024
+	};
 
 public:
 	TcpClient();
 	virtual ~TcpClient();
 	TcpClient &operator=(const TcpClient &) = delete;
-public:
+
+private:
+	fd_set fds_;
+	fd_set fdreads_;
+	fd_set fdwrites_;
+
+private:
 	virtual void HandleRead();
 
 	void MyMethod()
@@ -50,34 +63,37 @@ public:
 	virtual bool HandleWrite();
 	virtual void HandleError();
 
+	void Connected();
+	void Disconnected();
+
+public:
 	bool Start(const char *ip, const short port);
 	void Stop();
 
-public:
-	void Connected();
-	void Disconnected();
-	int GetConnState() { return conn_state_; }
-	JwSocket &GetSocket() { return socket_; }
+	int ConnState() { return conn_state_; }
 	void DoWrite(const char *buf, int32_t len);
-	void Close();
 
 	void OnConnected(std::function<void(TcpClient *)> connected_callback) { connected_callback_ = connected_callback; }
 	void OnDisconnected(std::function<void(TcpClient *)> disconnected_callback) { disconnected_callback_ = disconnected_callback; }
 	void OnRead(std::function<int32_t(TcpClient *, char *, int32_t)> read_callback) { read_callback_ = read_callback; }
 
 private:
-	int conn_state_;
-	socket_t socket_;
 	bool stoped_;
-	BaseThread thread_;
-	Buffer recv_data_;
-	BaseThread write_thread_;
-	LockQueue<Buffer *> inter_msg_;
-	//std::vector<Buffer*> proc_inter_msg_;
+	thread_t thread_;
+	thread_t write_thread_;
 
-	std::vector<Buffer *> free_data_;
-	std::vector<Buffer *> send_data_;
+	socket_t socket_;
+	int conn_state_;
+	sockaddr_in local_addr_;
+	sockaddr_in remote_addr_;
+
+	Buffer recv_data_;
+	LockQueue<Buffer *> write_msg_;
+	std::list<Buffer *> send_data_;
+
 	std::function<void(TcpClient *)> connected_callback_;
 	std::function<void(TcpClient *)> disconnected_callback_;
 	std::function<int32_t(TcpClient *, char *, int32_t)> read_callback_;
 };
+
+} // namespace jw

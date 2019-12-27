@@ -39,6 +39,28 @@ void close_socket(socket_t s)
 	}
 }
 
+bool set_recv_buf_size(socket_t s, int size);
+{
+	if (SOCKET_ERROR == ::setsockopt(s, SOL_SOCKET, SO_RCVBUF, (char*)&size, sizeof(size)))
+	{
+		JW_LOG(LL_ERROR, "set_recv_buf_size, err=%d", get_lasterror());
+		return false;
+	}
+	return true;
+}
+
+
+bool set_send_buf_size(socket_t s, int size);
+{
+	if (SOCKET_ERROR == ::setsockopt(s, SO_SNDBUF, SO_RCVBUF, (char*)&size, sizeof(size)))
+	{
+		JW_LOG(LL_ERROR, "set_send_buf_size, err=%d", get_lasterror());
+		return false;
+	}
+	return true;
+}
+
+
 bool set_nonblock(socket_t s, bool enable)
 {
 

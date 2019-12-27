@@ -14,6 +14,7 @@ class LockQueue {
 	bool pop(T *v);
 	int32_t size();
 	bool swap(std::list<T> &items);
+	bool append(std::list<T>& items);
 private:
 	std::list<T> items_;
 	mutex_t *lock_;
@@ -44,6 +45,18 @@ template <typename T>
 bool LockQueue<T>::swap(std::list<T> &items) {
 	jw::auto_mutex(lock_);
 	items.swap(items_);
+	return true;
+}
+
+template <typename T>
+bool LockQueue<T>::append(std::list<T>& items) {
+	jw::auto_mutex(lock_);
+
+	for (auto it = items_.begin(); it != items_.end();)
+	{
+		items.push_back(std::move(*it));
+		it = items_.erase(it);
+	}
 	return true;
 }
 

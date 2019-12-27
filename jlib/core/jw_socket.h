@@ -37,10 +37,10 @@ socket_t create_socket(void);
 void close_socket(socket_t s);
 
 /// set_recv_buf_size
-bool set_recv_buf_size(int size);
+bool set_recv_buf_size(socket_t s, int size);
 
 /// set_send_buf_size
-bool set_send_buf_size(int size);
+bool set_send_buf_size(socket_t s, int size);
 
 /// enable/disable socket non-block mode
 bool set_nonblock(socket_t s, bool enable);
