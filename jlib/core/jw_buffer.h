@@ -2,7 +2,7 @@
 
 #include <stdint.h>
 
-struct Buffer{
+class Buffer{
 	
 public:
 	Buffer(int default_size = 1024);
