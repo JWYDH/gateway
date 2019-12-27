@@ -3,10 +3,10 @@
 #include <vector>
 #include <functional>
 #include "jw_buffer.h"
-#include "../api/jw_log.h"
-#include "../api/jw_socket.h"
-#include "../api/jw_lock_queue.h"
-#include "../api/jw_lock_free_queue.h"
+#include "../core/jw_log.h"
+#include "../core/jw_socket.h"
+#include "../core/jw_lock_queue.h"
+#include "../core/jw_lock_free_queue.h"
 
 class TcpServer;
 
