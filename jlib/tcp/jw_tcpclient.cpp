@@ -57,9 +57,62 @@ void TcpClient::_read_thread_func()
 	}
 }
 
+void TcpClient::_write_thread_func()
+{
+	write_msg_.append(send_data_);
+	if (send_data_.empty())
+	{
+		return true;
+	}
+	int32_t send_count = 0;
+	for (auto it = send_data_.begin(); it != send_data_.end();)
+	{
+		auto &data = *it;
+		int32_t n = 0;
+		n = socket_.Send(data->OffsetPtr(), data->AvaliableLength());
+		if (n > 0)
+		{
+			send_count += n;
+			data->AdjustOffset(n);
+			if (data->AvaliableLength() == 0)
+			{
+				delete data;
+				it = send_data_.erase(it);
+				printf("·¢ËÍÒ»¸ö´ó°ü³É¹¦\n");
+			}
+			else
+			{
+				printf("Êý¾ÝÌ«´ó,¾¡¿ÉÄÜ¿½±´ÁË%dÊý¾Ýµ½·¢ËÍ»º³å\n", send_count);
+				break;
+			}
+		}
+		else if (n <= 0)
+		{
+			int error = errno;
+			if (error == EINTR)
+			{
+				break;
+			}
+			else if (error == EAGAIN || error == EWOULDBLOCK)
+			{
+				break;
+			}
+			else
+			{
+				printf("write expect %d\n", error);
+				break;
+			}
+		}
+	}
+	if (send_data_.empty())
+	{
+		printf("È«·¢ËÍ³É¹¦\n");
+	}
+	return false;
+}
+
 bool TcpClient::Start(const char *ip, const short port)
 {
-	socket_ = jw::create_socket();
 	auto thread_func = [this, ip, port]() {
 		while (!stoped_)
 		{
@@ -69,10 +122,7 @@ bool TcpClient::Start(const char *ip, const short port)
 			}
 			else
 			{
-				if (!socket_.Create())
-				{
-					printf("Disconnected error!%d\n", errno);
-				}
+				socket_ = jw::create_socket();
 
 				if (socket_.Connect(ip, port))
 				{
@@ -189,60 +239,6 @@ void TcpClient::HandleRead()
 			}
 		}
 	}
-}
-
-bool TcpClient::HandleWrite()
-{
-	write_msg_.append(send_data_);
-	if (send_data_.empty())
-	{
-		return true;
-	}
-	int32_t send_count = 0;
-	for (auto it = send_data_.begin(); it != send_data_.end();)
-	{
-		auto &data = *it;
-		int32_t n = 0;
-		n = socket_.Send(data->OffsetPtr(), data->AvaliableLength());
-		if (n > 0)
-		{
-			send_count += n;
-			data->AdjustOffset(n);
-			if (data->AvaliableLength() == 0)
-			{
-				delete data;
-				it = send_data_.erase(it);
-				printf("·¢ËÍÒ»¸ö´ó°ü³É¹¦\n");
-			}
-			else
-			{
-				printf("Êý¾ÝÌ«´ó,¾¡¿ÉÄÜ¿½±´ÁË%dÊý¾Ýµ½·¢ËÍ»º³å\n", send_count);
-				break;
-			}
-		}
-		else if (n <= 0)
-		{
-			int error = errno;
-			if (error == EINTR)
-			{
-				break;
-			}
-			else if (error == EAGAIN || error == EWOULDBLOCK)
-			{
-				break;
-			}
-			else
-			{
-				printf("write expect %d\n", error);
-				break;
-			}
-		}
-	}
-	if (send_data_.empty())
-	{
-		printf("È«·¢ËÍ³É¹¦\n");
-	}
-	return false;
 }
 
 void TcpClient::DoWrite(const char *buf, int32_t len)

@@ -36,7 +36,6 @@ public:
 
 private:
 	void _read_thread_func();
-	virtual void HandleRead();
 
 	void MyMethod()
 	{
@@ -56,7 +55,6 @@ private:
 		}
 	}
 	void _write_thread_func();
-	virtual bool HandleWrite();
 
 	void Connected();
 	void Disconnected();
