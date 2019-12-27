@@ -63,13 +63,13 @@ public:
 	}
 
 	////  copy n bytes from a contiguous memory area into the ring buffer
-	void read(const void *src, size_t count);
+	void write(const void *src, size_t count);
 
 	//// copy n bytes from the ring buffer into a contiguous memory area dst
-	size_t write(void *dst, size_t count);
+	size_t read(void *dst, size_t count);
 
 	//// copy data to another ringbuf dst
-	//size_t copyto(RingBuf *dst, size_t count);
+	size_t copyto(RingBuf *dst, size_t count);
 
 public:
 	RingBuf(size_t capacity = 1024);

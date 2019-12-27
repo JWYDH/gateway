@@ -1,6 +1,8 @@
 #include "jw_buffer.h"
 #include <string.h>
 #include <stdlib.h>
+#include <assert.h>
+#include <algorithm>
 
 namespace jw
 {
@@ -25,7 +27,8 @@ void RingBuf::_auto_resize(size_t need_size)
 {
 	//auto inc size
 	size_t new_size = 2;
-	while (new_size < need_size){
+	while (new_size < need_size)
+	{
 		new_size *= 2;
 	}
 
@@ -44,7 +47,7 @@ void RingBuf::_auto_resize(size_t need_size)
 	m_write = old_size;
 }
 
-void RingBuf::read(const void *src, size_t count)
+void RingBuf::write(const void *src, size_t count)
 {
 	if (get_free_size() < count)
 	{
@@ -57,35 +60,43 @@ void RingBuf::read(const void *src, size_t count)
 	size_t nwritten = 0;
 	while (nwritten != count)
 	{
-		size_t n = (size_t)MIN((size_t)(m_end - m_write), count - nwritten);
+		size_t n = (size_t)std::min((size_t)(m_end - m_write), count - nwritten);
 		memcpy(m_buf + m_write, csrc + nwritten, n);
 		m_write += n;
 		nwritten += n;
 
-		// wrap?
-		if (m_write >= m_end)
+		// wrap
+		assert(m_write <= m_end);
+		if (m_write == m_end)
+		{
 			m_write = 0;
+		}
 	}
 }
 
-size_t RingBuf::write(void *dst, size_t count)
+size_t RingBuf::read(void *dst, size_t count)
 {
 	size_t bytes_used = size();
 	if (count > bytes_used)
+	{
 		count = bytes_used;
+	}
 
 	char *cdst = (char *)dst;
 	size_t nread = 0;
 	while (nread != count)
 	{
-		size_t n = MIN((size_t)(m_end - m_read), count - nread);
+		size_t n = std::min((size_t)(m_end - m_read), count - nread);
 		memcpy(cdst + nread, m_buf + m_read, n);
 		m_read += n;
 		nread += n;
 
+		assert(m_read <= m_end);
 		// wrap
-		if (m_read >= m_end)
+		if (m_read == m_end)
+		{
 			m_read = 0;
+		}
 	}
 
 	//reset read and write index to zero
@@ -94,26 +105,34 @@ size_t RingBuf::write(void *dst, size_t count)
 	return count;
 }
 
-//-------------------------------------------------------------------------------------
 size_t RingBuf::copyto(RingBuf *dst, size_t count)
 {
-	// size_t bytes_used = size();
-	// if (count > bytes_used)
-	// 	count = bytes_used;
+	size_t bytes_used = size();
+	if (count > bytes_used)
+		count = bytes_used;
 
-	// size_t nread = 0;
-	// while (nread != count) {
-	// 	size_t n = MIN((size_t)(m_end - m_read), count - nread);
-	// 	dst->memcpy_into(m_buf + m_read, n);
-	// 	m_read += n;
-	// 	nread += n;
+	size_t nread = 0;
+	while (nread != count)
+	{
+		size_t n = std::min((size_t)(m_end - m_read), count - nread);
+		dst->read(m_buf + m_read, n);
+		m_read += n;
+		nread += n;
 
-	// 	// wrap
-	// 	if (m_read >= m_end) m_read = 0;
-	// }
+		assert(m_read <= m_end);
+		// wrap
+		if (m_read == m_end)
+		{
+			m_read = 0;
+		}
+	}
 
-	// //reset read and write index to zero
-	// if (empty()) reset();
+	//reset read and write index to zero
+	if (empty())
+	{
+		reset();
+	}
+
 	return count;
 }
 
