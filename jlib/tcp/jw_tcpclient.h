@@ -6,7 +6,6 @@
 #include "../core/jw_thread.h"
 #include "../core/jw_log.h"
 #include "../core/jw_socket.h"
-#include "../core/jw_buffer.h"
 #include "../core/jw_ring_buffer.h"
 #include "../core/jw_lock_queue.h"
 #include "../core/jw_lock_free_queue.h"
@@ -63,8 +62,8 @@ private:
 
 	RingBuf recv_data_;
 
-	LockQueue<Buffer *> send_data_pending;
-	std::list<Buffer *> send_data_;
+	LockQueue<RingBuf *> send_data_pending;
+	std::list<RingBuf *> send_data_;
 
 	std::function<void(TcpClient *)> connected_callback_;
 	std::function<void(TcpClient *)> disconnected_callback_;

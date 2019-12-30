@@ -126,49 +126,36 @@ void TcpClient::_write_thread_func()
 		jw::thread_sleep(100);
 		return;
 	}
-	int32_t send_count = 0;
 	for (auto it = send_data_.begin(); it != send_data_.end();)
 	{
 		auto &data = *it;
 		int32_t n = 0;
-		n = socket_.Send(data->OffsetPtr(), data->AvaliableLength());
+		n = data->write_socket(socket_);
 		if (n > 0)
 		{
-			send_count += n;
-			data->AdjustOffset(n);
-			if (data->AvaliableLength() == 0)
+			JW_LOG(LL_INFO, "send = %d\n", n);
+			if (data->size() == 0)
 			{
 				delete data;
 				it = send_data_.erase(it);
-				printf("·¢ËÍÒ»¸ö´ó°ü³É¹¦\n");
 			}
 			else
 			{
-				printf("Êý¾ÝÌ«´ó,¾¡¿ÉÄÜ¿½±´ÁË%dÊý¾Ýµ½·¢ËÍ»º³å\n", send_count);
 				break;
 			}
 		}
 		else if (n <= 0)
 		{
-			int error = errno;
-			if (error == EINTR)
-			{
-				break;
-			}
-			else if (error == EAGAIN || error == EWOULDBLOCK)
+			if (errno == EAGAIN || errno == EWOULDBLOCK || errno == EINPROGRESS)
 			{
 				break;
 			}
 			else
 			{
-				printf("write expect %d\n", error);
+				JW_LOG(LL_INFO, "send data fail, may be perr unnormal disconnect\n");
 				break;
 			}
 		}
-	}
-	if (send_data_.empty())
-	{
-		printf("È«·¢ËÍ³É¹¦\n");
 	}
 }
 
@@ -238,8 +225,8 @@ void TcpClient::DoWrite(const char *buf, int32_t len)
 	{
 		return;
 	}
-	Buffer *data = new Buffer();
-	data->WriteBuff(buf, len);
+	RingBuf *data = new RingBuf();
+	data->write(buf, len);
 	send_data_pending.push(std::move(data));
 }
 
