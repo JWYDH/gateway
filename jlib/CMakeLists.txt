@@ -26,6 +26,8 @@ set(SOURCE_FILES
 	"./core/jw_thread.cpp"
 	"./core/jw_log.cpp"
 	"./core/jw_socket.cpp"
+	"./core/jw_ring_buffer.cpp"
+	"./net/jw_tcp_client.cpp"
 	)
 
 set(CMAKE_CXX_COMPILER "g++")
