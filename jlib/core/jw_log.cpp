@@ -97,7 +97,7 @@ void log_file(LOG_LEVEL level, const char *message, ...)
 	char time_buf[32] = {0};
 
 	time_t now = jw::local_time_now();
-	jw::time_tostring(now, time_buf, 32, "%s%Y%m%d");
+	jw::time_tostring(now, time_buf, 32, "%Y%m%d");
 	snprintf(file_name, LOG_FILENAME_MAX, "%s_%s", thefile->process_name_, time_buf);
 
 	FILE *fp = fopen(file_name, "a");

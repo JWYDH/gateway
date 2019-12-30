@@ -10,7 +10,7 @@ namespace jw
 bool dir_create(const char *dir)
 {
 	bool ret = false;
-	if (dir_create(dir))
+	if (file_access(dir))
 	{
 		ret = true;
 	}

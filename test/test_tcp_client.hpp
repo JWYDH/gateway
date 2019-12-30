@@ -16,7 +16,7 @@ int test_tcp_client()
 		}
 	});
 
-	client.Start("10.10.14.192", 8000);
+	client.Start("10.10.14.48", 8000);
 	getchar();
 	return 0;
 }
