@@ -13,7 +13,7 @@ configure_file (
 #设置动态链接库的目录，以及头文件目录
 include_directories(
 	.
-	./api)
+	./)
 link_directories(
 	${PROJECT_SOURCE_DIR}/lib)
 
@@ -27,7 +27,7 @@ set(SOURCE_FILES
 	"./core/jw_log.cpp"
 	"./core/jw_socket.cpp"
 	"./core/jw_ring_buffer.cpp"
-	"./net/jw_tcp_client.cpp"
+	"./tcp/jw_tcp_client.cpp"
 	)
 
 set(CMAKE_CXX_COMPILER "g++")

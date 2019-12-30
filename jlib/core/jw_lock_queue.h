@@ -5,7 +5,7 @@
 
 #include "jw_thread.h"
 
-namespace
+namespace jw
 {
 
 template <typename T>
@@ -22,20 +22,20 @@ public:
 
 private:
 	std::list<T> items_;
-	mutex_t *lock_;
+	mutex_t lock_;
 };
 
 template <typename T>
 int32_t LockQueue<T>::size()
 {
-	jw::auto_mutex(lock_);
+	jw::auto_mutex lock(lock_);
 	return items_.size();
 }
 
 template <typename T>
 bool LockQueue<T>::push(T &&v)
 {
-	jw::auto_mutex(lock_);
+	jw::auto_mutex lock(lock_);
 	items_.push_back(std::move(v));
 	return true;
 }
@@ -43,7 +43,7 @@ bool LockQueue<T>::push(T &&v)
 template <typename T>
 bool LockQueue<T>::pop(T *v)
 {
-	jw::auto_mutex(lock_);
+	jw::auto_mutex lock(lock_);
 	*v = std::move(items_.front());
 	items_.pop_front();
 	return true;
@@ -52,7 +52,7 @@ bool LockQueue<T>::pop(T *v)
 template <typename T>
 bool LockQueue<T>::swap(std::list<T> &items)
 {
-	jw::auto_mutex(lock_);
+	jw::auto_mutex lock(lock_);
 	items.swap(items_);
 	return true;
 }
@@ -60,7 +60,7 @@ bool LockQueue<T>::swap(std::list<T> &items)
 template <typename T>
 bool LockQueue<T>::append(std::list<T> &items)
 {
-	jw::auto_mutex(lock_);
+	jw::auto_mutex lock(lock_);
 
 	for (auto it = items_.begin(); it != items_.end();)
 	{

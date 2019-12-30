@@ -81,7 +81,7 @@ void log_file(LOG_LEVEL level, const char *message, ...)
 
 	LogFile *thefile = LogFile::instance();
 
-	jw::auto_mutex(thefile->lock_);
+	jw::auto_mutex lock(thefile->lock_);
 
 	//check dir
 	if (!jw::file_access(LOG_PATH))

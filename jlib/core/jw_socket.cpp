@@ -39,7 +39,7 @@ void close_socket(socket_t s)
 	}
 }
 
-bool set_recv_buf_size(socket_t s, int size);
+bool set_recv_buf_size(socket_t s, int size)
 {
 	if (SOCKET_ERROR == ::setsockopt(s, SOL_SOCKET, SO_RCVBUF, (char*)&size, sizeof(size)))
 	{
@@ -50,7 +50,7 @@ bool set_recv_buf_size(socket_t s, int size);
 }
 
 
-bool set_send_buf_size(socket_t s, int size);
+bool set_send_buf_size(socket_t s, int size)
 {
 	if (SOCKET_ERROR == ::setsockopt(s, SO_SNDBUF, SO_RCVBUF, (char*)&size, sizeof(size)))
 	{
@@ -110,8 +110,6 @@ bool listen(socket_t s)
 
 bool connect(socket_t s, const struct sockaddr_in &addr)
 {
-
-	int ret = connect(socket_fd_, (struct sockaddr*)&svraddr, sizeof(svraddr));
 	if (::connect(s, (const sockaddr *)&addr, sizeof(addr)) == SOCKET_ERROR)
 	{
 		int lasterr = get_lasterror();
