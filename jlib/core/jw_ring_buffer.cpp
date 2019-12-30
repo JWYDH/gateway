@@ -7,7 +7,6 @@
 namespace jw
 {
 
-//-------------------------------------------------------------------------------------
 RingBuf::RingBuf(size_t capacity)
 {
 	/* One byte is used for detecting the full condition. */
@@ -16,13 +15,11 @@ RingBuf::RingBuf(size_t capacity)
 	reset();
 }
 
-//-------------------------------------------------------------------------------------
 RingBuf::~RingBuf()
 {
 	free(this->m_buf);
 }
 
-//-------------------------------------------------------------------------------------
 void RingBuf::_auto_resize(size_t need_size)
 {
 	//auto inc size
@@ -65,7 +62,6 @@ void RingBuf::write(const void *src, size_t count)
 		m_write += n;
 		nwritten += n;
 
-		// wrap
 		assert(m_write <= m_end);
 		if (m_write == m_end)
 		{
@@ -92,7 +88,7 @@ size_t RingBuf::read(void *dst, size_t count)
 		nread += n;
 
 		assert(m_read <= m_end);
-		// wrap
+
 		if (m_read == m_end)
 		{
 			m_read = 0;
@@ -120,7 +116,7 @@ size_t RingBuf::copyto(RingBuf *dst, size_t count)
 		nread += n;
 
 		assert(m_read <= m_end);
-		// wrap
+
 		if (m_read == m_end)
 		{
 			m_read = 0;
@@ -134,6 +130,58 @@ size_t RingBuf::copyto(RingBuf *dst, size_t count)
 	}
 
 	return count;
+}
+
+ssize_t RingBuf::read_socket(socket_t fd)
+{
+	size_t count = get_free_size();
+	if (count <= 0)
+	{
+		_auto_resize(size() + size());
+		count = get_free_size();
+	}
+
+	ssize_t n = (ssize_t)std::min((size_t)(m_end - m_write), count);
+	ssize_t len = jw::read(fd, m_buf + m_write, (ssize_t)n);
+
+	if (len > 0)
+	{
+		assert(m_write <= m_end);
+		m_write += len;
+		if (m_write == m_end)
+		{
+			m_write = 0;
+		}
+	}
+
+	return len;
+}
+
+ssize_t RingBuf::write_socket(socket_t fd)
+{
+	assert(!empty());
+
+	size_t count = size();
+
+	size_t n = std::min((size_t)(m_end - m_read), count);
+
+	ssize_t len = jw::write(fd, (const char *)m_buf + m_read, (ssize_t)n);
+
+	if (len > 0)
+	{
+		assert(m_read <= m_end);
+		m_read += len;
+		if (m_read == m_end)
+		{
+			m_read = 0;
+		}
+	}
+
+	//reset read and write index to zero
+	if (empty())
+		reset();
+
+	return (ssize_t)len;
 }
 
 } // namespace jw

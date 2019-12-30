@@ -59,11 +59,7 @@ thread_t thread_create(thread_function func, void *param, const char *name)
 
 void thread_sleep(int32_t msec)
 {
-	//::usleep(msec);
-	struct timeval time;
-	time.tv_sec = msec / 1000;
-	time.tv_usec = msec % 1000 * 1000;
-	select(0, NULL, NULL, NULL, &time);
+	::usleep(msec);
 }
 
 void thread_join(thread_t thread)

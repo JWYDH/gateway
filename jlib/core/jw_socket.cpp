@@ -110,6 +110,8 @@ bool listen(socket_t s)
 
 bool connect(socket_t s, const struct sockaddr_in &addr)
 {
+
+	int ret = connect(socket_fd_, (struct sockaddr*)&svraddr, sizeof(svraddr));
 	if (::connect(s, (const sockaddr *)&addr, sizeof(addr)) == SOCKET_ERROR)
 	{
 		int lasterr = get_lasterror();

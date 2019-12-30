@@ -1,6 +1,7 @@
 #pragma once
 
 #include <stdint.h>
+#include "../core/jw_socket.h"
 
 ///
 /// A byte-addressable ring buffer FIFO implementation.
@@ -70,6 +71,16 @@ public:
 
 	//// copy data to another ringbuf dst
 	size_t copyto(RingBuf *dst, size_t count);
+
+	//// call read on the socket descriptor(fd), using the ring buffer rb as the 
+	//// destination buffer for the read, and read as more data as impossible data.
+	//// set extra_read to false if you don't want expand this ringbuf
+	ssize_t read_socket(socket_t fd);
+
+	//// call write on the socket descriptor(fd), using the ring buffer rb as the 
+	//// source buffer for writing, In Linux platform, it will only call writev
+	//// once, and may return a short count.
+	ssize_t write_socket(socket_t fd);
 
 public:
 	RingBuf(size_t capacity = 1024);
