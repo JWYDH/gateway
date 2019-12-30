@@ -1,0 +1,35 @@
+{
+	"version": "0.2.0",
+	"configurations": [
+		{
+			"name": "gdb Remote Launch",
+			"type": "cppdbg",
+			"request": "launch",
+			"program": "/root/libjw/out/test",
+			"stopAtEntry": true,
+			"environment": [],
+			"externalConsole": false,
+			"MIMode": "gdb",
+			"miDebuggerPath": "gdb",
+			"miDebuggerArgs": "gdb",
+			"linux": {
+				"MIMode": "gdb",
+				"miDebuggerPath": "/usr/bin/gdb",
+				"miDebuggerServerAddress": "10.10.14.70:6666",
+			},
+			"logging": {
+				"moduleLoad": false,
+				"engineLogging": false,
+				"trace": false
+			},
+			"setupCommands": [
+				{
+					"description": "Enable pretty-printing for gdb",
+					"text": "-enable-pretty-printing",
+					"ignoreFailures": true
+				}
+			],
+			"cwd": "${workspaceFolder}",
+		}
+	]
+}
