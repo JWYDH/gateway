@@ -17,6 +17,11 @@ include_directories(
 link_directories(
 	${PROJECT_SOURCE_DIR}/lib)
 
+# 库文件集合
+set(LIBRARY_FILES
+	pthread
+	)
+
 
 # 将源添加到此项目的可执行文件。
 set(SOURCE_FILES
@@ -40,4 +45,5 @@ SET(EXECUTABLE_OUTPUT_PATH ${CMAKE_SOURCE_DIR}/out)
 SET(LIBRARY_OUTPUT_PATH ${CMAKE_SOURCE_DIR}/out)
 
 add_library(jlib STATIC ${SOURCE_FILES})
+target_link_libraries(jlib ${LIBRARY_FILES})
 

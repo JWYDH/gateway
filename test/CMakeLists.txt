@@ -5,29 +5,24 @@ project ("test")
 #设置头文件目录
 include_directories(
 	../jlib)
-#    ../jlib/base
-#	../jlib/encrypt
-#	../jlib/log
-#	../jlib/net)
 
 #设置动态链接库目录
 link_directories(
-    ../jlib/lib)
+	../jlib/lib)
 
 
 # 库文件集合
 set(LIBRARY_FILES
-        #pthread
-        jlib
-        )
+	jlib
+	)
 
 # 源文件代码集合
 set(SOURCE_FILES
-#		"test_log.hpp"
-#		"test_mysql.hpp"
-#		"test_tcpclient.hpp"
-#		"test_tcpserver.hpp"
-        "main.cpp")
+#	"test_log.hpp"
+#	"test_mysql.hpp"
+	"test_tcp_client.hpp"
+#	"test_tcpserver.hpp"
+	"main.cpp")
 
 SET(CMAKE_CXX_COMPILER "g++")
 add_definitions("-std=c++11 -O0 -g3 -gdwarf-2 -fmessage-length=0 -MMD -MP")

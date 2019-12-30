@@ -11,15 +11,15 @@ TcpClient::TcpClient()
 
 	conn_state_ = TcpClient::CONNSTATE_CLOSED;
 
-	OnConnected([this](TcpClient *conn) {
+	OnConnected([](TcpClient *conn) {
 
 	});
 
-	OnDisconnected([this](TcpClient *conn) {
+	OnDisconnected([](TcpClient *conn) {
 
 	});
 
-	OnRead([this](TcpClient *conn) {
+	OnRead([](TcpClient *conn, RingBuf &buf) {
 
 	});
 }
@@ -83,7 +83,7 @@ void TcpClient::_read_thread_func()
 				}
 				if (n == 0)
 				{
-					read_callback_(this);
+					read_callback_(this, recv_data_);
 					Disconnected();
 					break;
 				}
@@ -92,7 +92,7 @@ void TcpClient::_read_thread_func()
 					if (errno == EAGAIN || errno == EWOULDBLOCK || errno == EINPROGRESS)
 					{
 						JW_LOG(LL_INFO, "sum = %d, recv = %d\n", recv_data_.size(), count);
-						read_callback_(this);
+						read_callback_(this, recv_data_);
 						break;
 					}
 					else

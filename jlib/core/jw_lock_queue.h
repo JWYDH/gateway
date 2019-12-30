@@ -12,8 +12,15 @@ template <typename T>
 class LockQueue
 {
 public:
-	LockQueue() {}
-	~LockQueue() {}
+	LockQueue()
+	{
+		//create lock
+		lock_ = jw::mutex_create();
+	}
+	~LockQueue()
+	{
+		jw::mutex_destroy(lock_);
+	}
 	bool push(T &&v);
 	bool pop(T *v);
 	int32_t size();
@@ -23,7 +30,7 @@ public:
 private:
 	std::list<T> items_;
 	mutex_t lock_;
-};
+}; // namespace jw
 
 template <typename T>
 int32_t LockQueue<T>::size()
@@ -70,4 +77,4 @@ bool LockQueue<T>::append(std::list<T> &items)
 	return true;
 }
 
-} // namespace
+} // namespace jw

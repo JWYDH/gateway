@@ -10,7 +10,6 @@
 #include "../core/jw_lock_queue.h"
 #include "../core/jw_lock_free_queue.h"
 
-
 namespace jw
 {
 class TcpClient
@@ -33,12 +32,14 @@ public:
 	TcpClient();
 	virtual ~TcpClient();
 	TcpClient &operator=(const TcpClient &) = delete;
+
 private:
 	void Connected();
 	void Disconnected();
 
 	void _read_thread_func();
 	void _write_thread_func();
+
 public:
 	bool Start(const char *ip, const short port);
 	void Stop();
@@ -48,7 +49,7 @@ public:
 
 	void OnConnected(std::function<void(TcpClient *)> connected_callback) { connected_callback_ = connected_callback; }
 	void OnDisconnected(std::function<void(TcpClient *)> disconnected_callback) { disconnected_callback_ = disconnected_callback; }
-	void OnRead(std::function<void(TcpClient *)> read_callback) { read_callback_ = read_callback; }
+	void OnRead(std::function<void(TcpClient *, RingBuf &)> read_callback) { read_callback_ = read_callback; }
 
 private:
 	bool stoped_;
@@ -67,7 +68,7 @@ private:
 
 	std::function<void(TcpClient *)> connected_callback_;
 	std::function<void(TcpClient *)> disconnected_callback_;
-	std::function<void(TcpClient *)> read_callback_;
+	std::function<void(TcpClient *, RingBuf &)> read_callback_;
 };
 
 } // namespace jw
