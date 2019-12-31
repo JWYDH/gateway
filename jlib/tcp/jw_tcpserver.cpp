@@ -20,12 +20,12 @@ void TcpServer::_server_func()
 	{
 		if (errno == EINTR)
 		{
-			continue;
+			return;
 		}
 		else
 		{
 			JW_LOG(LL_ERROR, "epoll_wait error %d %s", errno, strerror(errno));
-			break;
+			return;
 		}
 	}
 	for (int i = 0; i < n; i++)
@@ -35,17 +35,16 @@ void TcpServer::_server_func()
 		int ev = evs[i].events;
 		if (ev & (EPOLLERR | EPOLLHUP))
 		{
-			printf("epoll_wait triger %s %s ", ev | EPOLLERR ? "EPOLLERR" : "", ev | EPOLLERR ? "EPOLLHUP" : "");
-			io->HandleError();
+			JW_LOG(LL_WARN, "epoll_wait triger %s %s ", ev | EPOLLERR ? "EPOLLERR" : "", ev | EPOLLERR ? "EPOLLHUP" : "");
 			continue;
 		}
 		if (ev & EPOLLIN)
 		{
-			io->HandleRead();
+			
 		}
 		if (ev & EPOLLOUT)
 		{
-			io->HandleWrite();
+			
 		}
 	}
 }
@@ -54,7 +53,7 @@ bool TcpServer::Start(const char *ip, const short port)
 {
 	epoll_fd_ = epoll_create1(EPOLL_CLOEXEC);
 
-	jw::create_socket(listen_fd_);
+	listen_fd_ = jw::create_socket();
 
 	struct sockaddr_in addr;
 	addr.sin_family = AF_INET;

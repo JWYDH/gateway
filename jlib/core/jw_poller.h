@@ -1,4 +1,5 @@
 #pragma once
+#include <sys/epoll.h>
 
 namespace jw
 {
@@ -11,10 +12,10 @@ namespace jw
 void poller_create();
 
 //// 
-void poller_init();
+void poller_run();
 
 //// 
-void poller_init();
+void poller_destory();
 
 
 } // namespace jw

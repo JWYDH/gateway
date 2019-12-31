@@ -5,6 +5,7 @@
 #include "../core/jw_thread.h"
 #include "../core/jw_log.h"
 #include "../core/jw_socket.h"
+#include "../core/jw_poller.h"
 #include "../core/jw_ring_buffer.h"
 #include "../core/jw_lock_queue.h"
 #include "../core/jw_lock_free_queue.h"
