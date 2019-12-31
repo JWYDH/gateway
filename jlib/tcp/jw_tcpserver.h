@@ -1,81 +1,58 @@
 #pragma once
-#include <thread>
+#include <errno.h>
 #include <vector>
-#include <map>
 #include <functional>
-#include "jw_socket.h"
-#include "../base/jw_thread.h"
-#include "../base/jw_safe_queue.h"
+#include "../core/jw_thread.h"
+#include "../core/jw_log.h"
+#include "../core/jw_socket.h"
+#include "../core/jw_ring_buffer.h"
+#include "../core/jw_lock_queue.h"
+#include "../core/jw_lock_free_queue.h"
 
-
-class TcpConn;
 class TcpServer {
+
+public:
+	enum CONN_STATE
+	{
+		CONNSTATE_CLOSED,
+		CONNSTATE_CONNECTING,
+		CONNSTATE_CONNECTED
+	};
+	enum BUFF_SIZE
+	{
+		RECV_MAX_SIZE = 1024 * 1024 * 8,
+		RECV_BUF_SIZE = 1024 * 1024 * 2,
+		SEND_BUF_SIZE = 1024 * 1024 * 2
+	};
+
 public:
 	TcpServer();
 	virtual ~TcpServer();
 	TcpServer& operator=(const TcpServer&) = delete;
-	bool Initialize();
-	void AddConvey(SOCKET fd, void *c);
-	void DelConvey(SOCKET fd);
-	void SetReadEvent(SOCKET fd, void *io, bool enable);
-	void SetWriteEvent(SOCKET fd, void *io, bool enable);
-	void Loop();
-private:
-
-#ifdef WIN32
-	fd_set fds_;
-	fd_set fdreads_;
-	fd_set fdwrites_;
-	std::map<SOCKET, void*> select_conn_list_;
-#else
-	SOCKET listen_fd_;
-#endif
 public:
-	union InterMsgData
-	{
-		struct
-		{
-			SOCKET fd_;
-			void* ptr_;
-		};
-	};
-	struct InterMsg 
-	{
-		int32_t msg_id_;
-		InterMsgData msg_data_;
-
-		InterMsg() {
-			msg_id_ = 0;
-		}
-	};
-
-	enum {
-		gcAddClient = 1,	//����һ���µĿͻ�������
-		gcGWData = 2, //��Ϸ�����ͻ��˷���Ϣ
-		gcGWClose = 3,	//��Ϸ�������رտͻ���
-		gcChBro = 4,//Ƶ���㲥��Ϣ
-		gcChAdd = 5,//Ƶ����Ϣ����
-		gcChDel = 6,//Ƶ����Ϣɾ��
-		gcGWDisconn = 7,//��Ϸ���Ͽ�����
-	};
-
-	bool Start(const char *ip, const short port, int back_log=256);
+	bool Start(const char *ip, const short port);
 	void Stop();
-	bool PushInterMsg(InterMsg &msg);
-	void ProcessInterMsg();
-	void OnRecvSysMsg(InterMsg& msg);
-	void OnNewSession(std::function<void(TcpConn*)> newsession_callback) { newsession_callback_ = newsession_callback; }
+
+	void OnConnected(std::function<void(TcpClient *)> connected_callback) { connected_callback_ = connected_callback; }
+	void OnDisconnected(std::function<void(TcpClient *)> disconnected_callback) { disconnected_callback_ = disconnected_callback; }
+	void OnRead(std::function<void(TcpClient *, RingBuf &)> read_callback) { read_callback_ = read_callback; }
 private:
 	bool stoped_;
-	LockQueue<InterMsg> inter_msg_;
-	LockQueue<InterMsg> proc_inter_msg_;
-	JwSocket socket_;
-	JwSocket socket_pair_send_;
-	JwSocket socket_pair_recv_;
-	BaseThread accept_thread_;
-	BaseThread work_thread_;
-	std::map<SOCKET, TcpConn*> conn_list_;
+	thread_t thread_;
+	thread_t write_thread_;
 
-	std::function<void(TcpConn*)> newsession_callback_;
+	socket_t socket_;
+	int conn_state_;
+	sockaddr_in local_addr_;
+	sockaddr_in remote_addr_;
+
+	RingBuf recv_data_;
+
+	LockQueue<RingBuf *> send_data_pending;
+	std::list<RingBuf *> send_data_;
+
+	std::function<void(TcpClient *)> connected_callback_;
+	std::function<void(TcpClient *)> disconnected_callback_;
+	std::function<void(TcpClient *, RingBuf &)> read_callback_;
 };
 
