@@ -33,8 +33,6 @@ void TcpServer::_server_func(void *)
 		for (int i = 0; i < n; i++)
 		{
 			int fd = evs[i].data.fd;
-			int ev = evs[i].events;
-			TcpConn *conn = (TcpConn *)(evs[i].data.ptr);
 			if (fd == listen_fd_)
 			{
 				TcpConn conn;
@@ -52,27 +50,30 @@ void TcpServer::_server_func(void *)
 				jw::getsockname(conn.socket_, conn.local_addr_);
 				jw::getpeername(conn.socket_, conn.remote_addr_);
 				connects_.push_back(conn);
-					
+
+				struct epoll_event ev;
 				ev.data.fd = connfd;
 				ev.events = EPOLLIN | EPOLLET;
-				epoll_ctl(epfd, EPOLL_CTL_ADD, connfd, &ev);
+				epoll_ctl(epoll_fd_, EPOLL_CTL_ADD, connfd, &ev);
 
-				cout << "accapt a connection from " << str << endl;
+				JW_LOG(LL_INFO, "accapt a connection from\n");
 			}
-
-			if (ev & (EPOLLERR | EPOLLHUP))
+			int events = evs[i].events;
+			TcpConn *conn = (TcpConn *)(evs[i].data.ptr);
+			if (events & (EPOLLERR | EPOLLHUP))
 			{
-				JW_LOG(LL_WARN, "epoll_wait triger %s %s",
-					   ev | EPOLLERR ? "EPOLLERR" : "",
-					   ev | EPOLLHUP ? "EPOLLHUP" : "",
-					   ev | EPOLLIN ? "EPOLLIN" : "",
-					   ev | EPOLLOUT ? "EPOLLOUT" : "");
+				JW_LOG(LL_WARN, "epoll_wait triger %s %s %s %s",
+					   events | EPOLLERR ? "EPOLLERR" : "",
+					   events | EPOLLHUP ? "EPOLLHUP" : "",
+					   events | EPOLLIN ? "EPOLLIN" : "",
+					   events | EPOLLOUT ? "EPOLLOUT" : "");
 				continue;
 			}
-			if (ev & EPOLLIN)
+			if (events & EPOLLIN)
 			{
+				conn
 			}
-			if (ev & EPOLLOUT)
+			if (events & EPOLLOUT)
 			{
 			}
 		}
