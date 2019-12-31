@@ -1,21 +1,15 @@
 #pragma once
-#include "net/jw_tcpconn.h"
-#include "net/jw_tcpserver.h"
+#include "tcp/jw_tcpserver.h"
 
 int test_tcpserver()
 {
-
-#ifdef WIN32
-	JwSocket::Init();
-#endif 
-
-	TcpServer server;
-	server.OnNewSession([](TcpConn* conn) {
+	jw::TcpServer server;
+	server.OnRead([](jw::TcpConn* conn, jw::RingBuf &buf) {
 
 	});
 	server.Start("0.0.0.0", 8000);
 
-	system("pause");
+	getchar();
 
 	server.Stop();
 	return 0;
