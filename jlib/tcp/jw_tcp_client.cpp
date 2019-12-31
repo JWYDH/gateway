@@ -213,14 +213,16 @@ bool TcpClient::Start(const char *ip, const short port)
 		}
 	};
 
-	jw::thread_create(read_thread_func, nullptr, "auto connect thread");
-	jw::thread_create(write_thread_func, nullptr, "forever write thread");
+	read_thread_ = jw::thread_create(read_thread_func, nullptr, "auto connect thread");
+	write_thread_ = jw::thread_create(write_thread_func, nullptr, "forever write thread");
 	return true;
 }
 
 void TcpClient::Stop()
 {
 	stoped_ = true;
+	jw::thread_join(read_thread_);
+	jw::thread_join(write_thread_);
 }
 
 void TcpClient::DoWrite(const char *buf, int32_t len)

@@ -53,7 +53,7 @@ public:
 
 private:
 	bool stoped_;
-	thread_t thread_;
+	thread_t read_thread_;
 	thread_t write_thread_;
 
 	socket_t socket_;

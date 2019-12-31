@@ -9,6 +9,14 @@
 #include "../core/jw_lock_queue.h"
 #include "../core/jw_lock_free_queue.h"
 
+struct TcpConn {
+	socket_t listen_fd_;
+	int conn_state_;
+	RingBuf recv_data_;
+	LockQueue<RingBuf *> send_data_pending;
+	std::list<RingBuf *> send_data_;
+}
+
 class TcpServer {
 
 public:
@@ -29,6 +37,9 @@ public:
 	TcpServer();
 	virtual ~TcpServer();
 	TcpServer& operator=(const TcpServer&) = delete;
+
+private:
+	void _server_func();
 public:
 	bool Start(const char *ip, const short port);
 	void Stop();
@@ -38,18 +49,10 @@ public:
 	void OnRead(std::function<void(TcpClient *, RingBuf &)> read_callback) { read_callback_ = read_callback; }
 private:
 	bool stoped_;
-	thread_t thread_;
-	thread_t write_thread_;
+	thread_t server_thread_;
 
-	socket_t socket_;
-	int conn_state_;
-	sockaddr_in local_addr_;
-	sockaddr_in remote_addr_;
-
-	RingBuf recv_data_;
-
-	LockQueue<RingBuf *> send_data_pending;
-	std::list<RingBuf *> send_data_;
+	socket_t epoll_fd_;
+	socket_t listen_fd_;
 
 	std::function<void(TcpClient *)> connected_callback_;
 	std::function<void(TcpClient *)> disconnected_callback_;
