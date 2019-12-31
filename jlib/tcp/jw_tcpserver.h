@@ -9,15 +9,20 @@
 #include "../core/jw_lock_queue.h"
 #include "../core/jw_lock_free_queue.h"
 
-struct TcpConn {
+namespace jw
+{
+
+struct TcpConn
+{
 	socket_t listen_fd_;
 	int conn_state_;
 	RingBuf recv_data_;
 	LockQueue<RingBuf *> send_data_pending;
 	std::list<RingBuf *> send_data_;
-}
+};
 
-class TcpServer {
+class TcpServer
+{
 
 public:
 	enum CONN_STATE
@@ -36,17 +41,19 @@ public:
 public:
 	TcpServer();
 	virtual ~TcpServer();
-	TcpServer& operator=(const TcpServer&) = delete;
+	TcpServer &operator=(const TcpServer &) = delete;
 
 private:
 	void _server_func();
+
 public:
 	bool Start(const char *ip, const short port);
 	void Stop();
 
-	void OnConnected(std::function<void(TcpClient *)> connected_callback) { connected_callback_ = connected_callback; }
-	void OnDisconnected(std::function<void(TcpClient *)> disconnected_callback) { disconnected_callback_ = disconnected_callback; }
-	void OnRead(std::function<void(TcpClient *, RingBuf &)> read_callback) { read_callback_ = read_callback; }
+	void OnConnected(std::function<void(TcpConn *)> connected_callback) { connected_callback_ = connected_callback; }
+	void OnDisconnected(std::function<void(TcpConn *)> disconnected_callback) { disconnected_callback_ = disconnected_callback; }
+	void OnRead(std::function<void(TcpConn *, RingBuf &)> read_callback) { read_callback_ = read_callback; }
+
 private:
 	bool stoped_;
 	thread_t server_thread_;
@@ -54,8 +61,9 @@ private:
 	socket_t epoll_fd_;
 	socket_t listen_fd_;
 
-	std::function<void(TcpClient *)> connected_callback_;
-	std::function<void(TcpClient *)> disconnected_callback_;
-	std::function<void(TcpClient *, RingBuf &)> read_callback_;
+	std::function<void(TcpConn *)> connected_callback_;
+	std::function<void(TcpConn *)> disconnected_callback_;
+	std::function<void(TcpConn *, RingBuf &)> read_callback_;
 };
 
+} // namespace jw
