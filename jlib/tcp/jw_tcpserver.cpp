@@ -32,9 +32,34 @@ void TcpServer::_server_func(void *)
 		}
 		for (int i = 0; i < n; i++)
 		{
-			void *ptr = evs[i].data.ptr;
-			TcpConn *io = (TcpConn *)ptr;
+			int fd = evs[i].data.fd;
 			int ev = evs[i].events;
+			TcpConn *conn = (TcpConn *)(evs[i].data.ptr);
+			if (fd == listen_fd_)
+			{
+				TcpConn conn;
+				int connfd = jw::accept(listen_fd_, nullptr);
+				if (connfd < 0)
+				{
+					JW_LOG(LL_ERROR, "unknown connfd connect");
+					continue;
+				}
+				conn.socket_ = connfd;
+				conn.conn_state_ = TcpServer::CONNSTATE_CONNECTED;
+				jw::set_nonblock(conn.socket_, true);
+				jw::set_recv_buf_size(conn.socket_, BUFF_SIZE::RECV_BUF_SIZE);
+				jw::set_send_buf_size(conn.socket_, BUFF_SIZE::SEND_BUF_SIZE);
+				jw::getsockname(conn.socket_, conn.local_addr_);
+				jw::getpeername(conn.socket_, conn.remote_addr_);
+				connects_.push_back(conn);
+					
+				ev.data.fd = connfd;
+				ev.events = EPOLLIN | EPOLLET;
+				epoll_ctl(epfd, EPOLL_CTL_ADD, connfd, &ev);
+
+				cout << "accapt a connection from " << str << endl;
+			}
+
 			if (ev & (EPOLLERR | EPOLLHUP))
 			{
 				JW_LOG(LL_WARN, "epoll_wait triger %s %s",
@@ -46,7 +71,6 @@ void TcpServer::_server_func(void *)
 			}
 			if (ev & EPOLLIN)
 			{
-				
 			}
 			if (ev & EPOLLOUT)
 			{

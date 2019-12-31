@@ -16,8 +16,11 @@ namespace jw
 
 struct TcpConn
 {
-	socket_t listen_fd_;
+	socket_t socket_;
 	int conn_state_;
+	sockaddr_in local_addr_;
+	sockaddr_in remote_addr_;
+	
 	RingBuf recv_data_;
 	LockQueue<RingBuf *> send_data_pending;
 	std::list<RingBuf *> send_data_;
@@ -62,6 +65,8 @@ private:
 
 	socket_t epoll_fd_;
 	socket_t listen_fd_;
+
+	std::vector<TcpConn> connects_;
 
 	std::function<void(TcpConn *)> connected_callback_;
 	std::function<void(TcpConn *)> disconnected_callback_;
