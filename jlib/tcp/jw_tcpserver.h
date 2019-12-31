@@ -1,5 +1,6 @@
 #pragma once
 #include <errno.h>
+#include <assert.h>
 #include <vector>
 #include <functional>
 #include "../core/jw_thread.h"
@@ -45,7 +46,7 @@ public:
 	TcpServer &operator=(const TcpServer &) = delete;
 
 private:
-	void _server_func();
+	void _server_func(void *);
 
 public:
 	bool Start(const char *ip, const short port);

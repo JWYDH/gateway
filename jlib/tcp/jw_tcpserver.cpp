@@ -11,40 +11,46 @@ TcpServer::~TcpServer()
 {
 }
 
-void TcpServer::_server_func()
+void TcpServer::_server_func(void *)
 {
-	const static int kMaxEvents = 20;
-	struct epoll_event evs[kMaxEvents];
-	int n = epoll_wait(listen_fd_, evs, kMaxEvents, 0);
-	if (n == -1)
+	while (!stoped_)
 	{
-		if (errno == EINTR)
+		const static int kMaxEvents = 32;
+		struct epoll_event evs[kMaxEvents];
+		int n = epoll_wait(listen_fd_, evs, kMaxEvents, 0);
+		if (n == -1)
 		{
-			return;
+			if (errno == EINTR)
+			{
+				return;
+			}
+			else
+			{
+				JW_LOG(LL_ERROR, "epoll_wait error %d %s", errno, strerror(errno));
+				break;
+			}
 		}
-		else
+		for (int i = 0; i < n; i++)
 		{
-			JW_LOG(LL_ERROR, "epoll_wait error %d %s", errno, strerror(errno));
-			return;
-		}
-	}
-	for (int i = 0; i < n; i++)
-	{
-		void *ptr = evs[i].data.ptr;
-		TcpConn *io = (TcpConn *)ptr;
-		int ev = evs[i].events;
-		if (ev & (EPOLLERR | EPOLLHUP))
-		{
-			JW_LOG(LL_WARN, "epoll_wait triger %s %s ", ev | EPOLLERR ? "EPOLLERR" : "", ev | EPOLLERR ? "EPOLLHUP" : "");
-			continue;
-		}
-		if (ev & EPOLLIN)
-		{
-			
-		}
-		if (ev & EPOLLOUT)
-		{
-			
+			void *ptr = evs[i].data.ptr;
+			TcpConn *io = (TcpConn *)ptr;
+			int ev = evs[i].events;
+			if (ev & (EPOLLERR | EPOLLHUP))
+			{
+				JW_LOG(LL_WARN, "epoll_wait triger %s %s",
+					   ev | EPOLLERR ? "EPOLLERR" : "",
+					   ev | EPOLLHUP ? "EPOLLHUP" : "",
+					   ev | EPOLLIN ? "EPOLLIN" : "",
+					   ev | EPOLLOUT ? "EPOLLOUT" : "");
+				continue;
+			}
+			if (ev & EPOLLIN)
+			{
+				
+			}
+			if (ev & EPOLLOUT)
+			{
+			}
 		}
 	}
 }
@@ -72,13 +78,7 @@ bool TcpServer::Start(const char *ip, const short port)
 		return false;
 	}
 
-	auto server_thread_func = [this](void *) {
-		while (!stoped_)
-		{
-			this->_server_func();
-		}
-	};
-	server_thread_ = jw::thread_create(server_thread_func, nullptr, "server thread");
+	server_thread_ = jw::thread_create(this->_server_func, nullptr, "server thread");
 	return true;
 }
 
