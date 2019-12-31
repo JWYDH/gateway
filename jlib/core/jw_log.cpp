@@ -46,8 +46,7 @@ public:
 		//pid_t process_id = jw::process_get_id();
 
 		//get process name
-		char process_name[LOG_FILENAME_MAX] = {0};
-		jw::process_get_module_name(process_name, LOG_FILENAME_MAX);
+		jw::process_get_module_name(process_name_, LOG_FILENAME_MAX);
 
 		//set level name
 		level_name_[LL_DEBUG] = "[D]";
@@ -98,7 +97,7 @@ void log_file(LOG_LEVEL level, const char *message, ...)
 
 	time_t now = jw::local_time_now();
 	jw::time_tostring(now, time_buf, 32, "%Y%m%d");
-	snprintf(file_name, LOG_FILENAME_MAX, "%s_%s", thefile->process_name_, time_buf);
+	snprintf(file_name, LOG_FILENAME_MAX, "%s%s_%s.log", LOG_PATH, thefile->process_name_, time_buf);
 
 	FILE *fp = fopen(file_name, "a");
 	if (fp == 0)

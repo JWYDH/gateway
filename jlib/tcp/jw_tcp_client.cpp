@@ -38,6 +38,10 @@ void TcpClient::Connected()
 	jw::set_nonblock(socket_, true);
 	jw::set_recv_buf_size(socket_, BUFF_SIZE::RECV_BUF_SIZE);
 	jw::set_send_buf_size(socket_, BUFF_SIZE::SEND_BUF_SIZE);
+
+	jw::getsockname(socket_, local_addr_);
+	jw::getpeername(socket_, remote_addr_);
+
 	JW_LOG(LL_INFO, "connected fd=%d, %s:%d ========= %s:%d\n",
 		   socket_,
 		   inet_ntoa(local_addr_.sin_addr), ntohs(local_addr_.sin_port),
@@ -179,9 +183,9 @@ bool TcpClient::Start(const char *ip, const short port)
 				}
 				else
 				{
-					JW_LOG(LL_INFO, "connect time out, auto reconnect after 1 seconds\n");
+					JW_LOG(LL_INFO, "connect time out, auto reconnect after 10 seconds\n");
 					jw::close_socket(socket_);
-					jw::thread_sleep(1000);
+					jw::thread_sleep(10000);
 				}
 			}
 			else if (conn_state_ == TcpClient::CONNSTATE_CONNECTING)
