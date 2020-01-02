@@ -1,11 +1,19 @@
 #pragma once
 #include "tcp/jw_tcpserver.h"
 
-int test_tcpserver()
+int test_tcp_server()
 {
 	jw::TcpServer server;
 	server.OnRead([](jw::TcpConn* conn, jw::RingBuf &buf) {
-
+		int64_t r = buf.size();
+		if (r > 0)
+		{
+			char *tmp_buf = (char*)malloc(r+1);
+			r = buf.read(tmp_buf, r);
+			tmp_buf[r+1] = '\0';
+			JW_LOG(jw::LL_INFO,"recv: %s", tmp_buf);
+			conn->DoWrite(tmp_buf, r);
+		}
 	});
 	server.Start("0.0.0.0", 8000);
 
