@@ -170,17 +170,17 @@ bool TcpServer::Start(const char *ip, const short port)
 
 	if (!jw::bind(listen_fd_, addr))
 	{
-		JW_LOG(LL_ERROR, "bind error: %d\n", errno);
+		JW_LOG(LL_ERROR, "tcpserver bind error: %d\n", errno);
 		return false;
 	}
 
 	if (!jw::listen(listen_fd_))
 	{
-		JW_LOG(LL_ERROR, "listen error: %d\n", errno);
+		JW_LOG(LL_ERROR, "tcpserver listen error: %d\n", errno);
 		return false;
 	}
 
-	server_thread_ = jw::thread_create(this->_server_func, nullptr, "server thread");
+	server_thread_ = jw::thread_create(this->_server_func, nullptr, "tcpserver thread");
 	return true;
 }
 

@@ -213,8 +213,8 @@ bool TcpClient::Start(const char *ip, const short port)
 		}
 	};
 
-	read_thread_ = jw::thread_create(read_thread_func, nullptr, "auto connect thread");
-	write_thread_ = jw::thread_create(write_thread_func, nullptr, "forever write thread");
+	read_thread_ = jw::thread_create(read_thread_func, nullptr, "tcpclient auto connect thread");
+	write_thread_ = jw::thread_create(write_thread_func, nullptr, "tcpclient write thread");
 	return true;
 }
 
