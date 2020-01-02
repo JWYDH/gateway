@@ -5,6 +5,17 @@ namespace jw
 
 TcpServer::TcpServer()
 {
+	OnConnected([](TcpConn *conn) {
+
+	});
+
+	OnDisconnected([](TcpConn *conn) {
+
+	});
+
+	OnRead([](TcpConn *conn, RingBuf &buf) {
+
+	});
 }
 
 TcpServer::~TcpServer()
@@ -81,10 +92,10 @@ void TcpServer::_server_func(void *)
 				}
 				connects_[connfd] = conn;
 
-				JW_LOG(LL_INFO, "accapt a connection fd %d from %s:%d\n",
-					   connfd,
+				JW_LOG(LL_INFO, "%s:%d accapt a connection from %s:%d fd=%d",
 					   inet_ntoa(conn->local_addr_.sin_addr), ntohs(conn->local_addr_.sin_port),
-					   inet_ntoa(conn->remote_addr_.sin_addr), ntohs(conn->remote_addr_.sin_port));
+					   inet_ntoa(conn->remote_addr_.sin_addr), ntohs(conn->remote_addr_.sin_port),
+					   connfd);
 
 				if (events & (EPOLLERR | EPOLLHUP))
 				{
@@ -103,7 +114,7 @@ void TcpServer::_server_func(void *)
 				{
 					if (conn->recv_data_.size() > TcpConn::BUFF_SIZE::RECV_MAX_SIZE)
 					{
-						JW_LOG(LL_WARN, "tcpconn too many data not proc!!!\n");
+						JW_LOG(LL_WARN, "tcpconn too many data not proc!!!");
 					}
 					int32_t count = 0;
 					for (;;)
@@ -142,7 +153,7 @@ void TcpServer::_server_func(void *)
 						wn = data->write_socket(conn->socket_);
 						if (wn > 0)
 						{
-							JW_LOG(LL_INFO, "tcpconn send succ = %d\n", n);
+							JW_LOG(LL_INFO, "tcpconn send succ = %d", n);
 							if (data->size() == 0)
 							{
 								delete data;
@@ -160,7 +171,7 @@ void TcpServer::_server_func(void *)
 								_set_event(conn, EPOLL_CTL_MOD, EPOLLIN | EPOLLET | EPOLLOUT);
 								break;
 							}
-							JW_LOG(LL_INFO, "tcpconn send data fail, may be peer unnormal disconnect\n");
+							JW_LOG(LL_INFO, "tcpconn send data fail, may be peer unnormal disconnect");
 							break;
 						}
 					}
@@ -181,13 +192,13 @@ bool TcpServer::Start(const char *ip, const short port)
 
 	if (!jw::bind(listen_fd_, addr))
 	{
-		JW_LOG(LL_ERROR, "tcpserver bind error: %d\n", errno);
+		JW_LOG(LL_ERROR, "tcpserver bind error: %d", errno);
 		return false;
 	}
 
 	if (!jw::listen(listen_fd_))
 	{
-		JW_LOG(LL_ERROR, "tcpserver listen error: %d\n", errno);
+		JW_LOG(LL_ERROR, "tcpserver listen error: %d", errno);
 		return false;
 	}
 
@@ -218,6 +229,9 @@ void TcpServer::Close(TcpConn *conn)
 	}
 	connects_.erase(it);
 	conn->conn_state_ = TcpConn::CONNSTATE_CLOSED;
+	JW_LOG(LL_INFO, "disconnected fd=%d, %s:%d ========= %s:%d",
+		   conn->socket_, inet_ntoa(conn->local_addr_.sin_addr), ntohs(conn->local_addr_.sin_port),
+		   inet_ntoa(conn->remote_addr_.sin_addr), ntohs(conn->remote_addr_.sin_port));
 	disconnected_callback_(conn);
 
 	jw::close_socket(conn->socket_);

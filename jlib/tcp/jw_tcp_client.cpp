@@ -43,7 +43,7 @@ void TcpClient::Connected()
 	jw::getsockname(socket_, local_addr_);
 	jw::getpeername(socket_, remote_addr_);
 
-	JW_LOG(LL_INFO, "connected fd=%d, %s:%d ========= %s:%d\n",
+	JW_LOG(LL_INFO, "connected fd=%d, %s:%d ========= %s:%d",
 		   socket_,
 		   inet_ntoa(local_addr_.sin_addr), ntohs(local_addr_.sin_port),
 		   inet_ntoa(remote_addr_.sin_addr), ntohs(remote_addr_.sin_port));
@@ -54,7 +54,7 @@ void TcpClient::Disconnected()
 {
 	disconnected_callback_(this);
 	conn_state_ = TcpClient::CONNSTATE_CLOSED;
-	JW_LOG(LL_INFO, "disconnected fd=%d, %s:%d ========= %s:%d\n",
+	JW_LOG(LL_INFO, "disconnected fd=%d, %s:%d ========= %s:%d",
 		   socket_, inet_ntoa(local_addr_.sin_addr), ntohs(local_addr_.sin_port),
 		   inet_ntoa(remote_addr_.sin_addr), ntohs(remote_addr_.sin_port));
 
@@ -73,7 +73,7 @@ void TcpClient::_read_thread_func()
 		{
 			if (recv_data_.size() > RECV_MAX_SIZE)
 			{
-				JW_LOG(LL_WARN, "too many data not proc!!!\n");
+				JW_LOG(LL_WARN, "too many data not proc!!!");
 			}
 			int32_t count = 0;
 			for (;;)
@@ -87,7 +87,7 @@ void TcpClient::_read_thread_func()
 				}
 				if (n <= 0)
 				{
-					JW_LOG(LL_INFO, "tcpclient sum = %d, recv = %d\n", recv_data_.size(), count);
+					JW_LOG(LL_INFO, "tcpclient sum = %d, recv = %d", recv_data_.size(), count);
 					if (recv_data_.size() > 0)
 					{
 						read_callback_(this, recv_data_);
@@ -103,13 +103,13 @@ void TcpClient::_read_thread_func()
 	}
 	else if (nRetAll == 0)
 	{
-		JW_LOG(LL_INFO, "select time out: %d\n", errno);
+		JW_LOG(LL_INFO, "tcpclient select time out: %d", errno);
 	}
 	else
 	{
 		if (errno != EINTR)
 		{
-			JW_LOG(LL_ERROR, "select error: %d\n", errno);
+			JW_LOG(LL_ERROR, "tcpclient select error: %d", errno);
 		}
 	}
 }
@@ -129,7 +129,7 @@ void TcpClient::_write_thread_func()
 		n = data->write_socket(socket_);
 		if (n > 0)
 		{
-			JW_LOG(LL_INFO, "tcpclient send = %d\n", n);
+			JW_LOG(LL_INFO, "tcpclient send = %d", n);
 			if (data->size() == 0)
 			{
 				delete data;
@@ -148,7 +148,7 @@ void TcpClient::_write_thread_func()
 			}
 			else
 			{
-				JW_LOG(LL_INFO, "tcpclient send data fail, may be perr unnormal disconnect\n");
+				JW_LOG(LL_INFO, "tcpclient send data fail, may be perr unnormal disconnect");
 				break;
 			}
 		}
@@ -175,7 +175,7 @@ bool TcpClient::Start(const char *ip, const short port)
 				}
 				else
 				{
-					JW_LOG(LL_INFO, "connect time out, auto reconnect after 10 seconds\n");
+					JW_LOG(LL_INFO, "connect time out, auto reconnect after 10 seconds");
 					jw::close_socket(socket_);
 					jw::thread_sleep(10000);
 				}
