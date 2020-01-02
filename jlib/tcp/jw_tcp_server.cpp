@@ -37,7 +37,7 @@ void TcpServer::_server_func(void *)
 	{
 		const static int kMaxEvents = 32;
 		struct epoll_event evs[kMaxEvents];
-		int n = epoll_wait(listen_fd_, evs, kMaxEvents, -1);
+		int n = epoll_wait(epoll_fd_, evs, kMaxEvents, -1);
 		if (n == -1)
 		{
 			if (errno == EINTR)
