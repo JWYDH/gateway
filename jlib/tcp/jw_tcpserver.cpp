@@ -44,13 +44,19 @@ void TcpServer::_server_func(void *)
 					continue;
 				}
 				conn->socket_ = connfd;
-				conn->conn_state_ = TcpServer::CONNSTATE_CONNECTED;
+				conn->conn_state_ = TcpConn::CONNSTATE_CONNECTED;
 				jw::set_nonblock(conn->socket_, true);
-				jw::set_recv_buf_size(conn->socket_, BUFF_SIZE::RECV_BUF_SIZE);
-				jw::set_send_buf_size(conn->socket_, BUFF_SIZE::SEND_BUF_SIZE);
+				jw::set_recv_buf_size(conn->socket_, TcpConn::BUFF_SIZE::RECV_BUF_SIZE);
+				jw::set_send_buf_size(conn->socket_, TcpConn::BUFF_SIZE::SEND_BUF_SIZE);
 				jw::getsockname(conn->socket_, conn->local_addr_);
 				jw::getpeername(conn->socket_, conn->remote_addr_);
-				connects_.push_back(conn);
+
+				auto it = connects_.find(connfd);
+				if (it != connects_.end())
+				{
+					connects_.erase(it);
+				}
+				connects_[connfd] = conn;
 
 				struct epoll_event ev;
 				ev.data.fd = connfd;
@@ -78,11 +84,43 @@ void TcpServer::_server_func(void *)
 				TcpConn *conn = (TcpConn *)(evs[i].data.ptr);
 				if (events & EPOLLIN)
 				{
+					if (conn->recv_data_.size() > TcpConn::BUFF_SIZE::RECV_MAX_SIZE)
+					{
+						JW_LOG(LL_WARN, "tcpconn too many data not proc!!!\n");
+					}
+					int32_t count = 0;
+					for (;;)
+					{
+						int32_t n = 0;
+						n = conn->recv_data_.read_socket(conn->socket_);
+						if (n > 0)
+						{
+							count = +n;
+							continue;
+						}
+						if (n <= 0)
+						{
+							JW_LOG(LL_INFO, "tcpconn sum = %d, recv = %d\n", conn->recv_data_.size(), count);
+							if (conn->recv_data_.size() > 0)
+							{
+								read_callback_(conn, conn->recv_data_);
+							}
+							if (n < 0)
+							{
+								if (!(errno == EAGAIN || errno == EWOULDBLOCK || errno == EINPROGRESS))
+								{
+									CloseTcpConn(conn);
+								}
+								break;
+							}
+						}
+					}
 					read_callback_(conn, conn->recv_data_);
 				}
 				if (events & EPOLLOUT)
 				{
-					conn->send_data_pending.append(conn->send_data_);
+
+					conn->send_data_pending_.append(conn->send_data_);
 					for (auto it = conn->send_data_.begin(); it != conn->send_data_.end();)
 					{
 						auto &data = *it;
@@ -90,7 +128,7 @@ void TcpServer::_server_func(void *)
 						n = data->write_socket(conn->socket_);
 						if (n > 0)
 						{
-							JW_LOG(LL_INFO, "send = %d\n", n);
+							JW_LOG(LL_INFO, "tcpconn send = %d\n", n);
 							if (data->size() == 0)
 							{
 								delete data;
@@ -109,7 +147,7 @@ void TcpServer::_server_func(void *)
 							}
 							else
 							{
-								JW_LOG(LL_INFO, "send data fail, may be perr unnormal disconnect\n");
+								JW_LOG(LL_INFO, "tcpconn send data fail, may be perr unnormal disconnect\n");
 								break;
 							}
 						}
@@ -150,5 +188,16 @@ void TcpServer::Stop()
 {
 	stoped_ = true;
 	jw::thread_join(server_thread_);
+}
+
+void TcpServer::CloseTcpConn(TcpConn *conn)
+{
+	auto it = connects_.find(conn->socket_);
+	if (it != connects_.end())
+	{
+		connects_.erase(it);
+	}
+	disconnected_callback_(conn);
+	jw::close_socket(conn->socket_);
 }
 } // namespace jw

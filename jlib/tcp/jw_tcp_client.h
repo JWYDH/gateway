@@ -61,9 +61,10 @@ private:
 	sockaddr_in local_addr_;
 	sockaddr_in remote_addr_;
 
+	
 	RingBuf recv_data_;
 	std::list<RingBuf *> send_data_;
-	LockQueue<RingBuf *> send_data_pending;
+	LockQueue<RingBuf *> send_data_pending_;
 	
 
 	std::function<void(TcpClient *)> connected_callback_;

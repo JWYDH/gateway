@@ -124,7 +124,7 @@ void TcpClient::_read_thread_func()
 
 void TcpClient::_write_thread_func()
 {
-	send_data_pending.append(send_data_);
+	send_data_pending_.append(send_data_);
 	if (send_data_.empty())
 	{
 		jw::thread_sleep(100);
@@ -137,7 +137,7 @@ void TcpClient::_write_thread_func()
 		n = data->write_socket(socket_);
 		if (n > 0)
 		{
-			JW_LOG(LL_INFO, "send = %d\n", n);
+			JW_LOG(LL_INFO, "tcpclient send = %d\n", n);
 			if (data->size() == 0)
 			{
 				delete data;
@@ -156,7 +156,7 @@ void TcpClient::_write_thread_func()
 			}
 			else
 			{
-				JW_LOG(LL_INFO, "send data fail, may be perr unnormal disconnect\n");
+				JW_LOG(LL_INFO, "tcpclient send data fail, may be perr unnormal disconnect\n");
 				break;
 			}
 		}
@@ -233,7 +233,7 @@ void TcpClient::DoWrite(const char *buf, int32_t len)
 	}
 	RingBuf *data = new RingBuf();
 	data->write(buf, len);
-	send_data_pending.push(std::move(data));
+	send_data_pending_.push(std::move(data));
 }
 
 } // namespace jw
