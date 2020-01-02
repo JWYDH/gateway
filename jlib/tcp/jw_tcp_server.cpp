@@ -11,13 +11,27 @@ TcpServer::~TcpServer()
 {
 }
 
+void TcpServer::_set_event(TcpConn *conn, int operation, uint32_t events)
+{
+	struct epoll_event event;
+	memset(&event, 0, sizeof(event));
+	event.data.fd = conn->socket_;
+	event.events = events;
+	event.data.ptr = (void *)conn;
+	if (::epoll_ctl(epoll_fd_, operation, conn->socket_, &event) < 0)
+	{
+		JW_LOG(LL_ERROR, "tcpserver epoll_ctl error, err=%d %s", errno, strerror(errno));
+	}
+}
+
 void TcpServer::_server_func(void *)
 {
 	epoll_fd_ = epoll_create1(EPOLL_CLOEXEC);
-	struct epoll_event ev;
-	ev.data.fd = listen_fd_;
-	ev.events = EPOLLIN | EPOLLET;
-	epoll_ctl(epoll_fd_, EPOLL_CTL_ADD, listen_fd_, &ev);
+	struct epoll_event event;
+	memset(&event, 0, sizeof(event));
+	event.data.fd = listen_fd_;
+	event.events = EPOLLIN | EPOLLET;
+	::epoll_ctl(epoll_fd_, EPOLL_CTL_ADD, listen_fd_, &event);
 
 	while (!stoped_)
 	{
@@ -49,9 +63,11 @@ void TcpServer::_server_func(void *)
 					JW_LOG(LL_ERROR, "unknown connfd connect");
 					continue;
 				}
+				conn->conn_state_ = TcpConn::CONNSTATE_CONNECTED;
 				conn->server_ = this;
 				conn->socket_ = connfd;
-				conn->conn_state_ = TcpConn::CONNSTATE_CONNECTED;
+				_set_event(conn, EPOLL_CTL_ADD, EPOLLIN | EPOLLET);
+
 				jw::set_nonblock(conn->socket_, true);
 				jw::set_recv_buf_size(conn->socket_, TcpConn::BUFF_SIZE::RECV_BUF_SIZE);
 				jw::set_send_buf_size(conn->socket_, TcpConn::BUFF_SIZE::SEND_BUF_SIZE);
@@ -64,12 +80,6 @@ void TcpServer::_server_func(void *)
 					connects_.erase(it);
 				}
 				connects_[connfd] = conn;
-
-				//struct epoll_event ev;
-				ev.data.fd = connfd;
-				ev.events = EPOLLIN | EPOLLET;
-				ev.data.ptr = conn;
-				epoll_ctl(epoll_fd_, EPOLL_CTL_ADD, connfd, &ev);
 
 				JW_LOG(LL_INFO, "accapt a connection fd %d from %s:%d\n",
 					   connfd,
@@ -125,6 +135,7 @@ void TcpServer::_server_func(void *)
 				}
 				if (events & EPOLLOUT)
 				{
+					_set_event(conn, EPOLL_CTL_MOD, EPOLLIN | EPOLLET);
 					conn->send_data_pending_.append(conn->send_data_);
 					for (auto it = conn->send_data_.begin(); it != conn->send_data_.end();)
 					{
@@ -148,6 +159,7 @@ void TcpServer::_server_func(void *)
 						{
 							if (errno == EAGAIN || errno == EWOULDBLOCK || errno == EINPROGRESS)
 							{
+								_set_event(conn, EPOLL_CTL_MOD, EPOLLIN | EPOLLET | EPOLLOUT);
 								break;
 							}
 							JW_LOG(LL_INFO, "tcpconn send data fail, may be peer unnormal disconnect\n");
@@ -196,9 +208,12 @@ void TcpServer::DoWrite(TcpConn *conn, const char *buf, int32_t len)
 	RingBuf *data = new RingBuf();
 	data->write(buf, len);
 	conn->send_data_pending_.push(std::move(data));
+	_set_event(conn, EPOLL_CTL_MOD, EPOLLIN | EPOLLET | EPOLLOUT);
+
 }
 void TcpServer::Close(TcpConn *conn)
 {
+	_set_event(conn, EPOLL_CTL_DEL, 0);
 	auto it = connects_.find(conn->socket_);
 	if (it == connects_.end())
 	{

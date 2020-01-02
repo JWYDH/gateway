@@ -66,6 +66,7 @@ public:
 	TcpServer &operator=(const TcpServer &) = delete;
 
 private:
+	void _set_event(TcpConn *conn, int operation, uint32_t events);
 	void _server_func(void *);
 
 public:
