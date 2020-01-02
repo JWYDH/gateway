@@ -2,21 +2,16 @@ cmake_minimum_required (VERSION 2.8.1)
 
 project ("test")
 
-#设置头文件目录
 include_directories(
 	../jlib)
 
-#设置动态链接库目录
 link_directories(
 	../jlib/lib)
 
-
-# 库文件集合
 set(LIBRARY_FILES
 	jlib
 	)
 
-# 源文件代码集合
 set(SOURCE_FILES
 #	"test_log.hpp"
 #	"test_mysql.hpp"

@@ -10,20 +10,16 @@ configure_file (
 	"${PROJECT_SOURCE_DIR}/config.h"
 	)
 
-#设置动态链接库的目录，以及头文件目录
 include_directories(
 	.
 	./)
 link_directories(
 	${PROJECT_SOURCE_DIR}/lib)
 
-# 库文件集合
 set(LIBRARY_FILES
 	pthread
 	)
 
-
-# 将源添加到此项目的可执行文件。
 set(SOURCE_FILES
 	"./core/jw_file.cpp"
 	"./core/jw_time.cpp"
