@@ -20,10 +20,16 @@ struct TcpConn
 	int conn_state_;
 	sockaddr_in local_addr_;
 	sockaddr_in remote_addr_;
-	
+
 	RingBuf recv_data_;
-	LockQueue<RingBuf *> send_data_pending;
 	std::list<RingBuf *> send_data_;
+	LockQueue<RingBuf *> send_data_pending;
+	void DoWrite(const char *buf, int32_t len)
+	{
+		RingBuf *data = new RingBuf();
+		data->write(buf, len);
+		send_data_pending.push(std::move(data));
+	}
 };
 
 class TcpServer
@@ -66,7 +72,7 @@ private:
 	socket_t epoll_fd_;
 	socket_t listen_fd_;
 
-	std::vector<TcpConn> connects_;
+	std::vector<TcpConn *> connects_;
 
 	std::function<void(TcpConn *)> connected_callback_;
 	std::function<void(TcpConn *)> disconnected_callback_;
