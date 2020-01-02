@@ -26,6 +26,7 @@ TcpClient::TcpClient()
 
 TcpClient::~TcpClient()
 {
+	send_data_pending_.append(send_data_);
 	for (auto &buf : send_data_)
 	{
 		delete buf;
@@ -51,7 +52,6 @@ void TcpClient::Connected()
 
 void TcpClient::Disconnected()
 {
-
 	disconnected_callback_(this);
 	conn_state_ = TcpClient::CONNSTATE_CLOSED;
 	JW_LOG(LL_INFO, "disconnected fd=%d, %s:%d ========= %s:%d\n",
@@ -85,24 +85,19 @@ void TcpClient::_read_thread_func()
 					count = +n;
 					continue;
 				}
-				if (n == 0)
+				if (n <= 0)
 				{
-					read_callback_(this, recv_data_);
-					Disconnected();
-					break;
-				}
-				if (n < 0)
-				{
-					if (errno == EAGAIN || errno == EWOULDBLOCK || errno == EINPROGRESS)
+					JW_LOG(LL_INFO, "tcpclient sum = %d, recv = %d\n", recv_data_.size(), count);
+					if (recv_data_.size() > 0)
 					{
-						JW_LOG(LL_INFO, "sum = %d, recv = %d\n", recv_data_.size(), count);
 						read_callback_(this, recv_data_);
-						break;
 					}
-					else
+					if (n < 0)
 					{
-						JW_LOG(LL_INFO, "is not normal close: %d\n", errno);
-						Disconnected();
+						if (!(errno == EAGAIN || errno == EWOULDBLOCK || errno == EINPROGRESS))
+						{
+							Disconnected();
+						}
 						break;
 					}
 				}

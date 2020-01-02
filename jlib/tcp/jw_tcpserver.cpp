@@ -91,21 +91,21 @@ void TcpServer::_server_func(void *)
 					int32_t count = 0;
 					for (;;)
 					{
-						int32_t n = 0;
-						n = conn->recv_data_.read_socket(conn->socket_);
-						if (n > 0)
+						int32_t rn = 0;
+						rn = conn->recv_data_.read_socket(conn->socket_);
+						if (rn > 0)
 						{
-							count = +n;
+							count = +rn;
 							continue;
 						}
-						if (n <= 0)
+						if (rn <= 0)
 						{
 							JW_LOG(LL_INFO, "tcpconn sum = %d, recv = %d\n", conn->recv_data_.size(), count);
 							if (conn->recv_data_.size() > 0)
 							{
 								read_callback_(conn, conn->recv_data_);
 							}
-							if (n < 0)
+							if (rn < 0)
 							{
 								if (!(errno == EAGAIN || errno == EWOULDBLOCK || errno == EINPROGRESS))
 								{
@@ -115,20 +115,18 @@ void TcpServer::_server_func(void *)
 							}
 						}
 					}
-					read_callback_(conn, conn->recv_data_);
 				}
 				if (events & EPOLLOUT)
 				{
-
 					conn->send_data_pending_.append(conn->send_data_);
 					for (auto it = conn->send_data_.begin(); it != conn->send_data_.end();)
 					{
 						auto &data = *it;
-						int32_t n = 0;
-						n = data->write_socket(conn->socket_);
-						if (n > 0)
+						int32_t wn = 0;
+						wn = data->write_socket(conn->socket_);
+						if (wn > 0)
 						{
-							JW_LOG(LL_INFO, "tcpconn send = %d\n", n);
+							JW_LOG(LL_INFO, "tcpconn send succ = %d\n", n);
 							if (data->size() == 0)
 							{
 								delete data;
@@ -139,17 +137,14 @@ void TcpServer::_server_func(void *)
 								break;
 							}
 						}
-						else if (n <= 0)
+						else if (wn <= 0)
 						{
 							if (errno == EAGAIN || errno == EWOULDBLOCK || errno == EINPROGRESS)
 							{
 								break;
 							}
-							else
-							{
-								JW_LOG(LL_INFO, "tcpconn send data fail, may be perr unnormal disconnect\n");
-								break;
-							}
+							JW_LOG(LL_INFO, "tcpconn send data fail, may be peer unnormal disconnect\n");
+							break;
 						}
 					}
 				}
@@ -197,7 +192,9 @@ void TcpServer::CloseTcpConn(TcpConn *conn)
 	{
 		connects_.erase(it);
 	}
+	conn->conn_state_ = TcpConn::CONNSTATE_CLOSED;
 	disconnected_callback_(conn);
 	jw::close_socket(conn->socket_);
+	delete conn;
 }
 } // namespace jw

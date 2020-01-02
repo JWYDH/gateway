@@ -17,6 +17,15 @@ namespace jw
 
 struct TcpConn
 {
+	TcpConn() {}
+	~TcpConn()
+	{
+		send_data_pending_.append(send_data_);
+		for (auto &buf : send_data_)
+		{
+			delete buf;
+		}
+	}
 	enum CONN_STATE
 	{
 		CONNSTATE_CLOSED,
