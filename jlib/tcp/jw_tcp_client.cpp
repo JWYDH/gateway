@@ -36,7 +36,7 @@ TcpClient::~TcpClient()
 void TcpClient::Connected()
 {
 	conn_state_ = TcpClient::CONNSTATE_CONNECTED;
-	jw::set_nonblock(socket_, true);
+
 	jw::set_recv_buf_size(socket_, BUFF_SIZE::RECV_BUF_SIZE);
 	jw::set_send_buf_size(socket_, BUFF_SIZE::SEND_BUF_SIZE);
 
@@ -163,27 +163,37 @@ bool TcpClient::Start(const char *ip, const short port)
 			if (conn_state_ == TcpClient::CONNSTATE_CLOSED)
 			{
 				socket_ = jw::create_socket();
-
 				struct sockaddr_in addr;
 				addr.sin_family = AF_INET;
 				addr.sin_addr.s_addr = inet_addr(ip);
 				addr.sin_port = htons(port);
 
+				jw::set_nonblock(socket_, true);
+
 				if (jw::connect(socket_, addr))
+				{
+					Connected();
+				}
+			}
+			if (conn_state_ == TcpClient::CONNSTATE_CONNECTING)
+			{
+				timeval tv;
+				tv.tv_sec = 5;
+				tv.tv_usec = 0;
+				fd_set fds;
+				FD_ZERO(&fds);
+				FD_SET(socket_, &fds);
+				int nRetAll = select(socket_ + 1, NULL, &fds, NULL, &tv);
+				if (nRetAll > 0 && jw::get_socket_error(socket_) == 0)
 				{
 					Connected();
 				}
 				else
 				{
-					JW_LOG(LL_INFO, "connect time out, auto reconnect after 10 seconds");
-					jw::close_socket(socket_);
-					jw::thread_sleep(10000);
+					JW_LOG(LL_INFO, "tcpclient connect time out, auto reconnecting");
 				}
 			}
-			else if (conn_state_ == TcpClient::CONNSTATE_CONNECTING)
-			{
-			}
-			else if (conn_state_ == TcpClient::CONNSTATE_CONNECTED)
+			if (conn_state_ == TcpClient::CONNSTATE_CONNECTED)
 			{
 				this->_read_thread_func();
 			}
