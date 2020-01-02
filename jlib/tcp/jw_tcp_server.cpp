@@ -122,14 +122,12 @@ void TcpServer::_server_func(void *)
 							{
 								read_callback_(conn, conn->recv_data_);
 							}
-							if (rn < 0)
+
+							if (!(errno == EAGAIN || errno == EWOULDBLOCK || errno == EINPROGRESS))
 							{
-								if (!(errno == EAGAIN || errno == EWOULDBLOCK || errno == EINPROGRESS))
-								{
-									Close(conn);
-								}
-								break;
+								Close(conn);
 							}
+							break;
 						}
 					}
 				}
@@ -209,7 +207,6 @@ void TcpServer::DoWrite(TcpConn *conn, const char *buf, int32_t len)
 	data->write(buf, len);
 	conn->send_data_pending_.push(std::move(data));
 	_set_event(conn, EPOLL_CTL_MOD, EPOLLIN | EPOLLET | EPOLLOUT);
-
 }
 void TcpServer::Close(TcpConn *conn)
 {

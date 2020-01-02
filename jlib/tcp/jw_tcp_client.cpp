@@ -92,14 +92,11 @@ void TcpClient::_read_thread_func()
 					{
 						read_callback_(this, recv_data_);
 					}
-					if (n < 0)
+					if (!(errno == EAGAIN || errno == EWOULDBLOCK || errno == EINPROGRESS))
 					{
-						if (!(errno == EAGAIN || errno == EWOULDBLOCK || errno == EINPROGRESS))
-						{
-							Disconnected();
-						}
-						break;
+						Disconnected();
 					}
+					break;
 				}
 			}
 		}
