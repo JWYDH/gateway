@@ -33,6 +33,7 @@ set(SOURCE_FILES
 	"./core/jw_socket.cpp"
 	"./core/jw_ring_buffer.cpp"
 	"./tcp/jw_tcp_client.cpp"
+	"./tcp/jw_tcp_server.cpp"
 	)
 
 set(CMAKE_CXX_COMPILER "g++")

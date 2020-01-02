@@ -21,7 +21,7 @@ set(SOURCE_FILES
 #	"test_log.hpp"
 #	"test_mysql.hpp"
 	"test_tcp_client.hpp"
-#	"test_tcpserver.hpp"
+	"test_tcp_server.hpp"
 	"main.cpp")
 
 SET(CMAKE_CXX_COMPILER "g++")
