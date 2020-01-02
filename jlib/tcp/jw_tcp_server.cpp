@@ -13,11 +13,17 @@ TcpServer::~TcpServer()
 
 void TcpServer::_server_func(void *)
 {
+	epoll_fd_ = epoll_create1(EPOLL_CLOEXEC);
+	struct epoll_event ev;
+	ev.data.fd = listen_fd_;
+	ev.events = EPOLLIN | EPOLLET;
+	epoll_ctl(epoll_fd_, EPOLL_CTL_ADD, listen_fd_, &ev);
+
 	while (!stoped_)
 	{
 		const static int kMaxEvents = 32;
 		struct epoll_event evs[kMaxEvents];
-		int n = epoll_wait(listen_fd_, evs, kMaxEvents, 0);
+		int n = epoll_wait(listen_fd_, evs, kMaxEvents, -1);
 		if (n == -1)
 		{
 			if (errno == EINTR)
@@ -43,6 +49,7 @@ void TcpServer::_server_func(void *)
 					JW_LOG(LL_ERROR, "unknown connfd connect");
 					continue;
 				}
+				conn->server_ = this;
 				conn->socket_ = connfd;
 				conn->conn_state_ = TcpConn::CONNSTATE_CONNECTED;
 				jw::set_nonblock(conn->socket_, true);
@@ -58,7 +65,7 @@ void TcpServer::_server_func(void *)
 				}
 				connects_[connfd] = conn;
 
-				struct epoll_event ev;
+				//struct epoll_event ev;
 				ev.data.fd = connfd;
 				ev.events = EPOLLIN | EPOLLET;
 				ev.data.ptr = conn;
@@ -109,7 +116,7 @@ void TcpServer::_server_func(void *)
 							{
 								if (!(errno == EAGAIN || errno == EWOULDBLOCK || errno == EINPROGRESS))
 								{
-									CloseTcpConn(conn);
+									Close(conn);
 								}
 								break;
 							}
@@ -154,7 +161,6 @@ void TcpServer::_server_func(void *)
 }
 bool TcpServer::Start(const char *ip, const short port)
 {
-	epoll_fd_ = epoll_create1(EPOLL_CLOEXEC);
 
 	listen_fd_ = jw::create_socket();
 
@@ -175,7 +181,7 @@ bool TcpServer::Start(const char *ip, const short port)
 		return false;
 	}
 
-	server_thread_ = jw::thread_create(this->_server_func, nullptr, "tcpserver thread");
+	server_thread_ = jw::thread_create(std::bind(&TcpServer::_server_func, this, std::placeholders::_1), nullptr, "tcpserver thread");
 	return true;
 }
 
@@ -185,16 +191,25 @@ void TcpServer::Stop()
 	jw::thread_join(server_thread_);
 }
 
-void TcpServer::CloseTcpConn(TcpConn *conn)
+void TcpServer::DoWrite(TcpConn *conn, const char *buf, int32_t len)
+{
+	RingBuf *data = new RingBuf();
+	data->write(buf, len);
+	conn->send_data_pending_.push(std::move(data));
+}
+void TcpServer::Close(TcpConn *conn)
 {
 	auto it = connects_.find(conn->socket_);
-	if (it != connects_.end())
+	if (it == connects_.end())
 	{
-		connects_.erase(it);
+		assert(true);
 	}
+	connects_.erase(it);
 	conn->conn_state_ = TcpConn::CONNSTATE_CLOSED;
 	disconnected_callback_(conn);
+
 	jw::close_socket(conn->socket_);
 	delete conn;
 }
+
 } // namespace jw
