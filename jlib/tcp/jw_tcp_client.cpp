@@ -37,8 +37,8 @@ void TcpClient::Connected()
 {
 	conn_state_ = TcpClient::CONNSTATE_CONNECTED;
 
-	jw::set_recv_buf_size(socket_, BUFF_SIZE::RECV_BUF_SIZE);
-	jw::set_send_buf_size(socket_, BUFF_SIZE::SEND_BUF_SIZE);
+	jw::set_recv_buf_size(socket_, TcpClient::BUFF_SIZE::RECV_BUF_SIZE);
+	jw::set_send_buf_size(socket_, TcpClient::BUFF_SIZE::SEND_BUF_SIZE);
 
 	jw::getsockname(socket_, local_addr_);
 	jw::getpeername(socket_, remote_addr_);
@@ -80,6 +80,7 @@ void TcpClient::_read_thread_func()
 			{
 				int32_t n = 0;
 				n = recv_data_.read_socket(socket_);
+				
 				if (n > 0)
 				{
 					count = +n;
@@ -87,12 +88,13 @@ void TcpClient::_read_thread_func()
 				}
 				if (n <= 0)
 				{
+					int read_errno = errno;
 					JW_LOG(LL_INFO, "tcpclient sum = %d, recv = %d", recv_data_.size(), count);
 					if (recv_data_.size() > 0)
 					{
 						read_callback_(this, recv_data_);
 					}
-					if (!(errno == EAGAIN || errno == EWOULDBLOCK || errno == EINPROGRESS))
+					if (!(read_errno == EAGAIN || read_errno == EWOULDBLOCK || read_errno == EINPROGRESS))
 					{
 						Disconnected();
 					}
@@ -127,6 +129,7 @@ void TcpClient::_write_thread_func()
 		auto &data = *it;
 		int32_t n = 0;
 		n = data->write_socket(socket_);
+		
 		if (n > 0)
 		{
 			JW_LOG(LL_INFO, "tcpclient send = %d", n);
@@ -142,7 +145,8 @@ void TcpClient::_write_thread_func()
 		}
 		else if (n <= 0)
 		{
-			if (errno == EAGAIN || errno == EWOULDBLOCK || errno == EINPROGRESS)
+			int write_errno = errno;
+			if (write_errno == EAGAIN || write_errno == EWOULDBLOCK || write_errno == EINPROGRESS)
 			{
 				break;
 			}

@@ -121,6 +121,7 @@ void TcpServer::_server_func(void *)
 					{
 						int32_t rn = 0;
 						rn = conn->recv_data_.read_socket(conn->socket_);
+						
 						if (rn > 0)
 						{
 							count = +rn;
@@ -128,13 +129,14 @@ void TcpServer::_server_func(void *)
 						}
 						if (rn <= 0)
 						{
+							int read_errno = errno;
 							JW_LOG(LL_INFO, "tcpconn sum = %d, recv = %d", conn->recv_data_.size(), count);
 							if (conn->recv_data_.size() > 0)
 							{
 								read_callback_(conn, conn->recv_data_);
 							}
 
-							if (!(errno == EAGAIN || errno == EWOULDBLOCK || errno == EINPROGRESS))
+							if (!(read_errno == EAGAIN || read_errno == EWOULDBLOCK || read_errno == EINPROGRESS))
 							{
 								Close(conn);
 							}
@@ -151,6 +153,7 @@ void TcpServer::_server_func(void *)
 						auto &data = *it;
 						int32_t wn = 0;
 						wn = data->write_socket(conn->socket_);
+						
 						if (wn > 0)
 						{
 							JW_LOG(LL_INFO, "tcpconn send succ = %d", n);
@@ -166,7 +169,8 @@ void TcpServer::_server_func(void *)
 						}
 						else if (wn <= 0)
 						{
-							if (errno == EAGAIN || errno == EWOULDBLOCK || errno == EINPROGRESS)
+							int write_errno = errno;
+							if (write_errno == EAGAIN || write_errno == EWOULDBLOCK || write_errno == EINPROGRESS)
 							{
 								_set_event(conn, EPOLL_CTL_MOD, EPOLLIN | EPOLLET | EPOLLOUT);
 								break;

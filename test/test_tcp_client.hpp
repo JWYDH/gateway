@@ -1,4 +1,5 @@
-#include "./tcp/jw_tcp_client.h"
+#pragma once
+#include "jw.h"
 
 int test_tcp_client()
 {

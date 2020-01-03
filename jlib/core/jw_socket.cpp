@@ -4,19 +4,19 @@
 namespace jw
 {
 
-bool DNS_parse(const char* domain, char* ip)
+bool DNS_parse(const char *domain, char *ip)
 {
-	struct hostent* p;
-	if ( (p = gethostbyname(domain)) == NULL )
+	struct hostent *p;
+	if ((p = gethostbyname(domain)) == NULL)
 		return false;
-		
-	sprintf(ip, 
-		"%u.%u.%u.%u",
-		(unsigned char)p->h_addr_list[0][0], 
-		(unsigned char)p->h_addr_list[0][1], 
-		(unsigned char)p->h_addr_list[0][2], 
-		(unsigned char)p->h_addr_list[0][3]);
-	
+
+	sprintf(ip,
+			"%u.%u.%u.%u",
+			(unsigned char)p->h_addr_list[0][0],
+			(unsigned char)p->h_addr_list[0][1],
+			(unsigned char)p->h_addr_list[0][2],
+			(unsigned char)p->h_addr_list[0][3]);
+
 	return true;
 }
 
@@ -41,7 +41,7 @@ void close_socket(socket_t s)
 
 bool set_recv_buf_size(socket_t s, int size)
 {
-	if (SOCKET_ERROR == ::setsockopt(s, SOL_SOCKET, SO_RCVBUF, (char*)&size, sizeof(size)))
+	if (SOCKET_ERROR == ::setsockopt(s, SOL_SOCKET, SO_RCVBUF, (char *)&size, sizeof(size)))
 	{
 		JW_LOG(LL_ERROR, "set_recv_buf_size, err=%d", get_lasterror());
 		return false;
@@ -49,17 +49,15 @@ bool set_recv_buf_size(socket_t s, int size)
 	return true;
 }
 
-
 bool set_send_buf_size(socket_t s, int size)
 {
-	if (SOCKET_ERROR == ::setsockopt(s, SO_SNDBUF, SO_RCVBUF, (char*)&size, sizeof(size)))
+	if (SOCKET_ERROR == ::setsockopt(s, SO_SNDBUF, SO_RCVBUF, (char *)&size, sizeof(size)))
 	{
 		JW_LOG(LL_ERROR, "set_send_buf_size, err=%d", get_lasterror());
 		return false;
 	}
 	return true;
 }
-
 
 bool set_nonblock(socket_t s, bool enable)
 {
@@ -113,14 +111,11 @@ bool connect(socket_t s, const struct sockaddr_in &addr)
 	if (::connect(s, (const sockaddr *)&addr, sizeof(addr)) == SOCKET_ERROR)
 	{
 		int lasterr = get_lasterror();
-
 		//non-block socket
-		if (lasterr == EINPROGRESS ||
-			lasterr == EINTR ||
-			lasterr == EISCONN)
-			return true;
-
-		JW_LOG(LL_ERROR, "socket_api::connect, err=%d", get_lasterror());
+		if (!(lasterr == EINPROGRESS || lasterr == EINTR || lasterr == EISCONN))
+		{
+			JW_LOG(LL_ERROR, "socket_api::connect, err=%d", get_lasterror());
+		}
 		return false;
 	}
 	return true;

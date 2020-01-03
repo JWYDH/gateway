@@ -1,5 +1,5 @@
 #pragma once
-#include "tcp/jw_tcp_server.h"
+#include "jw.h"
 
 int test_tcp_server()
 {

@@ -13,8 +13,6 @@ set(LIBRARY_FILES
 	)
 
 set(SOURCE_FILES
-	"test_tcp_client.hpp"
-	"test_tcp_server.hpp"
 	"main.cpp")
 
 SET(CMAKE_CXX_COMPILER "g++")
