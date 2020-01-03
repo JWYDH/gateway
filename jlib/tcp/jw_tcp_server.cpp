@@ -128,7 +128,7 @@ void TcpServer::_server_func(void *)
 						}
 						if (rn <= 0)
 						{
-							JW_LOG(LL_INFO, "tcpconn sum = %d, recv = %d\n", conn->recv_data_.size(), count);
+							JW_LOG(LL_INFO, "tcpconn sum = %d, recv = %d", conn->recv_data_.size(), count);
 							if (conn->recv_data_.size() > 0)
 							{
 								read_callback_(conn, conn->recv_data_);
