@@ -23,9 +23,9 @@ public:
 	};
 	enum BUFF_SIZE
 	{
-		RECV_MAX_SIZE = 1024 * 1024 * 8,
-		RECV_BUF_SIZE = 1024 * 1024 * 2,
-		SEND_BUF_SIZE = 1024 * 1024 * 2
+		RECV_MAX_SIZE = 64 * 1024,
+		RECV_BUF_SIZE = 64 * 1024,
+		SEND_BUF_SIZE = 64 * 1024
 	};
 
 public:

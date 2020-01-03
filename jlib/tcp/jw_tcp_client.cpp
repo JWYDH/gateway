@@ -184,6 +184,9 @@ bool TcpClient::Start(const char *ip, const short port)
 					if (lasterr == EINPROGRESS)
 					{
 						conn_state_ = TcpClient::CONNSTATE_CONNECTING;
+					} else{
+						JW_LOG(LL_ERROR, "tcpclient connect, err=%d %s", lasterr, strerror(lasterr));
+						jw::close_socket(socket_);
 					}
 				}
 			}

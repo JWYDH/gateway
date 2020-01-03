@@ -200,6 +200,9 @@ bool TcpServer::Start(const char *ip, const short port)
 		return false;
 	}
 
+	jw::set_recv_buf_size(listen_fd_, TcpConn::BUFF_SIZE::RECV_BUF_SIZE);
+	jw::set_send_buf_size(listen_fd_, TcpConn::BUFF_SIZE::SEND_BUF_SIZE);
+
 	if (!jw::listen(listen_fd_))
 	{
 		JW_LOG(LL_ERROR, "tcpserver listen error: %d", errno);
