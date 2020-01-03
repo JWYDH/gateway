@@ -51,7 +51,7 @@ bool set_recv_buf_size(socket_t s, int size)
 
 bool set_send_buf_size(socket_t s, int size)
 {
-	if (SOCKET_ERROR == ::setsockopt(s, SO_SNDBUF, SO_RCVBUF, (char *)&size, sizeof(size)))
+	if (SOCKET_ERROR == ::setsockopt(s, SOL_SOCKET, SO_SNDBUF, (char *)&size, sizeof(size)))
 	{
 		JW_LOG(LL_ERROR, "set_send_buf_size, err=%d", get_lasterror());
 		return false;
