@@ -5,7 +5,7 @@
 			"name": "gdb Remote Launch",
 			"type": "cppdbg",
 			"request": "launch",
-			"program": "/root/libjw/out/test",
+			"program": "/root/libjw/bin/test",
 			"stopAtEntry": true,
 			"environment": [],
 			"externalConsole": false,

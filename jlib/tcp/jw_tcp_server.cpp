@@ -136,7 +136,7 @@ void TcpServer::_server_func(void *)
 								read_callback_(conn, conn->recv_data_);
 							}
 
-							if (!(read_errno == EAGAIN || read_errno == EWOULDBLOCK || read_errno == EINPROGRESS))
+							if (!(read_errno == EAGAIN || read_errno == EWOULDBLOCK))
 							{
 								Close(conn);
 							}

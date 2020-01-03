@@ -110,12 +110,6 @@ bool connect(socket_t s, const struct sockaddr_in &addr)
 {
 	if (::connect(s, (const sockaddr *)&addr, sizeof(addr)) == SOCKET_ERROR)
 	{
-		int lasterr = get_lasterror();
-		//non-block socket
-		if (!(lasterr == EINPROGRESS || lasterr == EINTR || lasterr == EISCONN))
-		{
-			JW_LOG(LL_ERROR, "socket_api::connect, err=%d", get_lasterror());
-		}
 		return false;
 	}
 	return true;

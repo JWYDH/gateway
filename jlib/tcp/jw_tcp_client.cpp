@@ -80,7 +80,7 @@ void TcpClient::_read_thread_func()
 			{
 				int32_t n = 0;
 				n = recv_data_.read_socket(socket_);
-				
+
 				if (n > 0)
 				{
 					count = +n;
@@ -94,7 +94,7 @@ void TcpClient::_read_thread_func()
 					{
 						read_callback_(this, recv_data_);
 					}
-					if (!(read_errno == EAGAIN || read_errno == EWOULDBLOCK || read_errno == EINPROGRESS))
+					if (!(read_errno == EAGAIN || read_errno == EWOULDBLOCK))
 					{
 						Disconnected();
 					}
@@ -129,7 +129,7 @@ void TcpClient::_write_thread_func()
 		auto &data = *it;
 		int32_t n = 0;
 		n = data->write_socket(socket_);
-		
+
 		if (n > 0)
 		{
 			JW_LOG(LL_INFO, "tcpclient send = %d", n);
@@ -173,16 +173,24 @@ bool TcpClient::Start(const char *ip, const short port)
 				addr.sin_port = htons(port);
 
 				jw::set_nonblock(socket_, true);
-
 				if (jw::connect(socket_, addr))
 				{
 					Connected();
+				}
+				else
+				{
+					int lasterr = jw::get_lasterror();
+					//non-block socket
+					if (lasterr == EINPROGRESS)
+					{
+						conn_state_ = TcpClient::CONNSTATE_CONNECTING;
+					}
 				}
 			}
 			if (conn_state_ == TcpClient::CONNSTATE_CONNECTING)
 			{
 				timeval tv;
-				tv.tv_sec = 5;
+				tv.tv_sec = 0;
 				tv.tv_usec = 0;
 				fd_set fds;
 				FD_ZERO(&fds);
@@ -195,6 +203,9 @@ bool TcpClient::Start(const char *ip, const short port)
 				else
 				{
 					JW_LOG(LL_INFO, "tcpclient connect time out, auto reconnecting");
+					jw::close_socket(socket_);
+					conn_state_ = TcpClient::CONNSTATE_CLOSED;
+					jw::thread_sleep(5000);
 				}
 			}
 			if (conn_state_ == TcpClient::CONNSTATE_CONNECTED)
