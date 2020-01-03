@@ -170,7 +170,7 @@ void TcpServer::_server_func(void *)
 						else if (wn <= 0)
 						{
 							int write_errno = errno;
-							if (write_errno == EAGAIN || write_errno == EWOULDBLOCK || write_errno == EINPROGRESS)
+							if (write_errno == EAGAIN || write_errno == EWOULDBLOCK)
 							{
 								_set_event(conn, EPOLL_CTL_MOD, EPOLLIN | EPOLLET | EPOLLOUT);
 								break;

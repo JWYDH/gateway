@@ -146,7 +146,7 @@ void TcpClient::_write_thread_func()
 		else if (n <= 0)
 		{
 			int write_errno = errno;
-			if (write_errno == EAGAIN || write_errno == EWOULDBLOCK || write_errno == EINPROGRESS)
+			if (write_errno == EAGAIN || write_errno == EWOULDBLOCK)
 			{
 				break;
 			}
