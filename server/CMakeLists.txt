@@ -1,6 +1,6 @@
 cmake_minimum_required (VERSION 2.8.1)
 
-project ("test")
+project ("server")
 
 include_directories(
 	../jlib)
@@ -26,6 +26,6 @@ MESSAGE(STATUS "################" ${CMAKE_SOURCE_DIR})
 SET(EXECUTABLE_OUTPUT_PATH ${CMAKE_SOURCE_DIR}/bin)
 SET(LIBRARY_OUTPUT_PATH ${CMAKE_SOURCE_DIR}/lib)
 
-add_executable(test ${SOURCE_FILES})
-add_dependencies(test jlib)
-target_link_libraries(test ${LIBRARY_FILES})
+add_executable(server ${SOURCE_FILES})
+add_dependencies(server jlib)
+target_link_libraries(server ${LIBRARY_FILES})
